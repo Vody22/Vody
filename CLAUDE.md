@@ -1,0 +1,18 @@
+# Starfarer 3D
+
+Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne : https://starvody.netlify.app
+
+## Déploiement
+- Netlify (projet `starvody`) est relié à ce dépôt : **chaque push sur `main` met le site en ligne** (~30 s).
+- `index.html` est GÉNÉRÉ : ne pas l'éditer à la main. Modifier `src/`, puis `python3 build.py`, puis commit + push.
+- `netlify.toml` : publication de la racine, pas de commande de build côté Netlify.
+
+## Structure
+- `src/shell.html` : HTML/CSS/HUD, avec les marqueurs `%%THREE%%` et `%%GAME%%`.
+- `src/*.js` : modules concaténés dans cet ordre (voir `build.py`) : core, audio, gfx, models, world, game, surface, fx, ultra, detail, content, story, netroom, mp, hud. Tout est au niveau global (pas de modules ES).
+- `src/three-examples/` : post-process Three.js r128 (bloom…) incorporés tels quels.
+- Multijoueur : `mp.js` utilise la capacité `room` des artefacts Claude si présente, sinon `netroom.js` (PeerJS, WebRTC en étoile, salon via `#code` dans l'URL, `public` par défaut).
+- `dev/mockpeer.js`, `dev/mockroom.js` : faux réseau (BroadcastChannel) pour tester le multijoueur en local.
+
+## Vérifier avant de pousser
+`python3 build.py --check /tmp/g.js && node --check /tmp/g.js`
