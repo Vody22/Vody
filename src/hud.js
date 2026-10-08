@@ -22,7 +22,7 @@ OX.save();OX.translate(x,y);OX.rotate(a);OX.fillStyle=col;OX.shadowColor=col;OX.
 function label(p,txt,col,maxD){const s=proj(p);if(!s.front||s.d>maxD)return;OX.fillStyle=col;OX.font='600 12px system-ui';OX.textAlign='center';OX.fillText(txt,s.x,s.y)}
 function overlay(){const W=innerWidth,H=innerHeight;OX.clearRect(0,0,W,H);OX.shadowColor='rgba(0,0,0,.75)';OX.shadowBlur=4;
 if(CLOUDW>.01&&mode=='surf'){OX.fillStyle=`rgba(${CLOUDC},${CLOUDW*.88})`;OX.fillRect(0,0,W,H)}if(S.heat>.02){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.75);g.addColorStop(0,'rgba(255,120,30,0)');g.addColorStop(1,`rgba(255,110,30,${S.heat*.55})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}
-if(hurt>0){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.7);g.addColorStop(0,'rgba(255,0,0,0)');g.addColorStop(1,`rgba(255,30,30,${hurt*.9})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}
+if(shieldT>0&&ckActive()&&S.sh>0){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.75);g.addColorStop(0,'rgba(80,160,255,0)');g.addColorStop(1,`rgba(90,170,255,${shieldT*.45})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}if(hurt>0){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.7);g.addColorStop(0,'rgba(255,0,0,0)');g.addColorStop(1,`rgba(255,30,30,${hurt*.9})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}
 if(S.dead)return;
 // étiquettes
 if(mode=='space'){for(const p of planets)if(G.disc.has(p.name))label({x:p.x,y:p.y+p.r*1.25,z:p.z},p.name,'rgba(170,215,255,.9)',14000);for(const s of suns)label({x:s.x,y:s.y+s.r*1.5,z:s.z},'★ '+s.name,'#ffd890',22000);for(const st of stations)if(!(G.m&&G.m.tg===st)&&st!==hud.mk)label({x:st.x,y:st.y+110,z:st.z},st.n,'#ffc845',4000)}
@@ -36,9 +36,9 @@ else if(mode=='space'&&!S.docked){let best=null,bd=1e9;const cx=cof(S.pos.x),cz=
 if(mode=='surf'){const I=SURF.info();if(I.arts.length){const a=I.arts.reduce((m,o)=>o.pos.distanceTo(S.pos)<m.pos.distanceTo(S.pos)?o:m);edgeMarker(a.pos,'#ffd060','Artefact','✦')}}
 for(const e of en){if(e.pos.distanceTo(S.pos)>1400)continue;const s=proj(e.pos);if(!(s.front&&s.x>0&&s.x<W&&s.y>0&&s.y<H))edgeMarker(e.pos,e.boss?'#c890ff':'#ff5050','','')}
 // vitesse
-OX.fillStyle='rgba(180,220,255,.85)';OX.font='800 12px system-ui';OX.textAlign='center';OX.fillText(Math.round(S.spd)+' m/s'+(isBoost()&&!S.docked?' ⚡':''),W/2,H-(DESK?36:W>H&&H<520?70:96));
+if(!ckActive()){OX.fillStyle='rgba(180,220,255,.85)';OX.font='800 12px system-ui';OX.textAlign='center';OX.fillText(Math.round(S.spd)+' m/s'+(isBoost()&&!S.docked?' ⚡':''),W/2,H-(DESK?36:W>H&&H<520?70:96));}
 if(DESK&&MS.in&&!S.dead){const R=Math.min(W,H)*.34,cx=W/2+MS.x*R,cy=H/2+MS.y*R;OX.strokeStyle='rgba(160,230,255,.25)';OX.lineWidth=1;OX.beginPath();OX.arc(W/2,H/2,R*.05,0,TAU);OX.stroke();OX.setLineDash([3,5]);OX.beginPath();OX.moveTo(W/2,H/2);OX.lineTo(cx,cy);OX.stroke();OX.setLineDash([]);OX.strokeStyle='rgba(200,240,255,.9)';OX.lineWidth=2;OX.beginPath();OX.arc(cx,cy,7,0,TAU);OX.stroke();OX.fillStyle='#fff';OX.fillRect(cx-1,cy-1,2,2)}
-radar();contentOverlay();mpOverlay();
+if(!ckActive())radar();contentOverlay();mpOverlay();
 // joystick
 if(stick){const R=stick.R||70;OX.strokeStyle='rgba(120,220,255,.45)';OX.lineWidth=2;OX.beginPath();OX.arc(stick.ox,stick.oy,R,0,TAU);OX.stroke();OX.fillStyle='rgba(120,220,255,.35)';OX.beginPath();OX.arc(stick.ox+stick.x*R,stick.oy+stick.y*R,R*.36,0,TAU);OX.fill()}
 else if(!DESK&&(hint>0||t<4)){OX.globalAlpha=.35+.25*Math.sin(t*3);OX.strokeStyle='#8fd8ff';OX.lineWidth=2;OX.beginPath();OX.arc(W*.24,H*.72,52,0,TAU);OX.stroke();OX.globalAlpha=1}
@@ -59,7 +59,7 @@ function stepFX(dt){shieldT=Math.max(0,shieldT-dt*1.8);hurt=Math.max(0,hurt-dt);
 let last=performance.now();
 function frame(now){requestAnimationFrame(frame);const dt=clamp((now-last)/1000,0,.05);last=Math.max(last,now);DT=dt;t+=dt;hint-=dt;
 try{if(!isPaused()){if(mode=='space')updSpace(dt);else SURF.update(dt);updContent(dt)}updContentAlways(dt);updMP(dt)}catch(e){console.error(e)}
-SPK.update(dt);FIRE.update(dt);updFlashes(dt);updFXS(dt);updFX(dt);updFade(dt);placeShip(dt);updCam(dt);updSpeedLines(dt,mode=='space'&&!S.docked?fovK:0,S.spd);updDetail();stepFX(dt);updParts(dt);
+SPK.update(dt);FIRE.update(dt);updFlashes(dt);updFXS(dt);updFX(dt);updFade(dt);placeShip(dt);updCam(dt);updSpeedLines(dt,mode=='space'&&!S.docked?fovK:0,S.spd);updDetail();stepFX(dt);updParts(dt);updCockpit(dt);
 if(engG&&AC)engG.gain.setTargetAtTime(S.dead?0:S.thr*.05+(isBoost()&&!S.docked?.07:0),AC.currentTime,.08);if(engLP&&AC)engLP.frequency.setTargetAtTime(160+S.spd*2.2,AC.currentTime,.1);
 TM.value=t;camera.updateMatrixWorld();if(typeof updGodRays=='function')updGodRays();renderFrame();overlay();if(FADE.v>.003){OX.fillStyle=`rgba(${FADE.col},${FADE.v})`;OX.fillRect(0,0,innerWidth,innerHeight)}hud()}
 if(DESK){try{NEB.material.map=gpuNebula();NEB.material.needsUpdate=true}catch(e){console.warn(e)}setupEnv(NEB);setupPost();setupGrade()}

@@ -15,7 +15,7 @@ S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.75,damp(5,d
 // ----- caméra -----
 const camUp=new V3(0,1,0),camLook=new V3();let camInit=true,fovK=0;
 function updCam(dt){if(S.docked&&mode=='space'&&TAB=='atelier'&&!S.dead){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
-const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(3,dt));const off=_v.set(0,7.5,27+fovK*8).applyQuaternion(S.q).add(S.pos);
+if(ckActive()){ckCam(dt);return}const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(3,dt));const off=_v.set(0,7.5,27+fovK*8).applyQuaternion(S.q).add(S.pos);
 if(camInit){camera.position.copy(off);camInit=false}else camera.position.lerp(off,damp(8,dt));
 _u.set(0,1,0).applyQuaternion(S.q);camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);camLook.copy(S.pos).addScaledVector(fwd(),70);camera.lookAt(camLook);
 if(shake>0){camera.position.x+=rv(shake);camera.position.y+=rv(shake);shake=Math.max(0,shake-dt*2.5)}
