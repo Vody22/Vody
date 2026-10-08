@@ -13,7 +13,7 @@ function buildShip(){const[wl,el,hl]=G.u,tier=hl>=5?2:hl>=3?1:0,HC=HULLC[tier];c
 const hull=new THREE.MeshStandardMaterial({color:HC[0],map:HULLT,metalness:DESK?.72:.25,roughness:DESK?.3:.4,emissive:HC[0],emissiveIntensity:DESK?.03:.08}),
 dark=new THREE.MeshStandardMaterial({color:0x2a3038,metalness:.6,roughness:.45}),wingM=new THREE.MeshStandardMaterial({color:HC[1],map:HULLT,metalness:DESK?.68:.25,roughness:DESK?.34:.45,side:THREE.DoubleSide,emissive:HC[1],emissiveIntensity:DESK?.02:.06}),
 accent=new THREE.MeshStandardMaterial({color:tier==2?0x1a1a1a:0xff8a2a,emissive:tier==2?0:0x552200,metalness:.4,roughness:.4});
-hull.name='hull';wingM.name='wing';
+hull.name='hull';wingM.name='wing';accent.name='accent';dark.name='dark';const wingG=new THREE.Group(),engG=new THREE.Group(),gunG=new THREE.Group();body.add(wingG,engG,gunG);
 // fuselage profilé
 const fus=new THREE.Mesh(lathe([[0,-9.5],[.35,-8.6],[.85,-6.8],[1.3,-4.5],[1.6,-2],[1.7,.5],[1.6,3],[1.35,4.6],[1.1,5.2],[0,5.3]],18),hull);fus.scale.set(1,.72,1);body.add(fus);
 for(const z of[-4.2,-.6,2.6]){const b=new THREE.Mesh(new THREE.TorusGeometry(z<-3?1.32:1.67,.06,4,24),dark);b.scale.set(1,.72,1);b.position.z=z;body.add(b)}
@@ -27,9 +27,9 @@ for(const s of[-1,1]){const ia=new THREE.Mesh(new THREE.BoxGeometry(.9,.9,3.2),h
 // ailes biseautées
 const ws=new THREE.Shape();ws.moveTo(0,-3.2);ws.lineTo(2.5,-1.4);ws.lineTo(6.8,1.6);ws.lineTo(7.1,2.9);ws.lineTo(5.6,3.1);ws.lineTo(1.8,2.6);ws.lineTo(0,2.8);ws.closePath();
 const wg=new THREE.ExtrudeGeometry(ws,{depth:.22,bevelEnabled:true,bevelThickness:.08,bevelSize:.12,bevelSegments:2});wg.rotateX(Math.PI/2);wg.translate(1.4,0,0);
-for(const s of[-1,1]){const w=new THREE.Mesh(wg,wingM);w.scale.x=s;w.position.set(0,-.25,.9);w.rotation.z=s*-.06;body.add(w);
-const ac=new THREE.Mesh(new THREE.BoxGeometry(3.2,.05,.35),accent);ac.position.set(s*5,0,2.2);ac.rotation.y=s*-.62;body.add(ac);
-const tip=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,3.4,8).rotateX(Math.PI/2),dark);tip.position.set(s*8.45,-.25,3);body.add(tip);
+for(const s of[-1,1]){const w=new THREE.Mesh(wg,wingM);w.scale.x=s;w.position.set(0,-.25,.9);w.rotation.z=s*-.06;wingG.add(w);
+const ac=new THREE.Mesh(new THREE.BoxGeometry(3.2,.05,.35),accent);ac.position.set(s*5,0,2.2);ac.rotation.y=s*-.62;wingG.add(ac);
+const tip=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,3.4,8).rotateX(Math.PI/2),dark);tip.position.set(s*8.45,-.25,3);wingG.add(tip);
 const fin=new THREE.Mesh(new THREE.BoxGeometry(.16,2.3,2.4),wingM);fin.geometry.translate(0,1.1,0);fin.position.set(s*1.1,.6,3.4);fin.rotation.set(-.42,0,s*-.32);body.add(fin)}
 // antenne et détails
 const ant=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,2.2,4),dark);ant.position.set(0,1.6,2.2);ant.rotation.x=-.5;body.add(ant);
@@ -37,19 +37,20 @@ for(let i=0;i<5;i++){const gb=new THREE.Mesh(new THREE.BoxGeometry(.3+i%2*.25,.1
 if(hl>=3)for(const s of[-1,1]){const ar=new THREE.Mesh(new THREE.BoxGeometry(.25,1.2,4.5),hull);ar.position.set(s*1.55,.25,-1.6);ar.rotation.z=s*.35;body.add(ar)}
 // réacteurs
 const nE=el>=3?3:2,eC=el>=5?0xc07bff:el>=3?0x78e6ff:0x50aaff,ex=nE==3?[-1.55,0,1.55]:[-1,1],ey=nE==3?[-.15,.55,-.15]:[0,0];const flames=[];
-ex.forEach((x,i)=>{const n=new THREE.Mesh(lathe([[.5,-1.6],[.62,-1],[.72,.4],[.8,1.2],[.74,1.4],[.55,1.4]],16),dark);n.position.set(x,ey[i],4.4);body.add(n);
-const rg=new THREE.Mesh(new THREE.TorusGeometry(.74,.07,6,20),new THREE.MeshStandardMaterial({color:0x99a4b4,metalness:.9,roughness:.25}));rg.position.set(x,ey[i],5.1);body.add(rg);
-const core=new THREE.Mesh(new THREE.CircleGeometry(.56,20),new THREE.MeshBasicMaterial({color:new THREE.Color(eC).multiplyScalar(DESK?1.8:1.2)}));core.position.set(x,ey[i],5.75);body.add(core);
-const fl=new THREE.Mesh(new THREE.ConeGeometry(.5,4,12,1,true).rotateX(Math.PI/2),new THREE.MeshBasicMaterial({color:DESK?new THREE.Color(eC).multiplyScalar(1.6):eC,transparent:true,opacity:.85,blending:ADDB,depthWrite:false,side:THREE.DoubleSide}));fl.position.set(x,ey[i],7.8);body.add(fl);
-const gs=sprite(eC,3);gs.position.set(x,ey[i],6.1);body.add(gs);flames.push({fl,gs})});
+ex.forEach((x,i)=>{const n=new THREE.Mesh(lathe([[.5,-1.6],[.62,-1],[.72,.4],[.8,1.2],[.74,1.4],[.55,1.4]],16),dark);n.position.set(x,ey[i],4.4);engG.add(n);
+const rg=new THREE.Mesh(new THREE.TorusGeometry(.74,.07,6,20),new THREE.MeshStandardMaterial({color:0x99a4b4,metalness:.9,roughness:.25}));rg.position.set(x,ey[i],5.1);engG.add(rg);
+const core=new THREE.Mesh(new THREE.CircleGeometry(.56,20),new THREE.MeshBasicMaterial({color:new THREE.Color(eC).multiplyScalar(DESK?1.8:1.2)}));core.position.set(x,ey[i],5.75);engG.add(core);
+const fl=new THREE.Mesh(new THREE.ConeGeometry(.5,4,12,1,true).rotateX(Math.PI/2),new THREE.MeshBasicMaterial({color:DESK?new THREE.Color(eC).multiplyScalar(1.6):eC,transparent:true,opacity:.85,blending:ADDB,depthWrite:false,side:THREE.DoubleSide}));fl.position.set(x,ey[i],7.8);engG.add(fl);
+const gs=sprite(eC,3);gs.position.set(x,ey[i],6.1);engG.add(gs);flames.push({fl,gs})});
 // canons
-if(wl>=2)for(const sx of[-1,1]){const c=new THREE.Mesh(lathe([[.24,-3],[.24,1],[.32,1.4],[.32,2],[0,2]],8),MAT.metal);c.position.set(sx*8.45,-.25,-.4);body.add(c);if(wl>=4){const c2=c.clone();c2.position.set(sx*4.4,-.35,-1.2);body.add(c2)}if(wl>=6){const g=sprite(0x5af0ff,2.2);g.position.set(sx*8.45,-.25,-3.5);body.add(g)}}
+const muzzles=wl>=2?[[-8.45,-.25,-3.4],[8.45,-.25,-3.4]]:[[-4.6,-.3,-6],[4.6,-.3,-6]];if(wl>=4)muzzles.push([-4.4,-.35,-4.2],[4.4,-.35,-4.2]);
+if(wl>=2)for(const sx of[-1,1]){const c=new THREE.Mesh(lathe([[.24,-3],[.24,1],[.32,1.4],[.32,2],[0,2]],8),MAT.metal);c.position.set(sx*8.45,-.25,-.4);gunG.add(c);if(wl>=4){const c2=c.clone();c2.position.set(sx*4.4,-.35,-1.2);gunG.add(c2)}if(wl>=6){const g=sprite(0x5af0ff,2.2);g.position.set(sx*8.45,-.25,-3.5);gunG.add(g)}}
 const nl=sprite(0xff4040,1.6),nr=sprite(0x40ff70,1.6);nl.position.set(-8.5,-.1,4.6);nr.position.set(8.5,-.1,4.6);body.add(nl,nr);
-const shield=new THREE.Mesh(new THREE.SphereGeometry(11.5,28,18),new THREE.ShaderMaterial({uniforms:{op:{value:0}},vertexShader:AVS,fragmentShader:'uniform float op;varying vec3 vNV;varying vec3 vN;void main(){float f=pow(1.-abs(vNV.z),2.2);gl_FragColor=vec4(vec3(.35,.8,1.)*f*op*1.6,1.);}',transparent:true,blending:ADDB,depthWrite:false}));root.add(shield);
+const shield=new THREE.Mesh(new THREE.SphereGeometry(11.5,28,18),new THREE.ShaderMaterial({uniforms:{op:{value:0},col:{value:new THREE.Color(.35,.8,1)}},vertexShader:AVS,fragmentShader:'uniform float op;uniform vec3 col;varying vec3 vNV;varying vec3 vN;void main(){float f=pow(1.-abs(vNV.z),2.2);gl_FragColor=vec4(col*f*op*1.6,1.);}',transparent:true,blending:ADDB,depthWrite:false}));root.add(shield);
 // plasma d'entrée atmosphérique
 const plasma=new THREE.Mesh(new THREE.SphereGeometry(1,32,20),new THREE.ShaderMaterial({uniforms:PLU,vertexShader:PLASMA_VS,fragmentShader:PLASMA_FS,transparent:true,blending:ADDB,depthWrite:false,side:THREE.DoubleSide}));plasma.scale.set(6.5,4.5,13);plasma.position.z=-2;plasma.visible=false;root.add(plasma);
 body.traverse(o=>{if(o.isMesh&&!o.material.blending)o.castShadow=DESK&&mode=='surf'});
-root.userData={body,flames,shield,nl,nr,plasma};return root}
+root.userData={body,flames,shield,nl,nr,plasma,wingG,engG,gunG,muzzles,lasers:[[0,-1.15,-8.6]],spin:[],mats:{hull,wing:wingM,accent,dark},wl,el,hl,eC};return root}
 // ----- pirates -----
 const ETEX={};function enemyMat(ty){return ETEX[ty]||(ETEX[ty]=new THREE.MeshStandardMaterial({color:ENC[ty],map:HULLT,metalness:DESK?.55:.25,roughness:.42,emissive:ENC[ty],emissiveIntensity:.1}))}
 const EDARK=new THREE.MeshStandardMaterial({color:0x22262c,metalness:.6,roughness:.5}),EGLOW=new THREE.MeshBasicMaterial({color:0xff3a2a});

@@ -5,7 +5,7 @@ let ship=buildShip();scene.add(ship);
 function rebuildShip(){const p=ship.parent;p.remove(ship);ship=buildShip();p.add(ship)}
 const fwd=(q=S.q,o=_f)=>o.set(0,0,-1).applyQuaternion(q);
 // ----- pilotage -----
-function fly(dt,{rate=1,minSpd=0,surf=false}={}){const[yaw,pitch]=steerInput(),R=(1.2+.08*(G.u[1]-1))*rate*HS().turn;
+function fly(dt,{rate=1,minSpd=0,surf=false}={}){const[yaw,pitch]=steerInput(),R=(1.2+.08*(G.u[1]-1))*rate*HS().turn*PM('turn');
 S.yawV=lerp(S.yawV||0,yaw,damp(7,dt));S.pitchV=lerp(S.pitchV||0,pitch,damp(7,dt));
 _q.setFromAxisAngle(AY,S.yawV*R*dt);S.q.multiply(_q);_q.setFromAxisAngle(AX,S.pitchV*R*.85*dt);S.q.multiply(_q);
 _r.set(1,0,0).applyQuaternion(S.q);fwd();if(Math.abs(_f.y)<.97){const roll=Math.asin(clamp(_r.y,-1,1));_q.setFromAxisAngle(AZ,-roll*damp(2.2,dt));S.q.multiply(_q)}S.q.normalize();
@@ -14,7 +14,8 @@ fwd();S.vel.lerp(_v.copy(_f).multiplyScalar(S.spd),damp(3.2,dt));S.pos.addScaled
 S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.75,damp(5,dt))}
 // ----- caméra -----
 const camUp=new V3(0,1,0),camLook=new V3();let camInit=true,fovK=0;
-function updCam(dt){const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(3,dt));const off=_v.set(0,7.5,27+fovK*8).applyQuaternion(S.q).add(S.pos);
+function updCam(dt){if(S.docked&&mode=='space'&&TAB=='atelier'&&!S.dead){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
+const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(3,dt));const off=_v.set(0,7.5,27+fovK*8).applyQuaternion(S.q).add(S.pos);
 if(camInit){camera.position.copy(off);camInit=false}else camera.position.lerp(off,damp(8,dt));
 _u.set(0,1,0).applyQuaternion(S.q);camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);camLook.copy(S.pos).addScaledVector(fwd(),70);camera.lookAt(camLook);
 if(shake>0){camera.position.x+=rv(shake);camera.position.y+=rv(shake);shake=Math.max(0,shake-dt*2.5)}
@@ -25,19 +26,24 @@ ud.shield.material.uniforms.op.value=Math.max(0,shieldT);if(ud.plasma){const hk=
 if(S.thr>.2&&Math.random()<.5){fwd();for(const f of ud.flames){f.gs.getWorldPosition(_w);SPK.emit(_w.x,_w.y,_w.z,-_f.x*30+rv(6),-_f.y*30+rv(6),-_f.z*30+rv(6),.3,.12,.25,.45,.2)}}}
 // ----- tir et visée assistée -----
 let PB=[],EB=[],DROPS=[],en=[],fcd=0,lock=null,shieldT=0,hurt=0,lastHp=S.hp;
-const pbPool=[],ebPool=[];
-function mkPB(){const m=pbPool.pop()||new THREE.Mesh(PBG,PBM);curScene().add(m);return m}
-function rmPB(b){b.m.parent&&b.m.parent.remove(b.m);pbPool.push(b.m)}
-function mkEB(c){const m=new THREE.Mesh(EBG,ebMat(c));curScene().add(m);return m}
-function findLock(cands){fwd();let best=null,bs=1e9;for(const c of cands){_v.copy(c.pos).sub(S.pos);const d=_v.length();if(d>c.max||d<4)continue;const ang=Math.acos(clamp(_v.dot(_f)/d,-1,1));if(ang>c.cone)continue;const sc=ang*c.w+d/8000;if(sc<bs){bs=sc;best=c}}return best}
-function fire(dt){fcd-=dt;if(!isFire()||fcd>0||S.docked||S.entry||S.ascent)return;fcd=.27-.022*G.u[0];const n=G.u[0]>=4?2:1,bs=950;fwd();
-for(let i=0;i<n;i++){const off=n>1?(i?4.6:-4.6):0;_r.set(off,-.3,-6).applyQuaternion(S.q);const p=S.pos.clone().add(_r);let dir=_f.clone();
+const pbPool={},ebPool=[];let FALT=0;
+function mkPB(c){const P=pbPool[c]||(pbPool[c]=[]);const m=P.pop()||boltMesh(c,0);curScene().add(m);return m}
+function rmPB(b){b.m.parent&&b.m.parent.remove(b.m);(pbPool[b.c]||(pbPool[b.c]=[])).push(b.m)}
+function mkEB(c){const m=boltMesh(c,1);curScene().add(m);return m}
+function findLock(cands){fwd();let best=null,bs=1e9;for(const c of cands){_v.copy(c.pos).sub(S.pos);const d=_v.length();if(d>c.max*PM('lock')||d<4)continue;const ang=Math.acos(clamp(_v.dot(_f)/d,-1,1));if(ang>c.cone*PM('cone'))continue;const sc=ang*c.w+d/8000;if(sc<bs){bs=sc;best=c}}return best}
+// points de sortie des tirs (bouches des canons visibles sur le vaisseau)
+function muzzlePts(n){const ud=ship.userData,M=ud.muzzles&&ud.muzzles.length?ud.muzzles:[[-4.6,-.3,-6],[4.6,-.3,-6]],sc=ud.body.scale,L=[];
+if(n==1){FALT=(FALT+1)%M.length;L.push(M[FALT])}else{for(let i=0;i<Math.min(n,M.length);i++)L.push(M[i]);const X=[[0,-.7,-8.5],[0,.9,-6]];let k=0;while(L.length<n)L.push(X[k++%2])}
+return L.map(m=>({l:m,w:new V3(m[0]*sc.x,m[1]*sc.y,m[2]*sc.z).applyQuaternion(S.q).add(S.pos)}))}
+function fire(dt){fcd-=dt;if(!isFire()||fcd>0||S.docked||S.entry||S.ascent)return;fcd=(.27-.022*G.u[0])/PM('rate');const n=(G.u[0]>=4?2:1)+PM('shots'),bs=950,dmg=G.u[0]*HS().dmg*PM('dmg')*PM('cdmg'),gp=partOf('guns'),col=gp.bc;fwd();
+for(const M of muzzlePts(n)){const p=M.w;let dir=_f.clone();
 if(lock){const tp=lock.pos.clone();if(lock.vel){const tt=tp.distanceTo(p)/bs;tp.addScaledVector(lock.vel,tt)}dir=tp.sub(p).normalize()}
-mpShot(p,dir);const m=mkPB();m.position.copy(p);m.lookAt(p.clone().sub(dir));PB.push({m,p:m.position,v:dir.multiplyScalar(bs).addScaledVector(S.vel,.5),l:1.6,d:G.u[0]*HS().dmg})}SFX.shoot()}
+mpShot(p,dir,'c');const m=mkPB(col);m.position.copy(p);m.lookAt(p.clone().sub(dir));PB.push({m,p:m.position,v:dir.multiplyScalar(bs).addScaledVector(S.vel,.5),l:1.6,d:dmg,c:col});muzzleFlash(M.l,col)}gunKick();SFX.shoot()}
 const segHit=(a,b,c,r)=>{_v.copy(b).sub(a);const L2=_v.lengthSq();let k=L2?_w.copy(c).sub(a).dot(_v)/L2:0;k=clamp(k,0,1);return _w.copy(a).addScaledVector(_v,k).distanceToSquared(c)<r*r};
-function updPB(dt,targets){for(const b of PB){const a=b.p.clone();b.p.addScaledVector(b.v,dt);b.l-=dt;for(const T of targets){if(b.l<=0)break;if(segHit(a,b.p,T.pos,T.r)){b.l=0;T.hit(b.d,b.p)}}if(b.l<=0)rmPB(b)}PB=PB.filter(b=>b.l>0)}
-function updEB(dt){for(const b of EB){b.m.position.addScaledVector(b.v,dt);b.l-=dt;if(b.m.position.distanceTo(S.pos)<7.5){b.l=0;damage(b.dmg);boom3(b.m.position,10,0xff6650,40)}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}EB=EB.filter(b=>b.l>0)}
-function damage(n){if(S.dead)return;S.hp-=n;SFX.hit()}
+function updPB(dt,targets){for(const b of PB){const a=b.p.clone();b.p.addScaledVector(b.v,dt);b.l-=dt;for(const T of targets){if(b.l<=0)break;if(segHit(a,b.p,T.pos,T.r)){b.l=0;impactFX(b.p,b.c);T.hit(b.d,b.p)}}if(b.l<=0)rmPB(b)}PB=PB.filter(b=>b.l>0)}
+function updEB(dt){for(const b of EB){if(!b.or){b.or=1;b.m.lookAt(_w.copy(b.m.position).sub(b.v))}b.m.position.addScaledVector(b.v,dt);b.l-=dt;if(b.m.position.distanceTo(S.pos)<7.5){b.l=0;damage(b.dmg);impactFX(b.m.position,S.sh>0?partOf('shield').scol||0x5ad0ff:0xff6650,.8)}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}EB=EB.filter(b=>b.l>0)}
+// dégâts : le bouclier absorbe d'abord, l'éperon annule les collisions
+function damage(n,kind){if(S.dead)return;if(kind=='col'&&PM('ram'))return;S.shT=t;if(PM('sh')>0&&S.sh>0){const a=Math.min(S.sh,n);S.sh-=a;n-=a;shieldT=1;if(n<=0){SFX.shield();return}}S.hp-=n;SFX.hit()}
 // ----- butin -----
 function spawnDrops(p,n){for(let i=0;i<n;i++){const m=new THREE.Mesh(OREG,MAT.ore);const g=sprite(0x40e0ff,9);m.add(g);m.position.copy(p).add(new V3(rv(6),rv(6),rv(6)));curScene().add(m);DROPS.push({m,p:m.position,v:new V3(rv(20),rv(20),rv(20)),l:60})}}
 function updDrops(dt,mag=260){for(const d of DROPS){d.l-=dt;d.m.rotation.y+=dt*2;const dd=d.p.distanceTo(S.pos);if(dd<mag&&cargoUsed()<cap()){d.v.addScaledVector(_v.copy(S.pos).sub(d.p).normalize(),900*dt)}d.v.multiplyScalar(Math.pow(.3,dt));d.p.addScaledVector(d.v,dt);
@@ -80,10 +86,10 @@ function updSpace(dt){streamWorld();runJobs(LOWQ?5:8);
 if(S.entry)entryUpdate(dt);else if(!S.dead){fly(dt);if(S.undockT>0)S.undockT-=dt}
 const z=danger(),L=lightFor(S.pos.x,S.pos.y,S.pos.z);sunL.position.copy(S.pos).addScaledVector(L.dir,1000);sunL.target.position.copy(S.pos);sunL.color.copy(L.col);sunL.intensity=.95+L.k*.6;amb.intensity=.5;
 // collisions
-for(const p of planets){const d=S.pos.distanceTo(_v.set(p.x,p.y,p.z));if(d<p.r+14&&!(S.entry&&S.entry.p===p)){_w.copy(S.pos).sub(_v).normalize();S.pos.copy(_v).addScaledVector(_w,p.r+14);const rad=S.vel.dot(_w);if(rad<0){S.vel.addScaledVector(_w,-1.6*rad);if(rad<-60)damage(6)}}
+for(const p of planets){const d=S.pos.distanceTo(_v.set(p.x,p.y,p.z));if(d<p.r+14&&!(S.entry&&S.entry.p===p)){_w.copy(S.pos).sub(_v).normalize();S.pos.copy(_v).addScaledVector(_w,p.r+14);const rad=S.vel.dot(_w);if(rad<0){S.vel.addScaledVector(_w,-1.6*rad);if(rad<-60)damage(6,'col')}}
 if(d<p.r+2200&&!G.disc.has(p.name)){G.disc.add(p.name);G.dpos[p.name]=[p.x|0,p.y|0,p.z|0,p.hue|0,p.ring?1:0,p.r|0];G.cr+=10;toast('Planète découverte : '+p.name+' (+10 ¢)');SFX.disc()}}
 for(const s of suns){const d=S.pos.distanceTo(_v.set(s.x,s.y,s.z));if(d<s.r+40){_w.copy(S.pos).sub(_v).normalize();S.pos.copy(_v).addScaledVector(_w,s.r+40);S.vel.addScaledVector(_w,200)}if(d<s.r*1.9&&!S.dead){damage((1-(d-s.r)/(s.r*.9))*24*dt);if(t-S.heatT>4){S.heatT=t;toast('☀ Chaleur extrême — éloigne-toi !');SFX.alarm()}}}
-for(const a of asts){a.mesh.rotation.x+=a.sp*dt;a.mesh.rotation.y+=a.sp*.7*dt;const d=S.pos.distanceTo(a.pos),R=a.r*.95+5;if(d<R){_w.copy(S.pos).sub(a.pos).normalize();S.pos.copy(a.pos).addScaledVector(_w,R);const rad=S.vel.dot(_w);if(rad<0){S.vel.addScaledVector(_w,-1.5*rad);S.spd*=.5;if(rad<-50){damage(4);boom3(S.pos,8,0xcccccc,40)}}}}
+for(const a of asts){a.mesh.rotation.x+=a.sp*dt;a.mesh.rotation.y+=a.sp*.7*dt;const d=S.pos.distanceTo(a.pos),R=a.r*.95+5;if(d<R){_w.copy(S.pos).sub(a.pos).normalize();S.pos.copy(a.pos).addScaledVector(_w,R);const rad=S.vel.dot(_w);if(rad<0){S.vel.addScaledVector(_w,-1.5*rad);S.spd*=.5;if(rad<-50){damage(4,'col');boom3(S.pos,8,0xcccccc,40)}}}}
 // stations
 for(const st of stations){const g=st.mesh.userData;g.rot.rotation.z+=dt*.15;g.lights.forEach((l,i)=>l.visible=Math.sin(t*4+i)>.2);const tg=G.m&&G.m.tg===st;g.zone.material.color.set(tg?0x4dff8a:0xffc84a);g.zone.material.opacity=.25+.15*Math.sin(t*3);
 const d=S.pos.distanceTo(_v.set(st.x,st.y,st.z));if(S.mustLeave===st&&d>320)S.mustLeave=null;if(!S.docked&&S.mustLeave!==st&&d<230&&!S.dead)dock(st);if(S.docked===st&&d>400)S.docked=null}

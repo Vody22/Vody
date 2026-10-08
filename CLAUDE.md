@@ -9,10 +9,16 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 
 ## Structure
 - `src/shell.html` : HTML/CSS/HUD, avec les marqueurs `%%THREE%%` et `%%GAME%%`.
-- `src/*.js` : modules concaténés dans cet ordre (voir `build.py`) : core, audio, gfx, models, world, game, surface, fx, ultra, detail, content, story, netroom, mp, hud. Tout est au niveau global (pas de modules ES).
+- `src/*.js` : modules concaténés dans cet ordre (voir `build.py`) : core, audio, gfx, models, world, game, surface, fx, ultra, detail, content, lasers, parts, story, netroom, mp, hud. Tout est au niveau global (pas de modules ES).
+- `core.js` : `PARTS` (pièces de l'Atelier) et `PM(clé)` = multiplicateurs des pièces installées (coque, vitesse, cadence, bouclier…).
+- `parts.js` : visuels des pièces (enveloppe `buildShip(P, aLeLaser)`), onglet 🔧 Atelier, aperçu, achat. `lasers.js` : tirs lumineux, rayon laser (shader), éclairs/impacts, son du laser.
 - `src/three-examples/` : post-process Three.js r128 (bloom…) incorporés tels quels.
 - Multijoueur : `mp.js` utilise la capacité `room` des artefacts Claude si présente, sinon `netroom.js` (PeerJS, WebRTC en étoile, salon via `#code` dans l'URL, `public` par défaut).
 - `dev/mockpeer.js`, `dev/mockroom.js` : faux réseau (BroadcastChannel) pour tester le multijoueur en local.
+
+## Pièges connus
+- `netroom.js` : ne jamais passer l'objet `mine` directement à `up()` (il est gelé par `Object.freeze`, la présence ne se mettrait plus à jour).
+- En test headless (SwiftShader) les images sont lentes : appeler `placeShip()/updCam()` à la main avant une capture.
 
 ## Vérifier avant de pousser
 `python3 build.py --check /tmp/g.js && node --check /tmp/g.js`

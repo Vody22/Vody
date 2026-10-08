@@ -5,7 +5,7 @@ const _buildShipBase=buildShip;
 buildShip=function(){const root=_buildShipBase(),b=root.userData.body,h=G.ship||'eclaireur';if(h=='eclaireur')return root;
 const PAL={intercepteur:[0xdfe3ea,0xb3202c],cargo:[0xd9a632,0x4e545c],faucon:[0x7d9a66,0x45524c],leviathan:[0xe9edf2,0x24386e]}[h];
 b.traverse(o=>{if(o.isMesh&&o.material&&o.material.name=='hull')o.material.color.setHex(PAL[0]);if(o.isMesh&&o.material&&o.material.name=='wing')o.material.color.setHex(PAL[1])});
-const M=new THREE.MeshStandardMaterial({color:PAL[0],map:HULLT,metalness:DESK?.7:.25,roughness:.35}),D=new THREE.MeshStandardMaterial({color:0x2a3038,metalness:.6,roughness:.45}),A=new THREE.MeshStandardMaterial({color:PAL[1],map:HULLT,metalness:.5,roughness:.4});
+const M=new THREE.MeshStandardMaterial({color:PAL[0],map:HULLT,metalness:DESK?.7:.25,roughness:.35}),D=new THREE.MeshStandardMaterial({color:0x2a3038,metalness:.6,roughness:.45}),A=new THREE.MeshStandardMaterial({color:PAL[1],map:HULLT,metalness:.5,roughness:.4});M.name='hull';A.name='wing';
 const add=(g,m,x,y,z,rx=0,ry=0,rz=0)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);b.add(o);return o};
 if(h=='intercepteur'){b.scale.set(.82,.85,1.18);b.traverse(o=>{if(o.isMesh&&o.material.name=='wing'&&o.geometry.type=='ExtrudeGeometry')o.rotation.y+=o.scale.x>0?.32:-.32});
 for(const s of[-1,1]){add(new THREE.BoxGeometry(2.6,.12,1.1),A,s*1.9,0,-6.2,0,s*.4,0);add(new THREE.BoxGeometry(.12,1.6,2),A,s*.6,1.1,4,0,0,s*.5)}}
@@ -23,13 +23,10 @@ const WPN={canon:{n:'Canon',ic:'⚔',price:0,d:'Tir rapide, munitions infinies.'
 const AMMO={missile:{n:'10 missiles',q:10,price:150},mine:{n:'5 mines',q:5,price:100}};
 const curW=()=>G.w[G.wi%G.w.length]||'canon';
 function cycleW(dir=1){if(G.w.length<2)return;G.wi=(G.wi+dir+G.w.length)%G.w.length;toast(WPN[curW()].ic+' '+WPN[curW()].n);SFX.tick()}
-const dmgMul=()=>G.u[0]*HS().dmg;
+const dmgMul=()=>G.u[0]*HS().dmg*PM('dmg');
 let MIS=[],MINES=[];const LZ={on:0,heat:0,over:0,acc:new Map()};
 const MISG=lathe([[0,-1.8],[.28,-1.2],[.28,1.4],[0,1.5]],8),MISM=new THREE.MeshStandardMaterial({color:0xdde3ea,metalness:.6,roughness:.3});
 const MINEG=new THREE.IcosahedronGeometry(1.6,0),MINEM=new THREE.MeshStandardMaterial({color:0x3a3f46,metalness:.7,roughness:.35,emissive:0x400000});
-const LZB=new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,1,8,1,true).rotateX(Math.PI/2).translate(0,0,-.5),new THREE.MeshBasicMaterial({color:0x60f0ff,transparent:true,opacity:.85,blending:ADDB,depthWrite:false}));
-const LZC=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,1,6,1,true).rotateX(Math.PI/2).translate(0,0,-.5),new THREE.MeshBasicMaterial({color:0xffffff,blending:ADDB,transparent:true,depthWrite:false}));
-const LZG=sprite(0x80f4ff,22,.9);LZB.frustumCulled=LZC.frustumCulled=false;
 function fireW(dt,TG){const w=curW();if(w=='canon'){LZ.on=0;fire(dt);return}fcd-=dt;LZ.on=0;if(!isFire()||S.docked||S.entry||S.ascent||S.dead)return;
 if(w=='laser'){if(LZ.over<=0)LZ.on=1;return}if(fcd>0)return;const am=WPN[w].am;if(G.ammo[am]<=0){fcd=1.2;toast('Plus de '+(am=='missile'?'missiles':'mines')+' — achète-en en station');return}
 G.ammo[am]--;if(w=='missile'){fcd=.5;launchMissile()}else{fcd=.7;dropMine()}}
@@ -50,16 +47,10 @@ if(N.arm<=0&&!boom)for(const T of TG){if(!T.foe||T.dead||T.gone)continue;if(T.po
 if(boom){boom3(N.pos,40,0xff7030,110,true);SFX.boom();aoe(N.pos,95,16*dmgMul(),TG);N.l=0;N.m.parent&&N.m.parent.remove(N.m)}}MINES=MINES.filter(N=>N.l>0);
 // laser
 if(LZ.over>0){LZ.over-=dt;if(LZ.over<=0)LZ.heat=.3}
-if(LZ.on){LZ.heat+=dt*.42;if(LZ.heat>=1){LZ.heat=1;LZ.over=2.4;LZ.on=0;toast('🔆 Laser en surchauffe !');SFX.alarm()}}else LZ.heat=Math.max(0,LZ.heat-dt*.55);
-if(LZ.on){fwd();const o=_c1.copy(S.pos).addScaledVector(_f,10);let dir=_f.clone();if(lock&&lock.pos.distanceTo(S.pos)<800)dir=_c2.copy(lock.pos).sub(o).normalize();let best=null,bt=780;
-for(const T of TG){if(T.dead||T.gone)continue;_c3.copy(T.pos).sub(o);const tt=_c3.dot(dir);if(tt<0||tt>bt)continue;const perp=_c3.addScaledVector(dir,-tt).length();if(perp<(T.r||6)){bt=tt;best=T}}
-if(mode=='surf'){for(let s=20;s<bt;s+=20){const p=o.clone().addScaledVector(dir,s);if(p.y<SURF.height(p.x,p.z)){bt=s;best=null;break}}}
-const end=o.clone().addScaledVector(dir,bt);for(const L of[LZB,LZC]){if(L.parent!==sc)sc.add(L);L.visible=true;L.position.copy(o);L.lookAt(end);L.rotateY(Math.PI);L.scale.set(1+Math.random()*.25,1+Math.random()*.25,bt)}if(LZG.parent!==sc)sc.add(LZG);LZG.visible=true;LZG.position.copy(end);LZG.scale.setScalar(16+Math.random()*10);
-if(Math.random()<.7)SPK.emit(end.x,end.y,end.z,rv(40),rv(40),rv(40),.4,.5,1,1,.4);
-if(best){const a=(LZ.acc.get(best)||0)+dt*7*dmgMul();if(a>=1.2){best.hit(a,end);LZ.acc.set(best,0)}else LZ.acc.set(best,a)}
-if(AC&&!muted&&Math.random()<dt*14)tone(880+Math.random()*80,820,.06,'sawtooth',.02)}else{LZB.visible=LZC.visible=LZG.visible=false}}
-function clearWeapons(){for(const M of MIS)M.m.parent&&M.m.parent.remove(M.m);for(const N of MINES)N.m.parent&&N.m.parent.remove(N.m);MIS=[];MINES=[];LZ.on=0;LZB.visible=LZC.visible=LZG.visible=false}
-function buyWeapon(id){const W=WPN[id];if(G.w.includes(id)){G.wi=G.w.indexOf(id);toast(W.ic+' '+W.n+' équipé');return}if(G.cr<W.price){toast('Pas assez de crédits');return}G.cr-=W.price;G.w.push(id);G.wi=G.w.length-1;if(W.am)G.ammo[W.am]+=AMMO[W.am].q;toast('Nouvelle arme : '+W.n+' !');SFX.win();save()}
+if(LZ.on){LZ.heat+=dt*.42*PM('heat');if(LZ.heat>=1){LZ.heat=1;LZ.over=2.4;LZ.on=0;toast('🔆 Laser en surchauffe !');SFX.alarm()}}else LZ.heat=Math.max(0,LZ.heat-dt*.55);
+laserTick(dt,TG)}
+function clearWeapons(){for(const M of MIS)M.m.parent&&M.m.parent.remove(M.m);for(const N of MINES)N.m.parent&&N.m.parent.remove(N.m);MIS=[];MINES=[];LZ.on=0;laserHide()}
+function buyWeapon(id){const W=WPN[id];if(G.w.includes(id)){G.wi=G.w.indexOf(id);toast(W.ic+' '+W.n+' équipé');return}if(G.cr<W.price){toast('Pas assez de crédits');return}G.cr-=W.price;G.w.push(id);G.wi=G.w.length-1;if(W.am)G.ammo[W.am]+=AMMO[W.am].q;if(id=='laser')rebuildShip();toast('Nouvelle arme : '+W.n+' !');SFX.win();save()}
 function buyAmmo(am){const A2=AMMO[am];if(G.cr<A2.price){toast('Pas assez de crédits');return}G.cr-=A2.price;G.ammo[am]+=A2.q;SFX.coin()}
 // ----- commerce -----
 const GOODS=[{id:'food',n:'Nourriture',ic:'🌾',p:22},{id:'water',n:'Eau pure',ic:'💧',p:15},{id:'fuel',n:'Carburant',ic:'⛽',p:32},{id:'metal',n:'Alliages',ic:'🔩',p:48},{id:'med',n:'Médicaments',ic:'💊',p:70},{id:'elec',n:'Électronique',ic:'🔌',p:95},{id:'lux',n:'Produits de luxe',ic:'💎',p:170}];

@@ -13,7 +13,7 @@ async function mpNames(){if(!MP.user)return;const ids=[...MP.others.values()].ma
 // ----- réception -----
 function mpPeer(p){if(p.kind!='viewer')return;if(p.sameTab){MP.me=p.peer;return}const pr=p.presence||{};if(!pr.p)return;let o=MP.others.get(p.peer);
 if(!o){o={peer:p.peer,by:p.by,guest:p.guest,buf:[],mesh:null,key:'',lastShot:0,lastHit:{},lastChat:0,ds:0,first:true};MP.others.set(p.peer,o)}
-o.by=p.by;o.nick=cleanTxt(pr.nick).slice(0,16);o.hue=+pr.hue||0;o.ship=SHIPN[pr.sh]?pr.sh:'eclaireur';o.u=Array.isArray(pr.u)?pr.u.map(v=>clamp(v|0,1,6)).slice(0,3):[1,1,1];o.m=pr.m=='surf'?'surf':'space';o.pl=cleanTxt(pr.pl);o.hp=clamp(+pr.hp||0,0,1);o.dead=!!pr.dead;o.th=clamp(+pr.th||0,0,3);o.pvp=!!pr.pvp;o.pk=pr.pk|0;o.k=pr.k|0;o.lz=!!pr.lz;
+o.by=p.by;o.nick=cleanTxt(pr.nick).slice(0,16);o.hue=+pr.hue||0;o.ship=SHIPN[pr.sh]?pr.sh:'eclaireur';o.u=Array.isArray(pr.u)?pr.u.map(v=>clamp(v|0,1,6)).slice(0,3):[1,1,1];o.m=pr.m=='surf'?'surf':'space';o.pl=cleanTxt(pr.pl);o.hp=clamp(+pr.hp||0,0,1);o.dead=!!pr.dead;o.th=clamp(+pr.th||0,0,3);o.pvp=!!pr.pvp;o.pk=pr.pk|0;o.k=pr.k|0;o.lz=!!pr.lz;o.pt=typeof pr.pt=='string'?pr.pt.replace(/[^0-9]/g,'').slice(0,PSLOTS.length):'';o.parts=partsDecode(o.pt);o.lw=!!pr.lw;
 const num=a=>Array.isArray(a)&&a.every(x=>typeof x=='number'&&isFinite(x));if(num(pr.p)&&pr.p.length==3&&num(pr.q)&&pr.q.length==4){const s={t:performance.now(),p:new V3(...pr.p),q:new QT(...pr.q).normalize(),v:num(pr.v)&&pr.v.length==3?new V3(...pr.v):new V3()};if(!o.buf.length||o.buf[o.buf.length-1].p.distanceToSquared(s.p)>1e-4||o.buf.length<2){o.buf.push(s);if(o.buf.length>12)o.buf.shift()}}
 // tirs
 if(Array.isArray(pr.sh2)){for(const s of pr.sh2){if(!s||typeof s.i!='number'||s.i<=o.lastShot)continue;if(!o.first&&num(s.p)&&num(s.d))mpRemoteShot(o,s);o.lastShot=Math.max(o.lastShot,s.i)}}
@@ -24,12 +24,12 @@ if(pr.chat&&typeof pr.chat.n=='number'&&pr.chat.n>o.lastChat){o.lastChat=pr.chat
 // morts
 if(typeof pr.ds=='number'&&pr.ds>o.ds){if(!o.first){const killer=pr.kb&&(pr.kb===MP.me?'toi':MP.others.get(pr.kb)&&mpName(MP.others.get(pr.kb)));if(pr.kb===MP.me){MP.pk++;G.cr+=200;toast('⚔ Tu as abattu '+mpName(o)+' ! +200 ¢');SFX.win()}else if(killer)mpFeed('⚔',mpName(o)+' abattu par '+killer,'#f99');else mpFeed('💥',mpName(o)+' a été détruit','#f99')}o.ds=pr.ds}
 if(o.first){o.first=false;setTimeout(()=>{if(MP.others.has(o.peer)){mpFeed('👋',mpName(o)+' a rejoint la partie','#8fd');SFX.disc()}},1500)}}
-function mpRemove(peer){const o=MP.others.get(peer);if(!o)return;if(o.mesh&&o.mesh.parent)o.mesh.parent.remove(o.mesh);if(o.beam&&o.beam.parent)o.beam.parent.remove(o.beam);MP.others.delete(peer);mpFeed('👋',mpName(o)+' a quitté la partie','#aab')}
+function mpRemove(peer){const o=MP.others.get(peer);if(!o)return;if(o.mesh&&o.mesh.parent)o.mesh.parent.remove(o.mesh);rmBeam(o.beam);MP.others.delete(peer);mpFeed('👋',mpName(o)+' a quitté la partie','#aab')}
 // ----- envoi -----
 function mpSend(force){if(!MP.room)return;if(!force&&t-MP.sendT<.1)return;MP.sendT=t;const I=mode=='surf'?SURF.info():null;
-const pr={nick:MP.nick||null,hue:MP.hue,sh:G.ship,u:G.u,m:mode,pl:I?I.name:null,p:[r1(S.pos.x),r1(S.pos.y),r1(S.pos.z)],q:[r3(S.q.x),r3(S.q.y),r3(S.q.z),r3(S.q.w)],v:[r1(S.vel.x),r1(S.vel.y),r1(S.vel.z)],th:r1(S.thr||0),hp:r3(clamp(S.hp/maxhp(),0,1)),dead:S.dead?1:0,pvp:MP.pvp?1:0,pk:MP.pk,k:G.kills,lz:LZ.on?1:0,
+const pr={nick:MP.nick||null,hue:MP.hue,sh:G.ship,u:G.u,m:mode,pl:I?I.name:null,p:[r1(S.pos.x),r1(S.pos.y),r1(S.pos.z)],q:[r3(S.q.x),r3(S.q.y),r3(S.q.z),r3(S.q.w)],v:[r1(S.vel.x),r1(S.vel.y),r1(S.vel.z)],th:r1(S.thr||0),hp:r3(clamp(S.hp/maxhp(),0,1)),dead:S.dead?1:0,pvp:MP.pvp?1:0,pk:MP.pk,k:G.kills,lz:LZ.on?1:0,pt:partsCode(G.parts),lw:G.w.includes('laser')?1:0,
 sh2:MP.shots.slice(-6),hits:MP.hits.slice(-6),chat:MP.chat,ds:MP.ds,kb:MP.kb};MP.room.presence(pr).catch(()=>{})}
-function mpShot(p,d,w){if(!MP.room)return;MP.shots.push({i:++MP.shotN,p:[r1(p.x),r1(p.y),r1(p.z)],d:[r3(d.x),r3(d.y),r3(d.z)],w:w||'c'});if(MP.shots.length>6)MP.shots.shift()}
+function mpShot(p,d,w){if(!MP.room)return;MP.shots.push({i:++MP.shotN,p:[r1(p.x),r1(p.y),r1(p.z)],d:[r3(d.x),r3(d.y),r3(d.z)],w:w||'c',g:G.parts.guns||'std'});if(MP.shots.length>6)MP.shots.shift()}
 function mpHit(o,d,pp){MP.hits.push({i:++MP.hitN,to:o.peer,d:Math.round(d*10)/10});if(MP.hits.length>6)MP.hits.shift();boom3(pp,8,0xffaa66,40);SFX.tick();mpSend(true)}
 function mpDied(){MP.ds++;MP.kb=(MP.lastAtk&&t-MP.lastAtkT<6)?MP.lastAtk:null;mpSend(true)}
 function mpSay(txt){txt=cleanTxt(txt).trim();if(!txt)return;MP.chat={n:++MP.chatN,txt};mpFeed(MP.nick||'Toi',txt,`hsl(${MP.hue},70%,70%)`);mpSend(true)}
@@ -37,18 +37,18 @@ function mpSay(txt){txt=cleanTxt(txt).trim();if(!txt)return;MP.chat={n:++MP.chat
 const RSM={};function rShotMat(h){return RSM[h]||(RSM[h]=new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(h/360,.9,.65),blending:ADDB,transparent:true,depthWrite:false}))}
 let RSHOTS=[];
 function mpRemoteShot(o,s){if(o.m!=mode||(mode=='surf'&&o.pl!==(SURF.info()||{}).name))return;const p=new V3(...s.p),d=new V3(...s.d).normalize();if(p.distanceTo(S.pos)>3000)return;
-const m=new THREE.Mesh(s.w=='m'?MISG:PBG,s.w=='m'?MISM:rShotMat(o.hue));m.position.copy(p);m.lookAt(p.clone().sub(d));curScene().add(m);RSHOTS.push({m,v:d.multiplyScalar(s.w=='m'?600:950),l:s.w=='m'?2:1.4,w:s.w});if(p.distanceTo(S.pos)<900)(s.w=='m'?SFX.eshoot:SFX.shoot)()}
-function shipFor(sh,u){const s=G.ship,uu=G.u;G.ship=sh;G.u=u;let m;try{m=buildShip()}finally{G.ship=s;G.u=uu}return m}
+const gb=PARTS.guns.o[s.g]&&PARTS.guns.o[s.g].bc,m=s.w=='m'?new THREE.Mesh(MISG,MISM):boltMesh(gb||new THREE.Color().setHSL(o.hue/360,.9,.6).getHex(),0);m.position.copy(p);m.lookAt(p.clone().sub(d));curScene().add(m);RSHOTS.push({m,v:d.multiplyScalar(s.w=='m'?600:950),l:s.w=='m'?2:1.4,w:s.w});if(p.distanceTo(S.pos)<900)(s.w=='m'?SFX.eshoot:SFX.shoot)()}
+function shipFor(sh,u,P,lw){const s=G.ship,uu=G.u;G.ship=sh;G.u=u;let m;try{m=buildShip(P||{},!!lw)}finally{G.ship=s;G.u=uu}return m}
 function mpSample(o,now){const b=o.buf;if(!b.length)return null;const rt=now-110;if(b.length==1||rt>=b[b.length-1].t){const L=b[b.length-1],dt=clamp((now-L.t)/1000,0,.5);return{p:L.p.clone().addScaledVector(L.v,dt),q:L.q.clone()}}
 for(let i=b.length-1;i>0;i--){const A=b[i-1],B=b[i];if(rt>=A.t){const k=clamp((rt-A.t)/Math.max(1,B.t-A.t),0,1);return{p:A.p.clone().lerp(B.p,k),q:A.q.clone().slerp(B.q,k)}}}return{p:b[0].p.clone(),q:b[0].q.clone()}}
 function mpVisible(o){if(o.m!=mode)return false;if(mode=='surf'){const I=SURF.info();return I&&o.pl===I.name}return true}
 function updMP(dt){if(!MP.room){return}mpSend(false);const now=performance.now(),sc=curScene();
-for(const o of MP.others.values()){const vis=mpVisible(o)&&!o.dead,smp=vis&&mpSample(o,now);if(!smp){if(o.mesh)o.mesh.visible=false;if(o.beam)o.beam.visible=false;o.pos=null;continue}
-const key=o.ship+o.u.join('');if(!o.mesh||o.key!==key){if(o.mesh&&o.mesh.parent)o.mesh.parent.remove(o.mesh);o.mesh=shipFor(o.ship,o.u);o.key=key;o.mesh.userData.shield.visible=false;
+for(const o of MP.others.values()){const vis=mpVisible(o)&&!o.dead,smp=vis&&mpSample(o,now);if(!smp){if(o.mesh)o.mesh.visible=false;hideBeam(o.beam);o.pos=null;continue}
+const key=o.ship+o.u.join('')+o.pt+(o.lw?1:0);if(!o.mesh||o.key!==key){if(o.mesh&&o.mesh.parent)o.mesh.parent.remove(o.mesh);o.mesh=shipFor(o.ship,o.u,o.parts,o.lw);o.key=key;o.mesh.userData.shield.visible=false;
 const ring=new THREE.Mesh(new THREE.TorusGeometry(11,.25,6,40),new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(o.hue/360,.85,.6),transparent:true,opacity:.55,blending:ADDB,depthWrite:false}));ring.rotation.x=Math.PI/2;o.mesh.add(ring)}
 if(o.mesh.parent!==sc)sc.add(o.mesh);o.mesh.visible=true;o.mesh.position.copy(smp.p);o.mesh.quaternion.copy(smp.q);o.pos=smp.p;
 const ud=o.mesh.userData;for(const f of ud.flames){f.fl.scale.set(1,1,.3+o.th*(.7+Math.random()*.3));f.gs.scale.setScalar(2.6+o.th*1.6)}ud.nl.visible=ud.nr.visible=Math.sin(t*5)>.6;
-if(o.lz){if(!o.beam){o.beam=new THREE.Mesh(LZB.geometry,LZB.material.clone());o.beam.material.color.setHSL(o.hue/360,.9,.65);o.beam.frustumCulled=false}if(o.beam.parent!==sc)sc.add(o.beam);o.beam.visible=true;_m1.set(0,0,-1).applyQuaternion(smp.q);o.beam.position.copy(smp.p).addScaledVector(_m1,10);o.beam.lookAt(_m2.copy(o.beam.position).addScaledVector(_m1,-1));o.beam.scale.set(1,1,600)}else if(o.beam)o.beam.visible=false}
+if(o.lz){const lc=partOf('focus',o.parts).lc;if(o.beam&&o.beamC!==lc){rmBeam(o.beam);o.beam=null}if(!o.beam){o.beam=mkBeam(lc);o.beamC=lc}_m1.set(0,0,-1).applyQuaternion(smp.q);_m2.set(0,-.85,-8.6).applyQuaternion(smp.q).add(smp.p);placeBeam(o.beam,_m2,_m2.clone().addScaledVector(_m1,600),1+Math.random()*.15,false)}else hideBeam(o.beam)}
 for(const s of RSHOTS){s.m.position.addScaledVector(s.v,dt);s.l-=dt;if(s.w=='m'&&Math.random()<.7)FIRE.emit(s.m.position.x,s.m.position.y,s.m.position.z,rv(6),rv(6),rv(6),.3,.9,.45,.12,.4);if(s.l<=0){s.m.parent&&s.m.parent.remove(s.m);if(s.w=='m')boom3(s.m.position,20,0xffa040,70,true)}}RSHOTS=RSHOTS.filter(s=>s.l>0);
 for(let i=MP.feed.length-1;i>=0;i--)if(t-MP.feed[i].t>14){MP.feed.splice(i,1);MP.feedDirty=1}if(MP.feedDirty){MP.feedDirty=0;mpFeedRender()}
 if(MP.panel&&Math.random()<.1)mpPanel()}

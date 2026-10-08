@@ -15,7 +15,7 @@ const NA=['Kor','Vel','Zan','Thy','Ark','Nyx','Omi','Sol','Ria','Bel'],SU=['ia',
 const TM={value:0};
 // ===== ÉTAT =====
 const S={pos:new V3(0,30,900),vel:new V3(),q:new QT(),hp:100,ore:0,thr:0,spd:0,bank:0,pitchV:0,docked:null,heatT:-9};
-const G={cr:0,u:[1,1,1],disc:new Set(),kills:0,m:null,done:0,loot:{},ship:'eclaireur',owned:['eclaireur'],w:['canon'],wi:0,ammo:{missile:0,mine:0},cargo:{},story:null,time:0,vst:[{n:'Base Alpha',x:0,y:0,z:0}],dpos:{}};
+const G={cr:0,u:[1,1,1],disc:new Set(),kills:0,m:null,done:0,loot:{},ship:'eclaireur',owned:['eclaireur'],w:['canon'],wi:0,ammo:{missile:0,mine:0},cargo:{},story:null,time:0,vst:[{n:'Base Alpha',x:0,y:0,z:0}],dpos:{},parts:{},pown:[]};
 let t=0,mode='space',hint=10,DT=.016;
 const HULLS={eclaireur:{n:'Éclaireur',hp:1,spd:1,turn:1,cap:15,dmg:1,price:0,desc:'Polyvalent et fiable, ton premier vaisseau.'},
 intercepteur:{n:'Intercepteur Vif',hp:.8,spd:1.3,turn:1.4,cap:10,dmg:1,price:1200,desc:'Le plus rapide et le plus agile du secteur.'},
@@ -23,8 +23,24 @@ cargo:{n:'Cargo Mule',hp:1.4,spd:.85,turn:.75,cap:45,dmg:.8,price:1500,desc:'Sou
 faucon:{n:'Chasseur Faucon',hp:1.6,spd:.95,turn:.95,cap:20,dmg:1.5,price:3200,desc:'Blindé et lourdement armé.'},
 leviathan:{n:'Croiseur Léviathan',hp:2.5,spd:.8,turn:.7,cap:35,dmg:2.1,price:7500,desc:'Une forteresse volante.'}};
 const HS=()=>HULLS[G.ship]||HULLS.eclaireur;
-const maxhp=()=>Math.round((100+40*(G.u[2]-1))*HS().hp),cap=()=>Math.round(HS().cap*(1+(G.u[2]-1)*.66));
-const cruise=()=>(110+18*(G.u[1]-1))*HS().spd,boostSpd=()=>cruise()*2.6;
+// ----- pièces de vaisseau (Atelier) -----
+const PARTS={
+paint:{n:'Peinture',ic:'🎨',o:{std:{n:'Couleurs d\'usine',p:0,d:'Les couleurs d\'origine du vaisseau.'},arctique:{n:'Blanc arctique',p:250,d:'Blanc glacier, filets bleus.',c:[0xeef3f8,0x2f6fd0,0x39a0ff]},corsaire:{n:'Rouge corsaire',p:300,d:'Rouge sang et noir, pour faire peur aux pirates.',c:[0xb51f27,0x1c1c20,0xffc040]},toxique:{n:'Vert toxique',p:350,d:'Vert acide et graphite.',c:[0x63d43c,0x22282a,0xd4ff3a]},furtif:{n:'Noir furtif',p:450,d:'Mat et sombre, liserés lumineux.',c:[0x2a2d33,0x121316,0x39ff9a]},neon:{n:'Violet néon',p:550,d:'Violet électrique et cyan.',c:[0x6d34f0,0x16b8f0,0xff4adf]},royal:{n:'Or royal',p:800,d:'Or poli et pourpre. La grande classe.',c:[0xd8ad48,0x4e2378,0xffffff]}}},
+nose:{n:'Nez',ic:'🔺',o:{std:{n:'Nez standard',p:0,d:'Profilé de série.'},radar:{n:'Radar longue portée',p:700,d:'Verrouille les cibles 50 % plus loin.',lock:1.5},eperon:{n:'Éperon blindé',p:900,d:'Coque +15 % et les collisions ne t\'abîment plus.',hp:1.15,ram:1},chasse:{n:'Nez de chasse',p:1300,d:'Toutes les armes +12 %, visée assistée plus large.',dmg:1.12,cone:1.5}}},
+wings:{n:'Ailes',ic:'🪽',o:{std:{n:'Ailes standard',p:0,d:'Équilibrées.'},delta:{n:'Ailes delta',p:800,d:'Maniabilité +22 %.',turn:1.22},blindees:{n:'Ailes blindées',p:1100,d:'Coque +20 %, maniabilité −5 %.',hp:1.2,turn:.95},lames:{n:'Ailes-lames',p:1500,d:'Vitesse +10 %, maniabilité +15 %.',spd:1.1,turn:1.15}}},
+eng:{n:'Moteurs',ic:'🔥',o:{std:{n:'Réacteurs standard',p:0,d:'Fiables.'},ion:{n:'Propulseurs ioniques',p:1000,d:'Vitesse +15 %. Flamme bleu électrique.',spd:1.15,col:0x3fa8ff},triple:{n:'Triple poussée',p:1600,d:'Boost +35 %.',boost:1.35,col:0xff8a30},fusion:{n:'Réacteur à fusion',p:3200,d:'Vitesse +25 % et boost +20 %. Flamme dorée.',spd:1.25,boost:1.2,col:0xffd23a}}},
+guns:{n:'Canons',ic:'🔫',o:{std:{n:'Canons standard',p:0,d:'Tirs laser cyan.',bc:0x56e8ff},jumeles:{n:'Canons jumelés',p:1200,d:'Un tir de plus à chaque salve.',shots:1,bc:0x56e8ff},lourds:{n:'Canons lourds',p:1500,d:'Dégâts +45 %, cadence −15 %. Tirs orange.',cdmg:1.45,rate:.85,bc:0xff9a30},rotatifs:{n:'Canons rotatifs',p:2200,d:'Cadence +45 %. Tirs jaunes.',rate:1.45,bc:0xffe85a},plasma:{n:'Canons à plasma',p:3400,d:'Dégâts +30 % et cadence +15 %. Tirs verts.',cdmg:1.3,rate:1.15,bc:0x5dff6a}}},
+armor:{n:'Blindage',ic:'🛡',o:{std:{n:'Blindage standard',p:0,d:'De série.'},composite:{n:'Plaques composites',p:900,d:'Coque +25 %.',hp:1.25},reactif:{n:'Blindage réactif',p:1800,d:'Coque +50 %, vitesse −5 %.',hp:1.5,spd:.95},nano:{n:'Nano-coque',p:3000,d:'Coque +30 % et elle se répare toute seule.',hp:1.3,regen:2.5}}},
+shield:{n:'Bouclier',ic:'💠',o:{std:{n:'Aucun bouclier',p:0,d:'Rien ne protège la coque.'},leger:{n:'Déflecteur léger',p:800,d:'Bouclier de 25 points qui se recharge.',sh:25,scol:0x5ad0ff},tactique:{n:'Bouclier tactique',p:1700,d:'Bouclier de 55 points.',sh:55,scol:0x6a8cff},egide:{n:'Égide',p:3500,d:'Bouclier de 100 points, recharge rapide.',sh:100,shr:1.7,scol:0xc070ff}}},
+focus:{n:'Laser',ic:'🔆',o:{std:{n:'Focaliseur standard',p:0,d:'Rayon cyan (arme Laser).',lc:0x46e6ff},cryo:{n:'Cryo-refroidisseur',p:900,d:'Le laser chauffe 45 % moins vite.',heat:.55,lc:0x7fb2ff},surcharge:{n:'Surcharge',p:1500,d:'Dégâts du laser +60 %, il chauffe un peu plus.',ldmg:1.6,heat:1.15,lc:0xff4422},prisme:{n:'Prisme double',p:2600,d:'Deux rayons, dégâts du laser +35 %.',ldmg:1.35,twin:1,lc:0xc65cff},solaire:{n:'Lance solaire',p:4200,d:'Dégâts +90 %, portée +40 %, chauffe −20 %.',ldmg:1.9,heat:.8,lrange:1.4,lc:0xffd54a}}},
+cargo:{n:'Soute',ic:'📦',o:{std:{n:'Soute standard',p:0,d:'De série.'},pods:{n:'Modules latéraux',p:700,d:'Soute +50 %.',cap:1.5},ventral:{n:'Conteneur ventral',p:1500,d:'Soute ×2, vitesse −5 %.',cap:2,spd:.95}}}};
+const PSLOTS=Object.keys(PARTS),PADD={shots:1,twin:1,sh:1,regen:1,ram:1};
+const partOf=(s,P)=>{const o=PARTS[s].o;return o[(P||G.parts||{})[s]]||o.std};
+let PMK=null,PMC=null;
+function pmCalc(P){const r={hp:1,spd:1,boost:1,turn:1,dmg:1,cdmg:1,rate:1,shots:0,heat:1,ldmg:1,twin:0,sh:0,shr:1,regen:0,lock:1,cone:1,cap:1,ram:0,lrange:1};for(const s of PSLOTS){const o=partOf(s,P);for(const k in r)if(o[k]!=null)r[k]=PADD[k]?r[k]+o[k]:r[k]*o[k]}return r}
+function PM(k){const key=JSON.stringify(G.parts||{});if(key!==PMK){PMK=key;PMC=pmCalc(G.parts||{})}return PMC[k]}
+const maxhp=()=>Math.round((100+40*(G.u[2]-1))*HS().hp*PM('hp')),cap=()=>Math.round(HS().cap*(1+(G.u[2]-1)*.66)*PM('cap'));
+const cruise=()=>(110+18*(G.u[1]-1))*HS().spd*PM('spd'),boostSpd=()=>cruise()*2.6*PM('boost');
 function toast(s){const e=$('toast');e.textContent=s;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,2800)}
 const tn=['Arme','Moteur','Coque'];
 const ZN=['Zone sûre','Zone frontière','Zone hostile','Zone dangereuse','Zone mortelle'],ZC=['#7f9','#cf6','#fc4','#f84','#f44'];
@@ -32,9 +48,9 @@ const danger=()=>Math.min(4,Math.floor(S.pos.length()/9000));
 
 // ===== SAUVEGARDE =====
 const SK='starfarer3d-v1';
-function save(){try{localStorage.setItem(SK,JSON.stringify({cr:G.cr,u:G.u,disc:[...G.disc],kills:G.kills,done:G.done,loot:G.loot,ore:S.ore,p:S.pos.toArray(),q:S.q.toArray(),ship:G.ship,owned:G.owned,w:G.w,wi:G.wi,ammo:G.ammo,cargo:G.cargo,story:G.story,time:G.time,vst:G.vst,dpos:G.dpos}))}catch(e){}}
+function save(){try{localStorage.setItem(SK,JSON.stringify({cr:G.cr,u:G.u,disc:[...G.disc],kills:G.kills,done:G.done,loot:G.loot,ore:S.ore,p:S.pos.toArray(),q:S.q.toArray(),ship:G.ship,owned:G.owned,w:G.w,wi:G.wi,ammo:G.ammo,cargo:G.cargo,story:G.story,time:G.time,vst:G.vst,dpos:G.dpos,parts:G.parts,pown:G.pown}))}catch(e){}}
 function load(){try{let d=JSON.parse(localStorage.getItem(SK)||'null');if(!d){const o=JSON.parse(localStorage.getItem('starfarer-save-v1')||'null');if(o){G.cr=o.cr|0;G.u=o.u||[1,1,1];G.kills=o.kills|0;G.done=o.done|0;return 'old'}return false}
-G.cr=d.cr|0;G.u=d.u;G.disc=new Set(d.disc);G.kills=d.kills|0;G.done=d.done|0;G.loot=d.loot||{};S.ore=d.ore|0;S.pos.fromArray(d.p);S.q.fromArray(d.q);for(const k of['ship','owned','w','wi','ammo','cargo','story','time','vst','dpos'])if(d[k]!=null)G[k]=d[k];S.hp=maxhp();return true}catch(e){return false}}
+G.cr=d.cr|0;G.u=d.u;G.disc=new Set(d.disc);G.kills=d.kills|0;G.done=d.done|0;G.loot=d.loot||{};S.ore=d.ore|0;S.pos.fromArray(d.p);S.q.fromArray(d.q);for(const k of['ship','owned','w','wi','ammo','cargo','story','time','vst','dpos','parts','pown'])if(d[k]!=null)G[k]=d[k];if(typeof G.parts!='object'||!G.parts)G.parts={};for(const k in G.parts)if(!PARTS[k]||!PARTS[k].o[G.parts[k]])delete G.parts[k];if(!Array.isArray(G.pown))G.pown=[];S.hp=maxhp();return true}catch(e){return false}}
 setInterval(()=>{if(mode=='space'&&!S.dead)save()},5000);addEventListener('visibilitychange',()=>{if(document.hidden)save()});addEventListener('pagehide',save);
 
 // ===== COMMANDES =====

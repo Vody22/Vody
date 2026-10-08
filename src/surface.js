@@ -93,7 +93,7 @@ if(!dead){S.pos.set(p.x,p.y,p.z).addScaledVector(F.ang,p.r*1.6+120);S.q.setFromU
 clear();F=null;mode='space';camInit=true;save()};
 SURF.update=function(dt){if(!F)return;if(S.ascent)ascentUpdate(dt);else if(!S.dead)fly(dt,{rate:1.15,minSpd:8,surf:true});if(!F)return;
 // sol, plafond, bords
-const gy=Math.max(F.h(S.pos.x,S.pos.z),F.ty=='Glacée'?0:0)+6;if(S.pos.y<gy){S.pos.y=gy;if(S.vel.y<0){if(S.vel.y<-70){damage(5);boom3(S.pos,10,0xbbaa88,40)}S.vel.y*=-.3}fwd();if(_f.y<-.2){_q.setFromAxisAngle(AX,dt*1.6);S.q.multiply(_q)}}
+const gy=Math.max(F.h(S.pos.x,S.pos.z),F.ty=='Glacée'?0:0)+6;if(S.pos.y<gy){S.pos.y=gy;if(S.vel.y<0){if(S.vel.y<-70){damage(5,'col');boom3(S.pos,10,0xbbaa88,40)}S.vel.y*=-.3}fwd();if(_f.y<-.2){_q.setFromAxisAngle(AX,dt*1.6);S.q.multiply(_q)}}
 if(S.pos.y>720&&!S.ascent){S.pos.y-=(S.pos.y-720)*dt*2;if(!F.ceilT||t-F.ceilT>5){F.ceilT=t;toast('Altitude maximale — appuie sur DÉCOLLER pour quitter')}}
 const lim=HALF*.9;if(Math.abs(S.pos.x)>lim||Math.abs(S.pos.z)>lim){S.pos.x=clamp(S.pos.x,-lim,lim);S.pos.z=clamp(S.pos.z,-lim,lim);S.vel.multiplyScalar(.5)}
 const ground=F.h(S.pos.x,S.pos.z);F.onLiq=ground<0&&S.pos.y<26;if(F.onLiq&&F.ty=='Volcanique'){damage(9*dt);if(Math.random()<dt*6)FIRE.emit(S.pos.x,S.pos.y-4,S.pos.z,rv(10),20,rv(10),.6,1,.5,.1,.5)}

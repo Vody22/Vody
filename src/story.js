@@ -81,7 +81,7 @@ B.C.lerp(S.pos,dt*.04);B.ang+=dt*.045;const R=900,np=_s1.set(B.C.x+Math.cos(B.an
 for(const p of B.parts)p.obj.getWorldPosition(p.pos);B.shield.material.uniforms.op.value=.35+.35*Math.sin(t*3)+B.hitFl;B.hitFl=Math.max(0,B.hitFl-dt*3);B.eng.forEach(s=>s.scale.setScalar(55+Math.random()*12));
 for(const a of B.armor)if(a.userData.fall){a.position.addScaledVector(a.userData.fall,dt);a.rotation.x+=dt*2;a.rotation.z+=dt}
 // collision avec la coque
-const lp=g.worldToLocal(S.pos.clone()),e=(lp.x/62)**2+(lp.y/34)**2+(lp.z/160)**2;if(e<1){lp.divideScalar(Math.sqrt(e)*.98);S.pos.copy(g.localToWorld(lp));S.spd*=.4;S.vel.multiplyScalar(-.3);damage(4)}
+const lp=g.worldToLocal(S.pos.clone()),e=(lp.x/62)**2+(lp.y/34)**2+(lp.z/160)**2;if(e<1){lp.divideScalar(Math.sqrt(e)*.98);S.pos.copy(g.localToWorld(lp));S.spd*=.4;S.vel.multiplyScalar(-.3);damage(4,'col')}
 if(B.dying>0){B.dying-=dt;if(Math.random()<dt*7){const p=g.localToWorld(new V3(rv(40),rv(20),rv(150)));boom3(p,35,0xff8040,100,true);SFX.boom();shake=Math.min(1.4,shake+.3)}
 if(B.dying<=0){for(let i=0;i<4;i++)boom3(g.localToWorld(new V3(0,0,-120+i*80)),90,0xffa050,180,true);SFX.boom();scene.remove(g);spawnDrops(g.position,10);G.kills++;const st=B.opts.story;BOSS=null;if(st)storyBossDone();else{G.cr+=1500;toast('Croiseur détruit ! +1500 ¢');SFX.win()}}return}
 const d=S.pos.distanceTo(g.position);if(S.dead||S.docked)return;

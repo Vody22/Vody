@@ -24,7 +24,7 @@ function joinAsClient(){const p=new Peer(OPTS);peer=p;isHost=false;p.on('open',i
  c.on('data',m=>{if(!m)return;if(m.t=='all'&&Array.isArray(m.list)){for(const x of m.list)if(x.peer!==me&&x.pr)up(x.peer,x.pr,false)}else if(m.t=='p'&&m.peer!==me&&m.pr)up(m.peer,m.pr,false);else if(m.t=='bye')drop(m.peer)});
  const lost=()=>{if(hostConn!==c)return;hostConn=null;setConn(false);try{p.destroy()}catch(_){}retryT=setTimeout(start,800+Math.random()*2500)};c.on('close',lost);c.on('error',lost)});
  p.on('error',e=>{if(e&&e.type=='peer-unavailable'){try{p.destroy()}catch(_){}retryT=setTimeout(start,1000+Math.random()*2000)}})}
-function setMe(id){const old=me;me=id;if(old&&old!==id)peers.delete(old);up(me,mine,true)}
+function setMe(id){const old=me;me=id;if(old&&old!==id)peers.delete(old);up(me,{...mine},true)}
 let lastSent=0,pend=null;
 const room={code,dbg:()=>({isHost,me,clients:clients.size,hc:!!(hostConn&&hostConn.open),peers:peers.size}),presence(patch){for(const k in patch){if(patch[k]===null)delete mine[k];else mine[k]=patch[k]}if(me)up(me,{...mine},true);const msg=JSON.parse(JSON.stringify(mine));
  if(isHost)bcast({t:'p',peer:me,pr:msg});else if(hostConn&&hostConn.open)try{hostConn.send({t:'p',pr:msg})}catch(e){}return Promise.resolve()},
