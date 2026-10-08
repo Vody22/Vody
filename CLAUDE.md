@@ -16,6 +16,9 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - Multijoueur : `mp.js` utilise la capacité `room` des artefacts Claude si présente, sinon `netroom.js` (PeerJS, WebRTC en étoile, salon via `#code` dans l'URL, `public` par défaut).
 - `dev/mockpeer.js`, `dev/mockroom.js` : faux réseau (BroadcastChannel) pour tester le multijoueur en local.
 
+## Réglages
+- `ARGENT_ILLIMITE` (core.js) : crédits infinis pour tous (affichés ∞). Les sauvegardes gardent alors 999 999 999 ¢ : si on le désactive, prévoir de ramener ces sauvegardes à un montant normal au chargement.
+
 ## Pièges connus
 - `netroom.js` : ne jamais passer l'objet `mine` directement à `up()` (il est gelé par `Object.freeze`, la présence ne se mettrait plus à jour).
 - En test headless (SwiftShader) les images sont lentes : appeler `placeShip()/updCam()` à la main avant une capture.

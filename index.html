@@ -51,7 +51,7 @@ kbd{display:inline-block;font:700 10px system-ui;padding:1px 5px;border-radius:4
 #mpnet{display:none;flex-wrap:wrap;gap:5px;align-items:center;font-size:11px;color:#bcd}#mpnet span{flex-basis:100%}#mpnet b{color:#ffd257}#mpnet button{flex:1;padding:6px 4px;font-size:11px}#mpform{display:flex;gap:6px}#mpform button{padding:7px 10px;font-size:12px}
 @media (orientation:landscape) and (max-height:520px){#mpb{top:calc(env(safe-area-inset-top,0px) + 10px);right:calc(env(safe-area-inset-right,0px) + 264px)}#mppanel{top:60px;right:120px;max-height:80vh}#mpfeed{top:auto;bottom:10px;left:30%}}
 #loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#03050c;color:#9cf;font-weight:700;letter-spacing:.1em;z-index:9}#loading small{font-weight:400;color:#6a8aa8;letter-spacing:0}
-#shbar i{background:linear-gradient(90deg,#3a6bff,#8fe6ff);box-shadow:0 0 8px rgba(100,170,255,.7)}
+#toast{z-index:6}#shbar i{background:linear-gradient(90deg,#3a6bff,#8fe6ff);box-shadow:0 0 8px rgba(100,170,255,.7)}
 #tabs button{font-size:10.5px;padding:6px 1px;white-space:nowrap}
 .aslots{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:2px 0 6px}
 .aslots button{min-width:0;padding:4px 2px;font-size:15px;line-height:1.1;opacity:.6;border-radius:10px}.aslots button small{display:block;font-size:9px;margin-top:2px}
@@ -77,7 +77,7 @@ body.atelier #tabX{max-height:min(32vh,300px)}body.desk.atelier #shop{left:auto;
 <button id="mppvp"></button><div id="mplist"></div>
 <form id="mpform"><input id="mpmsg" maxlength="120" placeholder="Écris un message…" autocomplete="off"><button>Envoyer</button></form></div>
 <div id="loading">STARFARER 3D<small>Chargement…</small></div>
-<meta name="sf-build" content="20261009-012817"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261009-013514"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -1041,6 +1041,8 @@ const ZN=['Zone sûre','Zone frontière','Zone hostile','Zone dangereuse','Zone 
 const danger=()=>Math.min(4,Math.floor(S.pos.length()/9000));
 
 // ===== SAUVEGARDE =====
+// argent illimité pour tout le monde (mettre false pour revenir à l'économie normale)
+const ARGENT_ILLIMITE=true,CR_INF=999999999;
 const SK='starfarer3d-v1';
 function save(){try{localStorage.setItem(SK,JSON.stringify({cr:G.cr,u:G.u,disc:[...G.disc],kills:G.kills,done:G.done,loot:G.loot,ore:S.ore,p:S.pos.toArray(),q:S.q.toArray(),ship:G.ship,owned:G.owned,w:G.w,wi:G.wi,ammo:G.ammo,cargo:G.cargo,story:G.story,time:G.time,vst:G.vst,dpos:G.dpos,parts:G.parts,pown:G.pown}))}catch(e){}}
 function load(){try{let d=JSON.parse(localStorage.getItem(SK)||'null');if(!d){const o=JSON.parse(localStorage.getItem('starfarer-save-v1')||'null');if(o){G.cr=o.cr|0;G.u=o.u||[1,1,1];G.kills=o.kills|0;G.done=o.done|0;return 'old'}return false}
@@ -2054,7 +2056,7 @@ $('shop').addEventListener('click',e=>{const b=e.target.closest('button');
 if(b){if(b.dataset.aslot){ASLOT=b.dataset.aslot;HC.shopV=null;SFX.tick();return}const a=b.dataset.act||'';if(a.startsWith('pbuy:')){const[,s,id]=a.split(':');buyPart(s,id);HC.shopV=null}return}
 const r=e.target.closest('[data-aprev]');if(!r)return;const[s,id]=r.dataset.aprev.split(':');const same=(G.parts[s]||'std')==id;PREV=same||(PREV&&PREV.s==s&&PREV.id==id)?null:{s,id};rebuildShip();HC.shopV=null;SFX.tick()});
 // ----- par image : bouclier, réparation, aperçu, canons -----
-function updParts(dt){const ms=PM('sh');if(S.dead||S.docked)S.sh=ms;else if(ms>0){if(S.sh==null)S.sh=ms;if(t-(S.shT||-9)>3)S.sh=Math.min(ms,S.sh+dt*9*PM('shr'))}else S.sh=0;
+function updParts(dt){if(ARGENT_ILLIMITE)G.cr=CR_INF;const ms=PM('sh');if(S.dead||S.docked)S.sh=ms;else if(ms>0){if(S.sh==null)S.sh=ms;if(t-(S.shT||-9)>3)S.sh=Math.min(ms,S.sh+dt*9*PM('shr'))}else S.sh=0;
 const rg=PM('regen');if(rg&&!S.dead&&S.hp<maxhp())S.hp=Math.min(maxhp(),S.hp+rg*dt);
 if(PREV&&(!S.docked||TAB!='atelier'||mode!='space')){PREV=null;rebuildShip();HC.shopV=null}
 document.body.classList.toggle('atelier',!!S.docked&&TAB=='atelier'&&mode=='space');if(S.docked&&!updParts.seen){updParts.seen=1;let k=0;try{k=localStorage.getItem('sf-atelier')}catch(e){}if(!k){setTimeout(()=>toast('🔧 Nouveau : l\'Atelier ! Personnalise ton vaisseau pièce par pièce'),1800);try{localStorage.setItem('sf-atelier','1')}catch(e){}}}
@@ -2367,7 +2369,7 @@ $('mppub').onclick=()=>{location.hash='';location.reload()};
 const HC={};function setH(id,v){if(HC[id]!==v){HC[id]=v;$(id).innerHTML=v}}
 function setW(id,f){const v=(clamp(f,0,1)*100).toFixed(1)+'%';if(HC[id]!==v){HC[id]=v;$(id).style.width=v}}
 function setD(id,v){if(HC['d'+id]!==v){HC['d'+id]=v;$(id).style.display=v}}
-function hud(){const hp=Math.max(0,S.hp|0),mh=maxhp();setW('hpb',hp/mh);setH('hpt',hp);const low=hp/mh<.3;if(HC.low!==low){HC.low=low;$('hpbar').classList.toggle('low',low)}setW('orb',cargoUsed()/cap());setH('ort',cargoUsed()+'/'+cap());{const ms=PM('sh');setD('shrow',ms>0?'flex':'none');if(ms>0){setW('shb',(S.sh||0)/ms);setH('sht',Math.ceil(S.sh||0))}}setH('cr',G.cr+' <small>¢</small>');
+function hud(){const hp=Math.max(0,S.hp|0),mh=maxhp();setW('hpb',hp/mh);setH('hpt',hp);const low=hp/mh<.3;if(HC.low!==low){HC.low=low;$('hpbar').classList.toggle('low',low)}setW('orb',cargoUsed()/cap());setH('ort',cargoUsed()+'/'+cap());{const ms=PM('sh');setD('shrow',ms>0?'flex':'none');if(ms>0){setW('shb',(S.sh||0)/ms);setH('sht',Math.ceil(S.sh||0))}}if(ARGENT_ILLIMITE)G.cr=CR_INF;setH('cr',(ARGENT_ILLIMITE?'∞':G.cr)+' <small>¢</small>');
 let info='',sub,zone;if(mode=='surf'){const I=SURF.info();info=`<span style="color:#9cf">🪐 ${I.name} · ${I.ty}</span><br><span style="color:#a9c6da">${I.wx}</span>${I.lava?'<br><b style="color:#f84">⚠ Lave !</b>':I.gey?'<br><b style="color:#f84">⚠ Geyser !</b>':''}`;sub=`💎 ${I.cr} · ✦ ${I.ar} · ⌖ ${I.tu}`;zone=[I.ty,'#9cf']}
 else{const z=danger();sub=`🪐 ${G.disc.size} · ☠ ${G.kills} · ✔ ${G.done}`;zone=[ZN[z],ZC[z]]}
 if(G.m)info=(info?info+'<br>':'')+`<span style="color:#5f9">🎯 ${G.m.txt}${G.m.type=='chasse'?` (${G.kills-G.m.k0}/${G.m.n})`:''}</span> <span style="color:#ffd257">+${G.m.rw} ¢</span>`;

@@ -47,6 +47,8 @@ const ZN=['Zone sûre','Zone frontière','Zone hostile','Zone dangereuse','Zone 
 const danger=()=>Math.min(4,Math.floor(S.pos.length()/9000));
 
 // ===== SAUVEGARDE =====
+// argent illimité pour tout le monde (mettre false pour revenir à l'économie normale)
+const ARGENT_ILLIMITE=true,CR_INF=999999999;
 const SK='starfarer3d-v1';
 function save(){try{localStorage.setItem(SK,JSON.stringify({cr:G.cr,u:G.u,disc:[...G.disc],kills:G.kills,done:G.done,loot:G.loot,ore:S.ore,p:S.pos.toArray(),q:S.q.toArray(),ship:G.ship,owned:G.owned,w:G.w,wi:G.wi,ammo:G.ammo,cargo:G.cargo,story:G.story,time:G.time,vst:G.vst,dpos:G.dpos,parts:G.parts,pown:G.pown}))}catch(e){}}
 function load(){try{let d=JSON.parse(localStorage.getItem(SK)||'null');if(!d){const o=JSON.parse(localStorage.getItem('starfarer-save-v1')||'null');if(o){G.cr=o.cr|0;G.u=o.u||[1,1,1];G.kills=o.kills|0;G.done=o.done|0;return 'old'}return false}

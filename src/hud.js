@@ -2,7 +2,7 @@
 const HC={};function setH(id,v){if(HC[id]!==v){HC[id]=v;$(id).innerHTML=v}}
 function setW(id,f){const v=(clamp(f,0,1)*100).toFixed(1)+'%';if(HC[id]!==v){HC[id]=v;$(id).style.width=v}}
 function setD(id,v){if(HC['d'+id]!==v){HC['d'+id]=v;$(id).style.display=v}}
-function hud(){const hp=Math.max(0,S.hp|0),mh=maxhp();setW('hpb',hp/mh);setH('hpt',hp);const low=hp/mh<.3;if(HC.low!==low){HC.low=low;$('hpbar').classList.toggle('low',low)}setW('orb',cargoUsed()/cap());setH('ort',cargoUsed()+'/'+cap());{const ms=PM('sh');setD('shrow',ms>0?'flex':'none');if(ms>0){setW('shb',(S.sh||0)/ms);setH('sht',Math.ceil(S.sh||0))}}setH('cr',G.cr+' <small>¢</small>');
+function hud(){const hp=Math.max(0,S.hp|0),mh=maxhp();setW('hpb',hp/mh);setH('hpt',hp);const low=hp/mh<.3;if(HC.low!==low){HC.low=low;$('hpbar').classList.toggle('low',low)}setW('orb',cargoUsed()/cap());setH('ort',cargoUsed()+'/'+cap());{const ms=PM('sh');setD('shrow',ms>0?'flex':'none');if(ms>0){setW('shb',(S.sh||0)/ms);setH('sht',Math.ceil(S.sh||0))}}if(ARGENT_ILLIMITE)G.cr=CR_INF;setH('cr',(ARGENT_ILLIMITE?'∞':G.cr)+' <small>¢</small>');
 let info='',sub,zone;if(mode=='surf'){const I=SURF.info();info=`<span style="color:#9cf">🪐 ${I.name} · ${I.ty}</span><br><span style="color:#a9c6da">${I.wx}</span>${I.lava?'<br><b style="color:#f84">⚠ Lave !</b>':I.gey?'<br><b style="color:#f84">⚠ Geyser !</b>':''}`;sub=`💎 ${I.cr} · ✦ ${I.ar} · ⌖ ${I.tu}`;zone=[I.ty,'#9cf']}
 else{const z=danger();sub=`🪐 ${G.disc.size} · ☠ ${G.kills} · ✔ ${G.done}`;zone=[ZN[z],ZC[z]]}
 if(G.m)info=(info?info+'<br>':'')+`<span style="color:#5f9">🎯 ${G.m.txt}${G.m.type=='chasse'?` (${G.kills-G.m.k0}/${G.m.n})`:''}</span> <span style="color:#ffd257">+${G.m.rw} ¢</span>`;

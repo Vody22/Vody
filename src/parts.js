@@ -98,7 +98,7 @@ $('shop').addEventListener('click',e=>{const b=e.target.closest('button');
 if(b){if(b.dataset.aslot){ASLOT=b.dataset.aslot;HC.shopV=null;SFX.tick();return}const a=b.dataset.act||'';if(a.startsWith('pbuy:')){const[,s,id]=a.split(':');buyPart(s,id);HC.shopV=null}return}
 const r=e.target.closest('[data-aprev]');if(!r)return;const[s,id]=r.dataset.aprev.split(':');const same=(G.parts[s]||'std')==id;PREV=same||(PREV&&PREV.s==s&&PREV.id==id)?null:{s,id};rebuildShip();HC.shopV=null;SFX.tick()});
 // ----- par image : bouclier, réparation, aperçu, canons -----
-function updParts(dt){const ms=PM('sh');if(S.dead||S.docked)S.sh=ms;else if(ms>0){if(S.sh==null)S.sh=ms;if(t-(S.shT||-9)>3)S.sh=Math.min(ms,S.sh+dt*9*PM('shr'))}else S.sh=0;
+function updParts(dt){if(ARGENT_ILLIMITE)G.cr=CR_INF;const ms=PM('sh');if(S.dead||S.docked)S.sh=ms;else if(ms>0){if(S.sh==null)S.sh=ms;if(t-(S.shT||-9)>3)S.sh=Math.min(ms,S.sh+dt*9*PM('shr'))}else S.sh=0;
 const rg=PM('regen');if(rg&&!S.dead&&S.hp<maxhp())S.hp=Math.min(maxhp(),S.hp+rg*dt);
 if(PREV&&(!S.docked||TAB!='atelier'||mode!='space')){PREV=null;rebuildShip();HC.shopV=null}
 document.body.classList.toggle('atelier',!!S.docked&&TAB=='atelier'&&mode=='space');if(S.docked&&!updParts.seen){updParts.seen=1;let k=0;try{k=localStorage.getItem('sf-atelier')}catch(e){}if(!k){setTimeout(()=>toast('🔧 Nouveau : l\'Atelier ! Personnalise ton vaisseau pièce par pièce'),1800);try{localStorage.setItem('sf-atelier','1')}catch(e){}}}
