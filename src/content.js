@@ -41,10 +41,10 @@ if(tg){_c2.copy(tg.pos).sub(M.pos).normalize();const cur=M.vel.clone().normalize
 M.pos.addScaledVector(M.vel,dt);M.m.lookAt(_c3.copy(M.pos).sub(M.vel));if(Math.random()<.8)FIRE.emit(M.pos.x,M.pos.y,M.pos.z,rv(8),rv(8),rv(8),.35,.9,.45,.12,.4);if(Math.random()<.5)SPK.emit(M.pos.x,M.pos.y,M.pos.z,rv(4),rv(4),rv(4),.9,.25,.25,.28,.3);
 let hit=null;if(M.arm<=0)for(const T of TG){if(T.dead||T.gone)continue;if(T.pos.distanceTo(M.pos)<(T.r||6)+(T===M.tg?14:4)){hit=T;break}}
 if(mode=='surf'&&M.pos.y<SURF.height(M.pos.x,M.pos.z)+1)M.l=0;
-if(hit||M.l<=0){boom3(M.pos,26,0xffa040,80,true);SFX.boom();aoe(M.pos,50,9*dmgMul(),TG);M.l=0;M.m.parent&&M.m.parent.remove(M.m)}}MIS=MIS.filter(M=>M.l>0);
+if(hit||M.l<=0){boom3(M.pos,26,0xffa040,80,true);SFX.boom();aoe(M.pos,50,9*dmgMul()*(1+.15*talR('miss')),TG);M.l=0;M.m.parent&&M.m.parent.remove(M.m)}}MIS=MIS.filter(M=>M.l>0);
 for(const N of MINES){N.l-=dt;N.arm-=dt;N.pos.addScaledVector(N.vel,dt);N.vel.multiplyScalar(Math.pow(.4,dt));N.m.rotation.y+=dt;N.blink.visible=N.arm<=0&&Math.sin(t*10)>0;let boom=N.l<=0;
 if(N.arm<=0&&!boom)for(const T of TG){if(!T.foe||T.dead||T.gone)continue;if(T.pos.distanceTo(N.pos)<45+(T.r||0)){boom=true;break}}
-if(boom){boom3(N.pos,40,0xff7030,110,true);SFX.boom();aoe(N.pos,95,16*dmgMul(),TG);N.l=0;N.m.parent&&N.m.parent.remove(N.m)}}MINES=MINES.filter(N=>N.l>0);
+if(boom){boom3(N.pos,40,0xff7030,110,true);SFX.boom();aoe(N.pos,95,16*dmgMul()*(1+.15*talR('miss')),TG);N.l=0;N.m.parent&&N.m.parent.remove(N.m)}}MINES=MINES.filter(N=>N.l>0);
 // laser
 if(LZ.over>0){LZ.over-=dt;if(LZ.over<=0)LZ.heat=.3}
 if(LZ.on){LZ.heat+=dt*.42*PM('heat');if(LZ.heat>=1){LZ.heat=1;LZ.over=2.4;LZ.on=0;toast('🔆 Laser en surchauffe !');SFX.alarm()}}else LZ.heat=Math.max(0,LZ.heat-dt*.55);

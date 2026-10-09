@@ -59,7 +59,7 @@ svcAdd({o:60,ic:'gavel',t:'Hôtel des ventes',show:st=>!st.ground,html:st=>SROW(
 setTimeout(()=>{if(API_OK)mkLoad(true)},12000);
 addEventListener('keydown',e=>{if(e.code=='Escape'&&MK.open)mkToggle(false)});
 // ----- annonce de la mise à jour (une seule fois) -----
-if(!G.x.news10){setTimeout(()=>{G.x.news10=1;banner('star','Mise à jour : 10 nouveautés !','Ailiers au bar, outils de vaisseau, épaves géantes, courses, anomalies, guerre des territoires, missions de faction, contrebande, journal de bord (J), classements','#7ab6ff');save()},7000)}
+
 // ----- HUD : pas plus de quelques lignes d'objectifs à la fois (surtout sur mobile) -----
 {const _ci=contentInfo;contentInfo=function(){const s=_ci();if(!s)return s;const L=s.split('<br>'),m=DESK?5:3;return L.length>m?L.slice(0,m).join('<br>'):s}}
 // ===== SIGNALER UN PROBLÈME : journal des erreurs + rapport à copier =====

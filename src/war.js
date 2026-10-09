@@ -17,7 +17,7 @@ if(push&&!keys.length)return;WAR.busy=true;try{const d={};for(const k of keys.sl
 // ----- effets : apparitions d'ennemis, prix de guerre -----
 {const _ue=updEnemies;updEnemies=function(dt,z){const s0=spawnT;_ue(dt,z);if(spawnT>s0+.5){const c=ctlOf(secOf(S.pos.x,S.pos.z));spawnT*=c=='alliance'?1.5:c=='pirates'?.75:1}}}
 {const _gp=gPrice;gPrice=function(st,g){const p=_gp(st,g);return stFac(st)=='front'&&(g.id=='metal'||g.id=='fuel'||g.id=='med')?Math.round(p*1.3):p}}
-{const _he=hitEnemy;hitEnemy=function(e,d,p){const was=e.dead;_he(e,d,p);if(!was&&e.dead&&!e.kind)warAdd(e.boss?4:e.ty=='lourd'?2:1);if(!was&&e.dead&&e.bat&&WAR.bat)WAR.bat.pk=(WAR.bat.pk||0)+1}}
+{const _he=hitEnemy;hitEnemy=function(e,d,p){const was=e.dead;_he(e,d,p);if(!was&&e.dead&&(!e.kind||e.pir))warAdd(e.boss||e.big?4:e.ty=='lourd'?2:1);if(!was&&e.dead&&e.bat&&WAR.bat)WAR.bat.pk=(WAR.bat.pk||0)+1}}
 {const _cp=complete;complete=function(){_cp();warAdd(4)}}
 // ----- batailles de frontière -----
 const FRIGN=['Frégate Valiant','Frégate Aurore','Corvette Hestia','Frégate Bastion','Corvette Lyre','Frégate Sirius'];

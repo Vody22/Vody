@@ -1,0 +1,43 @@
+// ===== COMBAT TACTIQUE : esquive en tonneau, leurres anti-missiles, verrouillage des missiles, sous-systèmes des gros vaisseaux, répartition de l'énergie =====
+const CBT={rollT:0,rollD:1,rollCd:0,flCd:0,flares:[],mlk:{tg:null,k:0,done:false},flashT:0};
+const talR=id=>((G.x&&G.x.tal)||{})[id]|0;
+// ----- énergie : boucliers / moteurs / armes (6 points à répartir) -----
+const PWR=GX('pwr',{s:2,e:2,w:2});for(const k of['s','e','w'])PWR[k]=clamp(PWR[k]|0,0,4);if(PWR.s+PWR.e+PWR.w!==6){PWR.s=PWR.e=PWR.w=2}
+const PWRP=[['Équilibré',2,2,2],['Défense',4,1,1],['Vitesse',1,4,1],['Attaque',1,1,4]];
+function pwrSet(s,e,w,quiet){PWR.s=s;PWR.e=e;PWR.w=w;HC.pwrk=null;if(!quiet){const p=PWRP.find(x=>x[1]==s&&x[2]==e&&x[3]==w);toast('⚡ Énergie '+(p?p[0]+' · ':'')+'boucliers '+s+' · moteurs '+e+' · armes '+w);tone(500+s*60,700+w*60,.1,'triangle',.05)}save()}
+function pwrBoost(k){const o=['s','e','w'].filter(x=>x!==k);if(PWR[k]>=4)return pwrSet(PWR.s,PWR.e,PWR.w);const from=o.sort((a,b)=>PWR[b]-PWR[a])[0];if(PWR[from]<=0)return;PWR[k]++;PWR[from]--;pwrSet(PWR.s,PWR.e,PWR.w)}
+function pwrCycle(){const i=PWRP.findIndex(p=>p[1]==PWR.s&&p[2]==PWR.e&&p[3]==PWR.w),p=PWRP[(i+1)%PWRP.length];pwrSet(p[1],p[2],p[3])}
+{const _pm=PM;PM=function(k){let v=_pm(k);const sp=mode=='space';if(k=='spd'||k=='boost')v*=sp?.85+.075*PWR.e:1;else if(k=='dmg')v*=(sp?.8+.1*PWR.w:1)*(1+.06*talR('arme'));else if(k=='rate')v*=(sp?.85+.075*PWR.w:1)*(1+.1*talR('as'));else if(k=='shr')v*=(.5+.25*PWR.s)*(1+.15*talR('bouc'));else if(k=='sh')v*=.8+.1*PWR.s;else if(k=='hp')v*=1+.07*talR('coque');else if(k=='cap')v*=1+.08*talR('soute');return v}}
+addEventListener('keydown',e=>{if(e.target.tagName=='INPUT'||e.target.tagName=='TEXTAREA'||e.repeat||S.docked||mode!='space')return;if(e.code=='Digit1')pwrBoost('s');else if(e.code=='Digit2')pwrBoost('e');else if(e.code=='Digit3')pwrBoost('w');else if(e.code=='Digit4')pwrSet(2,2,2);else if(e.code=='KeyR')dodge();else if(e.code=='KeyX')flares()});
+$('pwr').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();pwrCycle()});
+TICK.push(()=>{const k=PWR.s+''+PWR.e+PWR.w+(mode=='space'?1:0);if(HC.pwrk===k)return;HC.pwrk=k;$('pwr').style.display=mode=='space'?'flex':'none';$('pwr').innerHTML=[['s','shield','#7ab6ff'],['e','flame','#ffb050'],['w','sword','#ff6a6a']].map(([c,ic,col])=>`<span style="color:${col}">${ICO(ic)}<i>${'<b></b>'.repeat(PWR[c])}${'<u></u>'.repeat(4-PWR[c])}</i></span>`).join('')});
+// ----- esquive en tonneau : petit bond latéral, invulnérable aux tirs pendant 0,35 s -----
+function dodge(){if(mode!='space'||S.docked||S.dead||S.entry||CBT.rollCd>0)return;const dir=(stick&&Math.abs(stick.x)>.2)?Math.sign(stick.x):(K.KeyA||K.ArrowLeft)?-1:(K.KeyD||K.ArrowRight)?1:(CBT.rollD=-CBT.rollD);
+CBT.rollD=dir;CBT.rollT=.45;CBT.rollCd=3.5*(1-.2*talR('esq'));const R=_c1.set(1,0,0).applyQuaternion(S.q);S.vel.addScaledVector(R,dir*190);noise(.25,.25,2400);tone(300,900,.25,'sine',.05);SFX.whoosh&&SFX.whoosh()}
+{const _dm=damage;damage=function(n,kind){if(CBT.rollT>.1&&CBT.inEB&&mode=='space'){CBT.flashT=.4;return}_dm(n,kind)}}
+{const _ps=placeShip;placeShip=function(dt){_ps(dt);if(CBT.rollT>0&&!FOOT.on){const k=1-CBT.rollT/.45;ship.userData.body.rotation.z=S.bank-CBT.rollD*k*TAU}}}
+// ----- leurres : détournent les missiles à tête chercheuse -----
+function flares(){if(mode!='space'||S.docked||S.dead||CBT.flCd>0)return;CBT.flCd=9;fwd();for(let i=0;i<4;i++){const s=sprite(i%2?0xffd080:0xff8040,16,.95);const p=S.pos.clone().addScaledVector(_f,-12);s.position.copy(p);scene.add(s);CBT.flares.push({s,p:s.position,v:_f.clone().multiplyScalar(-40).add(new V3(rv(60),rv(60),rv(60))).addScaledVector(S.vel,.4),l:3.5})}
+let n=0;for(const b of EB){if(!b.home||b.l<=0)continue;if(b.m.position.distanceTo(S.pos)<1100){b.home=0;b.flare=CBT.flares[n%4];n++}}tone(1200,300,.4,'square',.04);noise(.3,.2,3000);toast(n?'✨ Leurres largués : '+n+' missile'+(n>1?'s':'')+' détourné'+(n>1?'s':''):'✨ Leurres largués')}
+{const _ue=updEB;updEB=function(dt){for(const b of EB){if(b.flare&&b.l>0){const f=b.flare,sp=b.v.length();b.v.lerp(_w.copy(f.p).sub(b.m.position).normalize().multiplyScalar(sp),damp(2.5,dt));b.m.lookAt(_w.copy(b.m.position).sub(b.v));if(b.m.position.distanceTo(f.p)<14){b.l=0;boom3(b.m.position,14,0xffa040,50,true);b.m.parent&&b.m.parent.remove(b.m)}}}CBT.inEB=true;try{_ue(dt)}finally{CBT.inEB=false}}}
+// avertissement des missiles : rappeler les leurres
+{const _to=toast;toast=function(s){if(s==='⚠ Missile en approche — esquive !')s='⚠ Missile en approche — leurres ('+(DESK?'X':'✨')+') ou tonneau ('+(DESK?'R':'⟲')+') !';_to(s)}}
+// ----- missiles : verrouillage de 1 s avant le tir (sinon tir sans guidage) -----
+{const _lm=launchMissile;launchMissile=function(){_lm();const M=MIS[MIS.length-1];if(!M)return;const L=CBT.mlk;if(L.k>=1&&L.tg&&!L.tg.dead){M.tg=L.tg;M.lk=1}else M.tg=null}}
+function mlkTick(dt){const L=CBT.mlk;if(curW()!='missile'||!lock||!lock.foe||lock.dead){L.tg=null;L.k=0;L.done=false;return}if(L.tg!==lock){L.tg=lock;L.k=0;L.done=false}L.k=Math.min(1,L.k+dt/(lock.boss||lock.bossPart?1.4:1));if(L.k>=1&&!L.done){L.done=true;tone(1500,1500,.12,'square',.05);tone(1900,1900,.12,'square',.05,.12)}else if(!L.done&&Math.random()<dt*6)tone(900+L.k*600,900+L.k*600,.04,'square',.025)}
+// ----- sous-systèmes des gros vaisseaux : moteurs (arrière) et armes (avant) -----
+function subInit(e){if(e.sub||!(e.ty=='lourd'||e.boss||e.big))return;const h=e.mhp*.35;e.sub={eng:{hp:h,mx:h},gun:{hp:h,mx:h}}}
+{const _he=hitEnemy;hitEnemy=function(e,d,p){subInit(e);if(e.sub&&!e.dead&&p){const lp=e.mesh.worldToLocal(p.clone()),k=lp.z>.8?'eng':'gun',S2=e.sub[k];if(S2.hp>0){S2.hp-=d;if(S2.hp<=0){S2.hp=0;boom3(p,30,0xffa040,90,true);SFX.boom();if(k=='eng'){e.sp*=.45;e.engOff=1;toast('🔧 Moteurs ennemis détruits : il ralentit !')}else{e.rate*=2.5;e.n=1;e.mc=1e9;e.gunOff=1;toast('🔧 Armes ennemies détruites : il tire beaucoup moins !')}}}}_he(e,d,p)}}
+function subTick(dt){for(const e of en){if(e.engOff&&Math.random()<dt*8){const p=e.mesh.localToWorld(_c2.set(rv(2),rv(1),3));if(typeof smokePuff=='function')smokePuff(p,new V3(rv(4),rv(4),rv(4)),8,1.2,0x333333);else SPK.emit(p.x,p.y,p.z,rv(5),rv(5),rv(5),.8,.3,.3,.3,.4)}}}
+// ----- boucle -----
+STICK.push(dt=>{CBT.rollT=Math.max(0,CBT.rollT-dt);CBT.rollCd=Math.max(0,CBT.rollCd-dt);CBT.flCd=Math.max(0,CBT.flCd-dt);CBT.flashT=Math.max(0,CBT.flashT-dt);
+for(const f of CBT.flares){f.l-=dt;f.p.addScaledVector(f.v,dt);f.v.multiplyScalar(Math.pow(.5,dt));f.s.scale.setScalar(10+Math.random()*10);if(Math.random()<.6)FIRE.emit(f.p.x,f.p.y,f.p.z,rv(4),rv(4),rv(4),.4,1,.6,.2,.3);if(f.l<=0)scene.remove(f.s)}CBT.flares=CBT.flares.filter(f=>f.l>0);mlkTick(dt);subTick(dt)});
+TICK.push(()=>{const sp=mode=='space'&&!S.docked&&!DESK;setD('dodge',sp?'flex':'none');setD('flare',sp?'flex':'none');if(sp){const a=CBT.rollCd>0?.45:1,b=CBT.flCd>0?.45:1;if(HC.dga!==a){HC.dga=a;$('dodge').style.opacity=a}if(HC.fla!==b){HC.fla=b;$('flare').style.opacity=b}}});
+for(const[id,fn]of[['dodge',dodge],['flare',flares]])$(id).addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();fn()});
+btnSet('dodge','swap','Tonneau');btnSet('flare','spark','Leurres');
+// ----- HUD : verrouillage, sous-systèmes, esquive -----
+{const _ov=overlay;overlay=function(){_ov();if(mode!='space'||S.dead)return;const W=innerWidth,H=innerHeight;
+if(lock&&lock.pos){if(lock.mhp)subInit(lock);const s=proj(lock.pos);if(s.front){const r=clamp(1800/s.d*((lock.r||8)/6),12,60);if(curW()=='missile'){const L=CBT.mlk,k=L.tg===lock?L.k:0;OX.strokeStyle=k>=1?'#ff4b5c':'#ffc34d';OX.lineWidth=2.5;OX.beginPath();OX.arc(s.x,s.y,r+10,-Math.PI/2,-Math.PI/2+TAU*k);OX.stroke();OX.font="700 11px 'Chakra Petch',system-ui";OX.textAlign='center';OX.fillStyle=k>=1?'#ff7080':'#ffd27a';OX.fillText(k>=1?'VERROUILLÉ':'Verrouillage…',s.x,s.y-r-16)}
+if(lock.sub){const y=s.y+r+16;OX.font="700 9.5px 'Chakra Petch',system-ui";OX.textAlign='left';[['MOT',lock.sub.eng],['ARM',lock.sub.gun]].forEach(([n,q],i)=>{const x=s.x-34+i*36;OX.fillStyle='rgba(0,0,0,.55)';OX.fillRect(x+18,y-6,14,4);OX.fillStyle=q.hp>0?'#ffb050':'#666';OX.fillRect(x+18,y-6,14*q.hp/q.mx,4);OX.fillStyle=q.hp>0?'#ffd8a0':'#888';OX.fillText(n,x,y-1)})}}}
+if(CBT.flashT>0){OX.font="800 18px 'Chakra Petch',system-ui";OX.textAlign='center';OX.fillStyle=`rgba(140,220,255,${CBT.flashT*2})`;OX.fillText('ESQUIVÉ !',W/2,H*.4)}
+if(DESK&&(CBT.rollCd>0||CBT.flCd>0)){OX.font="600 11px 'Chakra Petch',system-ui";OX.textAlign='left';OX.fillStyle='rgba(205,242,255,.8)';let y=H-60;if(CBT.rollCd>0){OX.fillText('Tonneau (R) : '+CBT.rollCd.toFixed(1)+' s',W/2+70,y);y-=14}if(CBT.flCd>0)OX.fillText('Leurres (X) : '+CBT.flCd.toFixed(1)+' s',W/2+70,y)}}}

@@ -1,0 +1,29 @@
+// ===== ARBRE DE TALENTS : 1 point par niveau, trois branches (Combat, Commerce, Exploration), capacités ultimes à 5 points =====
+const TALB={combat:{n:'Combat',ic:'sword',col:'#ff7a7a',L:[['arme','Canonnier','+6 % de dégâts par rang',3],['coque','Blindage renforcé','+7 % de coque par rang',3],['bouc','Boucliers rapides','+15 % de recharge du bouclier par rang',3],['esq','Pilote acrobate','−20 % de recharge du tonneau par rang',2],['miss','Artificier','+15 % de dégâts des missiles et des mines par rang',2],['as','As du combat','+10 % de cadence de tir',1,5]]},
+commerce:{n:'Commerce',ic:'coin',col:'#ffc34d',L:[['neg','Négociateur','−3 % sur les vaisseaux, armes, pièces et améliorations par rang',3],['vend','Revendeur','+5 % sur la vente de minerais et de contrebande par rang',3],['soute','Soute optimisée','+8 % de capacité de soute par rang',3],['contre','Contrebandier','+15 % de chances que la douane ne trouve rien, par rang',2],['sal','Meneur d\'hommes','−15 % sur le salaire des ailiers par rang',2],['mag','Magnat','+10 % de crédits gagnés en mission',1,5]]},
+explo:{n:'Exploration',ic:'planet',col:'#7fe0ff',L:[['scan','Scanner amélioré','+20 % de portée du scanner par rang',3],['saut','Navigateur','−10 % sur le voyage rapide par rang',3],['xp','Érudit','+5 % d\'expérience par rang',3],['fore','Foreur','+15 % de puissance du laser de minage par rang',2],['jet','Jetpack amélioré','+25 % de carburant de jetpack par rang',2],['chance','Chasseur de trésors','+25 % de crédits dans les caisses, conteneurs et coffres',1,5]]}};
+const TAL=GX('tal',{});
+const talSpent=()=>Object.values(TAL).reduce((a,b)=>a+(b|0),0);
+const talPts=()=>Math.max(0,lvl()-1-talSpent());
+const talBranch=b=>TALB[b].L.reduce((a,x)=>a+(TAL[x[0]]|0),0);
+function talBuy(id){let def=null,br=null;for(const b in TALB)for(const x of TALB[b].L)if(x[0]==id){def=x;br=b}if(!def)return;const r=TAL[id]|0;if(r>=def[3]){toast('Rang maximum');return}if(talPts()<=0){toast('Aucun point de talent : gagne un niveau');return}if(def[4]&&talBranch(br)-r<def[4]){toast('Il faut '+def[4]+' points dans la branche '+TALB[br].n);return}
+TAL[id]=r+1;applyPerks();HC.shopV=null;toast('🌟 '+def[1]+' : rang '+(r+1));SFX.buy();save();talRender()}
+const talCost=()=>300*lvl();
+function talReset(){if(!talSpent())return;const c=talCost();if(G.cr<c){toast('Pas assez de crédits ('+fmt(c)+' ¢)');return}G.cr-=c;for(const k in TAL)delete TAL[k];applyPerks();toast('🌟 Talents réinitialisés : '+talPts()+' points à replacer');SFX.coin();save();talRender()}
+// ----- effets -----
+{const _ap=applyPerks;applyPerks=function(){_ap();const k=1-.03*talR('neg'),r10=v=>Math.round(v/10)*10;if(k<1){for(const s in PARTS)for(const id in PARTS[s].o){const o=PARTS[s].o[id];if(!o.craft&&!o.uniq&&o.p)o.p=r10(o.p*k)}for(const id in HULLS)HULLS[id].price=r10(HULLS[id].price*k);for(const id in WPN)WPN[id].price=r10(WPN[id].price*k);for(const a in AMMO)AMMO[a].price=r10(AMMO[a].price*k)}SELLK*=1+.05*talR('vend')}}
+{const _uc=upCost;upCost=function(i){return Math.round(_uc(i)*(1-.03*talR('neg'))/50)*50}}
+{const _bp=bmPrice;bmPrice=function(st,g,buy,k){const v=_bp(st,g,buy,k);return buy?v:Math.round(v*(1+.05*talR('vend')))}}
+{const _cp=complete;complete=function(){if(G.m&&talR('mag'))G.m.rw=Math.round(G.m.rw*1.1);_cp()}}
+{const _gx=gainXP;gainXP=function(n){const a=lvl();_gx((n||0)*(1+.05*talR('xp')));if(lvl()>a)setTimeout(()=>{toast('🌟 Point de talent disponible ('+(DESK?'touche K':'Profil → Talents')+')');$('profb').classList.add('pts')},2600)}}
+applyPerks();
+// ----- panneau -----
+const TALP={open:false};
+function talRender(){if(!TALP.open)return;const el=$('talpanel'),p=talPts();let h=`<div class="phead"><b>${ICO('star')} Talents du pilote</b><button id="talx">${ICO('close')}</button></div><div class="psec"><div class="plv"><b>${p} point${p>1?'s':''} à placer</b><span>niveau ${lvl()} · ${talSpent()} utilisé${talSpent()>1?'s':''}</span></div><small>Tu gagnes 1 point à chaque niveau. Les talents ultimes demandent 5 points dans leur branche.</small></div>`;
+for(const b in TALB){const B2=TALB[b],sp=talBranch(b);h+=`<div class="psec"><b class="pt" style="color:${B2.col}">${ICO(B2.ic)} ${B2.n} · ${sp}</b>`;for(const[id,n,d,mx,req]of B2.L){const r=TAL[id]|0,lk=req&&sp-r<req,can=p>0&&r<mx&&!lk;
+h+=`<div class="tal${r?' on':''}${lk?' lk':''}"><div><b>${n}${req?' ✦':''}</b><small>${d}${lk?' · '+req+' points dans la branche':''}</small><span class="pips">${'<i class="f"></i>'.repeat(r)}${'<i></i>'.repeat(mx-r)}</span></div><button data-tal="${id}" class="${can?'hot':'dim'}">${r>=mx?'✓':'+'}</button></div>`}h+='</div>'}
+h+=`<div class="psec"><div class="obtns"><button id="talr" class="${talSpent()?'':'dim'}">Réinitialiser · ${fmt(talCost())} ¢</button></div></div>`;el.innerHTML=h;$('talx').onclick=()=>talToggle(false);$('talr').onclick=talReset;el.querySelectorAll('[data-tal]').forEach(b=>b.onclick=()=>talBuy(b.dataset.tal))}
+function talToggle(v){TALP.open=v==null?!TALP.open:v;$('talpanel').style.display=TALP.open?'flex':'none';if(TALP.open){if(PROF.open)profToggle(false);if(CXP.open)cxToggle(false);$('profb').classList.remove('pts');talRender()}}
+addEventListener('keydown',e=>{if(e.target.tagName=='INPUT'||e.target.tagName=='TEXTAREA'||e.repeat)return;if(e.code=='KeyK')talToggle();if(e.code=='Escape'&&TALP.open)talToggle(false)});
+{const _pr=profRender;profRender=function(){_pr();const sec=document.createElement('div');sec.className='psec';const p=talPts();sec.innerHTML=`<b class="pt">Talents</b><small>${p?'<b style="color:#ffc34d">'+p+' point'+(p>1?'s':'')+' à placer !</b>':'Combat '+talBranch('combat')+' · Commerce '+talBranch('commerce')+' · Exploration '+talBranch('explo')}</small><div class="obtns"><button id="proftal" class="${p?'hot':''}">${ICO('star')} Ouvrir les talents</button></div>`;const ref=$('prof').children[2];$('prof').insertBefore(sec,ref||null);$('proftal').onclick=()=>talToggle(true)}}
+if(talPts()>0)$('profb').classList.add('pts');

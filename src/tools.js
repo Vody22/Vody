@@ -10,7 +10,7 @@ sentinelle:{n:'Sentinelle',hp:2,spd:1.1,turn:1.1,cap:25,dmg:1.85,price:0,uniq:'a
 mastodonte:{n:'Mastodonte',hp:2.3,spd:.85,turn:.75,cap:60,dmg:1.3,price:0,uniq:'guilde',desc:'Le cargo-foreuse légendaire de la Guilde : soute géante, laser de minage ×2.',tool:{drill:2,tractor:1.8}}});applyPerks();
 Object.assign(SHIPN,{prospecteur:'Prospecteur',explorateur:'Pathfinder',sentinelle:'Sentinelle',mastodonte:'Mastodonte'});
 const toolK=k=>{const T=HS().tool;return T&&T[k]||1};
-TICK.push(()=>{TRAVK=(1-rankOf('carto')*.08)*toolK('trav')});
+TICK.push(()=>{TRAVK=(1-rankOf('carto')*.08)*toolK('trav')*(1-.1*talR('saut'))});
 {const BASEH={prospecteur:'cargo',explorateur:'intercepteur',sentinelle:'faucon',mastodonte:'leviathan'};const _b=buildShip;
 buildShip=function(...a){const h=G.ship,bh=BASEH[h];if(!bh)return _b(...a);G.ship=bh;let r;try{r=_b(...a)}finally{G.ship=h}try{shipDeco(r,h)}catch(e){console.warn(e)}return r}}
 function shipDeco(root,h){const b=root.userData.body,P=(G.parts||{}).paint;const PAL={prospecteur:[0xd98c2a,0x3a3f46],explorateur:[0xeef2f4,0x1fa59a],sentinelle:[0x203a6e,0xd8ad48],mastodonte:[0xe8b820,0x2a2a2e]}[h];
@@ -30,7 +30,7 @@ function rayPick(o,dir,R,TG,filter){let best=null,bt=R;for(const T of TG){if(T.d
 const TOOLF={
 drill(dt,TG,on){if(!on){if(TS.drillB)hideBeam(TS.drillB);return}const o=nosePt().clone(),R=950;fwd();let dir=_f.clone();if(lock&&lock.pos.distanceTo(S.pos)<R){const ld=lock.pos.clone().sub(o).normalize();if(ld.dot(dir)>.9)dir=ld}
 const hit=rayPick(o,dir,R,TG);const end=hit?o.clone().addScaledVector(dir,hit.d):o.clone().addScaledVector(dir,R);if(!TS.drillB)TS.drillB=mkBeam(0xffa030);placeBeam(TS.drillB,o,end,.55,!!hit);if(ship.userData.drillBit)ship.userData.drillBit.rotation.z+=dt*30;
-TS.snd-=dt;if(TS.snd<=0){TS.snd=.11;tone(jit(140),jit(120),.12,'sawtooth',.03)}if(!hit)return;const T=hit.T,ast=T.isAst||T.rich,dps=(ast?12:1.6)*(1+.3*(G.u[0]-1))*toolK('drill');TS.acc+=dps*dt;if(Math.random()<.6)SPK.emit(end.x,end.y,end.z,rv(40),rv(40),rv(40),.35,1,.7,.3,.4);
+TS.snd-=dt;if(TS.snd<=0){TS.snd=.11;tone(jit(140),jit(120),.12,'sawtooth',.03)}if(!hit)return;const T=hit.T,ast=T.isAst||T.rich,dps=(ast?12:1.6)*(1+.3*(G.u[0]-1))*toolK('drill')*(1+.15*talR('fore'));TS.acc+=dps*dt;if(Math.random()<.6)SPK.emit(end.x,end.y,end.z,rv(40),rv(40),rv(40),.35,1,.7,.3,.4);
 if(TS.acc>(ast?.5:.4)){DRILLING=true;try{T.hit(TS.acc,end.clone())}finally{DRILLING=false}TS.acc=0}},
 tractor(dt,TG,on){if(!on){if(TS.trB)hideBeam(TS.trB);return}fwd();const R=1100*toolK('tractor'),o=nosePt().clone();let near=null,nd=1e9;
 for(const d of DROPS){const v=_c2.copy(S.pos).sub(d.p),dd=v.length();if(dd>R)continue;if(-v.dot(_f)/dd<.35&&dd>120)continue;d.v.addScaledVector(v.normalize(),1500*dt);d.l=Math.max(d.l,5);if(dd<nd){nd=dd;near=d.p}}
@@ -41,7 +41,7 @@ probe(dt,TG,on){if(!on||fcd>0)return;if((G.ammo.probe||0)<=0){fcd=1.2;toast('Plu
 {const _wh=wpnHUD;wpnHUD=function(){let s=_wh();const w=curW();if(w=='scanner')s+=TS.cd>0?` <small>recharge ${Math.ceil(TS.cd)} s</small>`:` <span class="heat"><i style="width:${(TS.chg*100).toFixed(0)}%;background:#6ef"></i></span>`;if(w=='probe')s=s.replace(/<b>\d+<\/b>/,`<b>${G.ammo.probe||0}</b>`);return s}}
 // ----- scanner : onde de balayage -----
 const PULSEM=new THREE.ShaderMaterial({uniforms:{op:{value:0}},vertexShader:AVS,fragmentShader:'uniform float op;varying vec3 vNV;void main(){float f=pow(1.-abs(vNV.z),3.);gl_FragColor=vec4(vec3(.35,.85,1.)*f*op,1.);}',transparent:true,blending:ADDB,depthWrite:false,side:THREE.DoubleSide});
-function scanPulse(){const R=4000*toolK('scan');if(!TS.pulse){TS.pulse=new THREE.Mesh(new THREE.SphereGeometry(1,40,24),PULSEM);TS.pulse.frustumCulled=false}scene.add(TS.pulse);TS.pulse.position.copy(S.pos);TS.pt=0;TS.reveal=t+16;TS.revR=R;TS.revP=S.pos.clone();STS.scans++;tone(300,1800,.6,'sine',.08);tone(900,2400,.4,'triangle',.04,.1);
+function scanPulse(){const R=4000*toolK('scan')*(1+.2*talR('scan'));if(!TS.pulse){TS.pulse=new THREE.Mesh(new THREE.SphereGeometry(1,40,24),PULSEM);TS.pulse.frustumCulled=false}scene.add(TS.pulse);TS.pulse.position.copy(S.pos);TS.pt=0;TS.reveal=t+16;TS.revR=R;TS.revP=S.pos.clone();STS.scans++;tone(300,1800,.6,'sine',.08);tone(900,2400,.4,'triangle',.04,.1);
 let n=0;for(const C of CONT.act.values()){if(!C.found&&C.pos.distanceTo(S.pos)<R){C.found=1;CONT.save(C);n++}}if(n){toast('📡 '+n+' conteneur'+(n>1?'s':'')+' dérivant'+(n>1?'s':'')+' détecté'+(n>1?'s':'')+' !');cxAdd('an','cont')}
 let rich=0;for(const R2 of RICH.act.values())if(!R2.gone&&R2.pos.distanceTo(S.pos)<R){rich++;cxAdd('an','rich')}if(rich)setTimeout(()=>toast('📡 Astéroïde riche à proximité : sors le laser de minage'),900);
 if(typeof anScan=='function')anScan(S.pos,R*3);if(typeof derScan=='function')derScan(S.pos,R*3)}
@@ -72,7 +72,7 @@ if(c.ast.length>18&&!RICH.act.has(k)){const done=RICHD[k];if(!done||Date.now()-d
 R.tg={pos:R.pos,r:r,max:1500,cone:.16,w:1,isAst:1,rich:1,hit:(d,p)=>richHit(R,d,p)};RICH.act.set(k,R)}}
 if(!CONT.act.has(k)&&h3(c.cx,c.cy,c.cz,211)<.3&&Math.abs(c.cx)+Math.abs(c.cz)>0){const st=CONTD[k];if(st&&st[0]=='o'&&Date.now()-(+st.slice(1))<4*3600e3)continue;const ox=c.cx*CS,oy=c.cy*CS,oz=c.cz*CS,C={k,found:st=='f',opened:false,pos:new V3(ox+600+h3(c.cx,c.cy,c.cz,212)*(CS-1200),oy+CS/2+(h3(c.cx,c.cy,c.cz,213)-.5)*1500,oz+600+h3(c.cx,c.cy,c.cz,214)*(CS-1200))};C.mesh=contMesh();C.mesh.position.copy(C.pos);C.pos=C.mesh.position;C.mesh.rotation.set(rv(1),rv(3),rv(1));scene.add(C.mesh);CONT.act.set(k,C)}}
 for(const[k,R]of RICH.act)if(!SMALL.has(k)){if(R.mesh.parent)scene.remove(R.mesh);RICH.act.delete(k)}for(const[k,C]of CONT.act)if(!SMALL.has(k)){if(C.mesh.parent)scene.remove(C.mesh);CONT.act.delete(k)}}
-function contOpen(C){C.opened=1;CONT.save(C);scene.remove(C.mesh);boom3(C.pos,18,0xffc040,50);SFX.win();const cr=80+Math.floor(Math.random()*170);G.cr+=cr;let txt='+'+cr+' ¢';const pool=Math.random()<.25?ILLG.map(g=>g.id):['metal','elec','med','lux','fuel','titane','cristal'],id=pool[Math.random()*pool.length|0],q=Math.min(2+(Math.random()*5|0),cap()-cargoUsed());
+function contOpen(C){C.opened=1;CONT.save(C);scene.remove(C.mesh);boom3(C.pos,18,0xffc040,50);SFX.win();const cr=Math.round((80+Math.floor(Math.random()*170))*(1+.25*talR('chance')));G.cr+=cr;let txt='+'+cr+' ¢';const pool=Math.random()<.25?ILLG.map(g=>g.id):['metal','elec','med','lux','fuel','titane','cristal'],id=pool[Math.random()*pool.length|0],q=Math.min(2+(Math.random()*5|0),cap()-cargoUsed());
 if(q>0){G.cargo[id]=(G.cargo[id]||0)+q;txt+=' · '+q+' '+matG(id).n}toast('📦 Conteneur récupéré : '+txt);gainXP(40);addRep('carto',15);if(Math.random()<.08+rankOf('carto')*.02)setTimeout(giveBlueprint,1200);save()}
 let SOT=0;STICK.push(dt=>{SOT-=dt;if(SOT<=0){SOT=.5;sectorObjs()}updPulse(dt);updProbes(dt);
 for(const R of RICH.act.values()){if(R.gone)continue;R.mesh.rotation.y+=dt*.05;const d=S.pos.distanceTo(R.pos),rr=R.r*.95+6;if(d<rr){_c2.copy(S.pos).sub(R.pos).normalize();S.pos.copy(R.pos).addScaledVector(_c2,rr);const rad=S.vel.dot(_c2);if(rad<0){S.vel.addScaledVector(_c2,-1.5*rad);S.spd*=.5;if(rad<-50)damage(4,'col')}}}

@@ -50,7 +50,7 @@ const WROLE={chasseur:{n:'Chasseur',d:'Dégâts +30 %, engage de plus loin.',ic:
 const WN=['Nova','Rook','Ash','Kira','Juno','Dax','Lyra','Orso','Zia','Brix','Taro','Vela','Milo','Sana','Cole','Indra','Pax','Nyra','Odo','Remy'],WS=['« Faucon »','« Silex »','« Comète »','« Lame »','« Écho »','« Grizzly »','« Zéphyr »','« Rivet »','« Brume »','« Étincelle »'];
 const wMax=()=>2+(rankOf('alliance')>=3?1:0);
 const wNeed=lv=>Math.round(100*Math.pow(lv,1.4));
-const wWage=w=>Math.round(45*w.lv*(w.role=='garde'?1.15:1));
+const wWage=w=>Math.round(45*w.lv*(w.role=='garde'?1.15:1)*(1-.15*talR('sal')));
 const wStats=w=>{const lv=w.lv;return{hp:Math.round((45+16*lv)*(w.role=='garde'?1.6:1)),dmg:(.9+.28*lv)*(w.role=='chasseur'?1.3:1),rate:Math.max(.42,.9-lv*.04),rng:w.role=='chasseur'?1700:1300,regen:w.role=='garde'?2+lv*.4:0}};
 function wingCands(st){const per=Math.floor(Date.now()/(30*60e3)),r=rng(seedOf(st.x|0,st.z|0,per,61)),dz=stDz(st),L=[];for(let i=0;i<3;i++){const role=['chasseur','garde','mineur'][(r()*3)|0],lv=clamp(1+Math.floor(r()*2.2+dz*.7),1,7);L.push({id:'c'+per+'-'+(st.x|0)+'-'+i,n:WN[r()*WN.length|0]+' '+WS[r()*WS.length|0],role,lv,fee:Math.round(700*Math.pow(lv,1.35)/50)*50,hue:r()})}return L}
 function wingXP(w,n){w.xp=(w.xp||0)+n;let up=false;while(w.lv<10&&w.xp>=wNeed(w.lv)){w.xp-=wNeed(w.lv);w.lv++;up=true}if(up){toast('⬆ '+w.n+' passe niveau '+w.lv+(w.lv==3?' : capsule de survie débloquée':''));SFX.disc();const F=FR.find(f=>f.w===w);if(F){const s=wStats(w);F.mhp=s.hp;F.dmg=s.dmg;F.rate=s.rate;F.rng=s.rng;F.regen=s.regen;F.hp=Math.min(F.mhp,F.hp+20)}}}

@@ -96,7 +96,7 @@ const want=_g3.copy(fw).multiplyScalar(iz).addScaledVector(rt,ix).multiplyScalar
 const hs=Math.hypot(FOOT.vel.x,FOOT.vel.z);if(hs>.5){const ty=Math.atan2(-FOOT.vel.x,-FOOT.vel.z);let d=ty-FOOT.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));FOOT.yaw+=d*damp(10,dt);if(!FOOT.drag&&!document.pointerLockElement&&!DESK&&t-FOOT.lastLook>1.2){let e=FOOT.yaw-FOOT.cy;e=Math.atan2(Math.sin(e),Math.cos(e));FOOT.cy+=e*damp(1.2,dt)*Math.min(1,hs/6)}}
 if(isFire())FOOT.yaw=FOOT.cy;
 // saut + jetpack
-const jump=B.boost||K.Space;if(FOOT.grounded){FOOT.fuel=Math.min(1,FOOT.fuel+dt*.5);if(jump&&!FOOT.jl){FOOT.vy=8.5;FOOT.grounded=false;tone(200,320,.12,'sine',.05)}}else if(jump&&FOOT.fuel>0&&FOOT.vy<6){FOOT.vy+=34*dt;FOOT.fuel-=dt*.4;if(Math.random()<.6){const b=_g3.copy(P).add(_g1.set(Math.sin(FOOT.yaw)*.3,1.1,Math.cos(FOOT.yaw)*.3));FIRE.emit(b.x,b.y,b.z,rv(2),-12,rv(2),.25,.6,.75,1,.18)}}FOOT.jl=jump;
+const jump=B.boost||K.Space;if(FOOT.grounded){FOOT.fuel=Math.min(1,FOOT.fuel+dt*.5);if(jump&&!FOOT.jl){FOOT.vy=8.5;FOOT.grounded=false;tone(200,320,.12,'sine',.05)}}else if(jump&&FOOT.fuel>0&&FOOT.vy<6){FOOT.vy+=34*dt;FOOT.fuel-=dt*.4/(1+.25*talR('jet'));if(Math.random()<.6){const b=_g3.copy(P).add(_g1.set(Math.sin(FOOT.yaw)*.3,1.1,Math.cos(FOOT.yaw)*.3));FIRE.emit(b.x,b.y,b.z,rv(2),-12,rv(2),.25,.6,.75,1,.18)}}FOOT.jl=jump;
 FOOT.vy-=20*dt;P.x+=FOOT.vel.x*dt;P.z+=FOOT.vel.z*dt;P.y+=FOOT.vy*dt;
 for(const c of GR.col){const dx=P.x-c.x,dz=P.z-c.z,d=Math.hypot(dx,dz);if(d<c.r+.5&&d>.01){P.x=c.x+dx/d*(c.r+.5);P.z=c.z+dz/d*(c.r+.5)}}
 const sd=FOOT.sp,dsx=P.x-sd.x,dsz=P.z-sd.z,dss=Math.hypot(dsx,dsz);if(dss<5.5&&dss>.01){P.x=sd.x+dsx/dss*5.5;P.z=sd.z+dsz/dss*5.5}
