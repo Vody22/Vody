@@ -60,3 +60,21 @@ setTimeout(()=>{if(API_OK)mkLoad(true)},12000);
 addEventListener('keydown',e=>{if(e.code=='Escape'&&MK.open)mkToggle(false)});
 // ----- annonce de la mise à jour (une seule fois) -----
 if(!G.x.news10){setTimeout(()=>{G.x.news10=1;banner('star','Mise à jour : 10 nouveautés !','Ailiers au bar, outils de vaisseau, épaves géantes, courses, anomalies, guerre des territoires, missions de faction, contrebande, journal de bord (J), classements','#7ab6ff');save()},7000)}
+// ----- HUD : pas plus de quelques lignes d'objectifs à la fois (surtout sur mobile) -----
+{const _ci=contentInfo;contentInfo=function(){const s=_ci();if(!s)return s;const L=s.split('<br>'),m=DESK?5:3;return L.length>m?L.slice(0,m).join('<br>'):s}}
+// ===== SIGNALER UN PROBLÈME : journal des erreurs + rapport à copier =====
+const ERRLOG=[];const errPush=(k,a)=>{try{const m=[...a].map(x=>x&&x.stack?String(x.stack).split('\n').slice(0,3).join(' ← '):String(x)).join(' ').slice(0,280);ERRLOG.push(new Date().toLocaleTimeString('fr-FR')+' '+k+' '+m);if(ERRLOG.length>15)ERRLOG.shift()}catch(e){}};
+{const _ce=console.error.bind(console),_cw=console.warn.bind(console);console.error=(...a)=>{errPush('ERR',a);_ce(...a)};console.warn=(...a)=>{errPush('AVT',a);_cw(...a)}}
+addEventListener('error',e=>errPush('ERR',[e.message+' @'+(e.lineno||'?')]));addEventListener('unhandledrejection',e=>errPush('ERR',[e.reason]));
+function bugReport(desc){const I=lvInfo(),st=S.docked,pl=mode=='surf'&&SURF.info()?SURF.info().name:'',fc=typeof fmCur=='function'&&fmCur();
+const L=['— Rapport Starfarer 3D —','Problème : '+(desc||'(non décrit)'),'Version : '+(UPD.cur||'?')+' · '+new Date().toLocaleString('fr-FR'),'Appareil : '+(DESK?'PC':'mobile')+' · '+innerWidth+'×'+innerHeight+' · '+(navigator.userAgent.match(/(iPhone|iPad|Android|Windows|Mac OS X|Linux)[^;)]*/)||['?'])[0]+' · qualité '+(DESK?QN[QI]:QNM[GQL]),
+'Partie : niveau '+I.L+' · '+fmt(G.cr)+' ¢ · vaisseau '+(HULLS[G.ship]||{}).n+' · améliorations '+G.u.join('/')+' · coque '+Math.round(S.hp)+'/'+maxhp(),
+'Lieu : mode '+mode+(st?' · amarré à '+st.n:'')+(pl?' · planète '+pl:'')+(mode=='int'&&DER.on?' · épave '+DER.on.q.n:'')+' · position '+[S.pos.x,S.pos.y,S.pos.z].map(v=>Math.round(v)).join(', ')+' · '+ZN[danger()]+(typeof terrTag=='function'?terrTag():''),
+'En cours : '+([G.m&&('mission « '+G.m.txt+' »'),fc&&(FMC[fc.f].n+' '+(fc.i+1)+'/5 étape '+(fc.s+1)),RC.on&&('course '+RC.on.C.n),LAW.b>0&&('prime '+fmt(Math.round(LAW.b))+' ¢'),WG.list.length&&(WG.list.length+' ailier(s)'),G.story&&G.story.ch<8&&('histoire chapitre '+G.story.ch)].filter(Boolean).join(' · ')||'rien'),
+'Multijoueur : '+(typeof MP!='undefined'&&MP.room?(MP.others.size+' autre(s) pilote(s)'):'non'),'Dernières erreurs :',...(ERRLOG.length?ERRLOG.slice(-8):['aucune'])];return L.join('\n')}
+const BUGP={open:false};
+function bugRender(){const el=$('bugpanel');el.innerHTML=`<div class="phead"><b>${ICO('warn')} Signaler un problème</b><button id="bugx">${ICO('close')}</button></div><div class="psec"><small>Décris ce qui s'est passé (où, quand, ce que tu faisais). Le rapport ajoute tout seul les infos utiles sur ta partie.</small><textarea id="bugt" maxlength="800" placeholder="Ex. : en sortant de l'épave, mon vaisseau a disparu…"></textarea><div class="obtns"><button id="bugc" class="hot">Copier le rapport</button></div><small>Colle-le ensuite dans ta conversation avec Claude.</small><pre id="bugpre"></pre></div>`;
+const upd=()=>{$('bugpre').textContent=bugReport($('bugt').value.trim())};upd();$('bugt').oninput=upd;for(const ev of['keydown','keyup'])$('bugt').addEventListener(ev,e=>e.stopPropagation());$('bugx').onclick=()=>bugToggle(false);
+$('bugc').onclick=async()=>{const txt=bugReport($('bugt').value.trim());try{await navigator.clipboard.writeText(txt);toast('📋 Rapport copié : colle-le dans ta conversation avec Claude');SFX.coin()}catch(e){const r=document.createRange();r.selectNodeContents($('bugpre'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Sélectionne le texte du rapport et copie-le')}}}
+function bugToggle(v){BUGP.open=v==null?!BUGP.open:v;$('bugpanel').style.display=BUGP.open?'flex':'none';if(BUGP.open){optToggle(false);bugRender()}}
+$('bugb').onclick=()=>bugToggle(true);addEventListener('keydown',e=>{if(e.code=='Escape'&&BUGP.open)bugToggle(false)});

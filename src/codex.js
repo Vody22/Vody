@@ -79,7 +79,7 @@ const ACH=[
 ['wanted','Hors-la-loi','Aie une prime de 5 000 ¢ sur ta tête.','skull',()=>[xs('law','max'),5000],{cr:1000,xp:200,ti:'Hors-la-loi'}],
 ['hunt','Les chasseurs chassés','Abats 10 chasseurs de primes.','target',()=>[STS.k.hunter||0,10],{cr:4000,xp:600}],
 ['bat3','Héros de la frontière','Gagne 3 batailles de frontière.','swords',()=>[STS.bat,3],{cr:4000,xp:600,ti:'Héros de la frontière'}]];
-const ACHL=ACH.filter(a=>a.length>1);
+const ACHL=ACH.filter(a=>a.length>1);for(const a of ACHL)a[5].cr=Math.round(a[5].cr*.5/50)*50;
 function achCheck(){let n=0;for(const a of ACHL){if(ACHD[a[0]])continue;let p;try{p=a[4]()}catch(e){continue}if(p[0]>=p[1]){ACHD[a[0]]=Date.now();const r=a[5];if(r.cr)G.cr+=r.cr;if(r.xp)gainXP(r.xp);
 banner('trophy','Succès : '+a[1],a[2]+' · +'+fmt(r.cr)+' ¢'+(r.ti?' · titre « '+r.ti+' »':''),'#ffc34d');SFX.win();n++;CXP.dirty=1}}if(n)save()}
 let ACHT=2;TICK.push(dt=>{ACHT-=dt;if(ACHT<=0){ACHT=1.5;achCheck();if(CXP.open&&CXP.dirty){CXP.dirty=0;cxRender()}}});

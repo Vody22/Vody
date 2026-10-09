@@ -107,7 +107,7 @@ lv.inter.push({pos:new V3(p.x,1,p.z+.4),r:2.2,done:false,label:()=>'💻 LIRE LE
 // drones et tourelles
 const z=Math.min(4,Math.floor(Math.hypot(o.x,o.z)/9000));for(const rm of rooms){if(rm.role=='airlock')continue;const n=rm.role=='bridge'?2:rm.role=='armory'?2:rr2()<.55?1:0;for(let k=0;k<n+(z>=2&&rr2()<.4?1:0);k++){lv.drones.push(droneMk(rm.x*DTS+1+rr2()*(rm.w*DTS-2),rm.z*DTS+1+rr2()*(rm.h*DTS-2),z))}}
 for(let k=0;k<2;k++){const cells=[];for(let j=0;j<DGH;j++)for(let i=0;i<DGW;i++)if(at(i,j)==-1)cells.push([i,j]);if(cells.length){const c=cells[(rr2()*cells.length)|0];lv.drones.push(droneMk(c[0]*DTS+2.5,c[1]*DTS+2.5,z))}}
-for(const s of lv.sentry||[])lv.drones.push(sentryMk(s.x,s.z,z));
+for(const s of lv.sentry||[])lv.drones.push(sentryMk(s.x,s.z,z));lv.drones.forEach((d,i)=>d.i=i);
 return lv}
 // ----- drones -----
 const DRNG=new THREE.SphereGeometry(.42,16,12),DRNM=new THREE.MeshStandardMaterial({color:0x30343a,metalness:.8,roughness:.3}),DRNE=new THREE.MeshBasicMaterial({color:0xff2a20});
@@ -124,7 +124,7 @@ const dCeil=(x,z)=>{const rm=dRoom(x,z);return rm&&rm.role=='breach'?DBRE:DCEIL}
 // ----- entrer / sortir -----
 function derEnter(){const q=DRH.near;if(!q||mode!='space')return;FADE.col='0,0,0';FADE.tg=1;FADE.sp=5;SFX.buy();tone(180,90,.6,'sawtooth',.05);
 setTimeout(()=>{if(DER.lvl&&DER.lvl.o.id!==q.id){DER.scene.remove(DER.lvl.g);DER.lvl.g.traverse(m=>{if(m.geometry)m.geometry.dispose()});for(const d of DER.lvl.drones)d.g.parent&&d.g.parent.remove(d.g);DER.lvl=null}
-if(!DER.lvl){DER.lvl=derBuild(q);DER.scene.add(DER.lvl.g)}const lv=DER.lvl;for(const d of lv.drones){if(d.hp<=0&&!d.static){d.hp=d.mhp}if(d.hp>0&&!d.g.parent)DER.scene.add(d.g)}
+if(!DER.lvl){DER.lvl=derBuild(q);DER.scene.add(DER.lvl.g)}const lv=DER.lvl,KD=(DERD[q.id]||{}).dd||{};for(const d of lv.drones)if(d.i==null)d.g.parent&&d.g.parent.remove(d.g);lv.drones=lv.drones.filter(d=>d.i!=null);for(const d of lv.drones){const dead=KD[d.i]&&Date.now()-KD[d.i]<30*60e3;if(dead){d.hp=0;d.g.parent&&d.g.parent.remove(d.g);continue}if(d.hp<=0)d.hp=d.mhp;if(!d.g.parent)DER.scene.add(d.g)}
 DER.on={q,air:S.pos.clone(),aq:S.q.clone()};DER.p.copy(lv.start);DER.vel.set(0,0,0);DER.vy=0;FOOT.cy=-Math.PI/2;FOOT.cp=.12;DER.yaw=FOOT.cy;DER.fuel=1;
 if(!DER.model)DER.model=buildHuman({suit:new THREE.Color().setHSL(((typeof MP!='undefined'?MP.hue:200))/360,.3,.78).getHex(),acc:0xff8a2a,tool:true,skin:0xe0b090,helmet:true,closed:true,visor:0x3a6a8a});if(DER.model.parent!==DER.scene)DER.scene.add(DER.model);
 DER.scene.add(SPK.pts,FIRE.pts);SPK.clear();FIRE.clear();DER.psz=[SPK.pts.material.size,FIRE.pts.material.size];SPK.pts.material.size=.35;FIRE.pts.material.size=1.6;mode='int';S.docked=null;landP=null;S.spd=0;S.vel.set(0,0,0);S.thr=0;clearWeapons();ship.visible=false;camInit=true;btnSet('fire','tool','Tirer');btnSet('boost','jump','Saut');btnSet('brake','run','Course');document.body.classList.add('foot');setD('footb','none');
@@ -140,7 +140,7 @@ function bridgeLoot(o){const K=DERD[o.id];const first=!K.b;K.b=1;SFX.win();boom3
 // ----- piratage (mini-jeu : appuyer quand l'aiguille passe dans la zone) -----
 function hackStart(tg){if(DER.hack)return;DER.hack={tg,k:0,a:0,sp:2.6,z:1+Math.random()*4,w:.75,pos:DER.p.clone()};SFX.tick();tone(400,600,.1,'square',.04)}
 function hackPress(){const H=DER.hack;if(!H)return;const a=((H.a%TAU)+TAU)%TAU,dz=Math.atan2(Math.sin(a-H.z),Math.cos(a-H.z));if(Math.abs(dz)<H.w/2){H.k++;tone(700+H.k*200,900+H.k*200,.12,'square',.05);if(H.k>=3){hackDone(H);return}H.z=Math.random()*TAU;H.sp*=1.18;H.w*=.9}
-else{H.k=Math.max(0,H.k-1);tone(200,120,.3,'sawtooth',.06);toast('⚠ Erreur de code : alarme déclenchée !');const lv=DER.lvl;const p=DER.p.clone().add(new V3(rv(4),0,rv(4)));if(dFree(p.x,p.z,.5)){const d=droneMk(p.x,p.z,1);d.st='chase';lv.drones.push(d);DER.scene.add(d.g)}}}
+else{H.k=Math.max(0,H.k-1);tone(200,120,.3,'sawtooth',.06);toast('⚠ Erreur de code : alarme déclenchée !');const lv=DER.lvl;const p=DER.p.clone().add(new V3(rv(4),0,rv(4)));if(dFree(p.x,p.z,.5)){const d=droneMk(p.x,p.z,1);d.st='chase';d.noLoot=1;lv.drones.push(d);DER.scene.add(d.g)}}}
 function hackDone(H){DER.hack=null;STS.hacks++;SFX.win();gainXP(25);if(H.tg.door){const D2=H.tg.door;D2.lock=false;D2.strip.material.color.setHex(0x40ff90);const K=DERD[DER.on.q.id];(K.dh=K.dh||[]).push(D2.d.i+','+D2.d.j);const I=DER.lvl.inter.find(x=>x.door===D2);if(I)I.done=true;toast('🔓 Porte déverrouillée')}else if(H.tg.crate)crateOpen(H.tg.crate)}
 // ----- boucle intérieure -----
 const _d1=new V3(),_d2=new V3(),_d3=new V3();
@@ -188,7 +188,7 @@ dBolt(DER.pb,hand.clone().addScaledVector(dir,.4),dir,42,1.4+G.u[0]*.15,DRBM.p,0
 const step=(list,isP)=>{for(const b of list){const a=b.p.clone();b.p.addScaledVector(b.v,dt);b.l-=dt;if(dSolid(b.p.x,b.p.z)||b.p.y<0||b.p.y>dCeil(b.p.x,b.p.z)){b.l=0;SPK.emit(a.x,a.y,a.z,rv(3),rv(3),rv(3),.3,1,.6,.3,.2)}
 if(b.l>0&&isP){for(const d of lv.drones){if(d.hp<=0)continue;if(segHit(a,b.p,d.pos,d.static?.7:.55)){b.l=0;d.hp-=b.d;SPK.emit(b.p.x,b.p.y,b.p.z,rv(3),rv(3),rv(3),.4,1,.7,.3,.25);tone(1200,600,.05,'square',.03);if(d.st!='sentry')d.st='chase',d.seen=t;if(d.hp<=0)droneDie(d);break}}}
 else if(b.l>0){const c=_d2.set(P.x,P.y+1.1,P.z);if(segHit(a,b.p,c,.55)){b.l=0;damage(b.d);hurt=Math.min(.5,hurt+.15)}}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}return list.filter(b=>b.l>0)};DER.pb=step(DER.pb,true);DER.eb=step(DER.eb,false)}
-function droneDie(d){d.hp=0;boom3(d.pos.clone(),18,0xff7030,6);fxGlow(d.pos.clone(),0xffa050,4,.3,2,DER.scene);noise(.3,.3,1200);d.g.parent&&d.g.parent.remove(d.g);const cr=d.static?120:40;G.cr+=cr;gainXP(d.static?40:15);STS.k[d.kind]=(STS.k[d.kind]||0)+1;STS.drones++;cxAdd('en',d.kind);toast((d.static?'Tourelle détruite':'Drone abattu')+' · +'+cr+' ¢')}
+function droneDie(d){d.hp=0;boom3(d.pos.clone(),18,0xff7030,6);fxGlow(d.pos.clone(),0xffa050,4,.3,2,DER.scene);noise(.3,.3,1200);d.g.parent&&d.g.parent.remove(d.g);if(d.i!=null&&DER.on){const K=DERD[DER.on.q.id];(K.dd=K.dd||{})[d.i]=Date.now()}const cr=d.noLoot?0:d.static?120:40;G.cr+=cr;gainXP(d.static?40:15);STS.k[d.kind]=(STS.k[d.kind]||0)+1;STS.drones++;cxAdd('en',d.kind);toast((d.static?'Tourelle détruite':'Drone abattu')+(cr?' · +'+cr+' ¢':''))}
 // ----- interface : action, invite, caméra, HUD -----
 function derNearI(){const lv=DER.lvl;if(!lv)return null;let b=null,bd=1e9;for(const I of lv.inter){if(I.done)continue;const d=Math.hypot(I.pos.x-DER.p.x,I.pos.z-DER.p.z),dy=Math.abs(I.pos.y-(DER.p.y+.8));if(d<I.r&&dy<2.6&&d<bd){bd=d;b=I}}return b}
 function derPrompt(){if(DER.hack)return'🔓 VALIDER LE CODE';const I=derNearI();return I?I.label():''}

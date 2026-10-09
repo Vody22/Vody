@@ -17,8 +17,8 @@ e.hp-=d;e.hitT=t;boom3(p,5,0xffaa66,40);if(e.mesh.userData.bar)e.mesh.userData.b
 // ----- IA des chasseurs alliés -----
 const _wF=new V3(),_wR=new V3(),_wU=new V3(),_wS=new V3(),_wG=new V3(),_wT=new V3(),_wA=new V3(),_wP=new V3();
 function frFighter(F,dt){fwd(S.q,_wF);_wR.set(1,0,0).applyQuaternion(S.q);_wU.set(0,1,0).applyQuaternion(S.q);let tg=null,bd=F.rng;
-if(F.kind=='wing'&&lock&&lock.foe&&!lock.dead&&lock.pos&&lock.pos.distanceTo(F.pos)<F.rng*1.3&&en.includes(lock))tg=lock;
-if(!tg)for(const e of en){if(e.dead)continue;const d=e.pos.distanceTo(F.anchor||S.pos);if(d<bd){bd=d;tg=e}}
+if(F.kind=='wing'&&lock&&lock.foe&&!lock.dead&&!lock.passive&&lock.pos&&lock.pos.distanceTo(F.pos)<F.rng*1.3&&en.includes(lock))tg=lock;
+if(!tg)for(const e of en){if(e.dead||e.passive)continue;const d=e.pos.distanceTo(F.anchor||S.pos);if(d<bd){bd=d;tg=e}}
 F.ph+=dt;let spd;const goal=_wG;
 if(tg){const d=F.pos.distanceTo(tg.pos);_wT.copy(tg.pos).sub(F.pos).normalize();_wS.crossVectors(_wT,_wU).normalize();goal.copy(tg.pos).addScaledVector(_wT,-(220+Math.sin(F.ph*.7)*80)).addScaledVector(_wS,Math.cos(F.ph*1.3)*120);goal.y+=Math.sin(F.ph)*60;spd=Math.max(F.sp,(tg.vel?tg.vel.length():0)*1.1);
 F.cd-=dt;if(F.cd<=0&&d<900){F.cd=F.rate*(.8+Math.random()*.4);const tt=d/800,aim=tg.pos.clone();if(tg.vel)aim.addScaledVector(tg.vel,tt);const dir=aim.sub(F.pos).normalize().add(new V3(rv(.03),rv(.03),rv(.03))).normalize();const m=mkPB(F.bc);m.position.copy(F.pos);m.lookAt(F.pos.clone().sub(dir));FB.push({m,p:m.position,v:dir.multiplyScalar(800),l:1.4,d:F.dmg,c:F.bc,F});if(F.pos.distanceTo(S.pos)<1200&&Math.random()<.5)tone(jit(760),240,.08,'square',.018)}
@@ -38,7 +38,7 @@ for(let i=FR.length-1;i>=0;i--)if(FR[i].gone)FR.splice(i,1);
 // tirs alliés
 const TG=en.filter(e=>!e.dead);for(const b of FB){const a=b.p.clone();b.p.addScaledVector(b.v,dt);b.l-=dt;for(const e of TG){if(b.l<=0)break;if(e.dead)continue;if(segHit(a,b.p,e.pos,e.r||10)){b.l=0;impactFX(b.p,b.c,.7);frHit(b.F,e,b.d,b.p.clone())}}if(b.l<=0)rmPB(b)}FB=FB.filter(b=>b.l>0);
 // les pirates tirent aussi sur les alliés (et visent en priorité leur cible désignée)
-for(const e of TG){let F=e.tgF&&!e.tgF.gone?e.tgF:null,d=F?F.pos.distanceTo(e.pos):1e9;if(!F){for(const o of FR){if(o.gone)continue;const q=o.pos.distanceTo(e.pos);if(q<d){d=q;F=o}}}if(!F||d>(e.tgF?1100:750))continue;
+for(const e of TG){if(e.passive)continue;let F=e.tgF&&!e.tgF.gone?e.tgF:null,d=F?F.pos.distanceTo(e.pos):1e9;if(!F){for(const o of FR){if(o.gone)continue;const q=o.pos.distanceTo(e.pos);if(q<d){d=q;F=o}}}if(!F||d>(e.tgF?1100:750))continue;
 if(e.tgF&&d>350){e.pos.addScaledVector(_fc.copy(F.pos).sub(e.pos).normalize(),e.sp*.55*dt)}
 const p=dt*(e.tgF?.9:F.role=='garde'?.55:.3);if(Math.random()<p){const dir=_fc.copy(F.pos).addScaledVector(F.vel||_fd.set(0,0,0),d/e.bs*.8).sub(e.pos).normalize().add(_fd.set(rv(.04),rv(.04),rv(.04))).normalize();const m=mkEB(e.bc);m.position.copy(e.pos);EB.push({m,v:dir.clone().multiplyScalar(e.bs),l:2.4,dmg:e.dmg,toF:1});if(d<900)SFX.eshoot()}}}
 {const _ue=updEB;updEB=function(dt){for(const b of EB){if(b.l<=0)continue;const p=b.m.position;for(const F of FR){if(F.gone)continue;if(p.distanceTo(F.pos)<F.r){b.l=0;impactFX(p,0xff6650,.6);frDamage(F,b.dmg);break}}}_ue(dt)}}

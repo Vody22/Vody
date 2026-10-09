@@ -52,6 +52,14 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - `derelict.js` : épaves géantes (`DERFIX` + `derCell`), entrée par le sas → **mode `'int'`** (scène `DER.scene`, `derUpdate/derCam/derOverlay/derInfo/derRadar/derPrompt/derAction` appelés par hud.js et game.js), plan généré (salles + couloirs, portes `doorsM`, piratage `DER.hack`), drones/tourelles, salle en apesanteur, coffre du capitaine. Butin pris : `G.x.der[id]`.
 - `board.js` : classements (`SEA` = saison ISO de la semaine, récompenses du top 10 la semaine suivante, titre + peinture `paint:laurier`), hôtel des ventes (`#mkpanel`).
 
+## Équilibrage (référence)
+- Contenu total à acheter ≈ 430 000 ¢ (améliorations 58 k, vaisseaux 158 k, armes/outils 37 k, pièces 133 k, fabrication 46 k). Succès ≈ 69 k au total (récompenses divisées par 2 dans codex.js).
+- Courses : médailles Or/Argent/Bronze = L/235+3, L/195+3, L/160+3 s (un robot pilote fait ≈ 37 s avec l'Éclaireur de base sur 7,8 km, ≈ 28 s avec un Intercepteur amélioré). Gain plein seulement pour une nouvelle médaille sur le circuit, 20 % ensuite, inscription 100 ¢.
+- Contrebande : le prix baisse de 5 % par unité vendue au même endroit (remonte d'une unité toutes les 30 s) ; patrouilles douanières (passives tant qu'on ne fuit pas : `e.passive`) en territoire Alliance/frontière, pirates rivaux en territoire pirate.
+- Batailles de frontière : 400 + 100 ¢ par frégate survivante, seulement si le joueur a abattu au moins un pirate. Drones d'épave : 30 min avant de réapparaître (`G.x.der[id].dd`), ceux de l'alarme ne rapportent rien.
+- Options → « Signaler un problème » : rapport à copier (version, appareil, lieu, missions, 8 dernières erreurs/avertissements de la console).
+- Mise à jour auto : `UPD` (svc.js) compare la balise `sf-build` de la page en ligne ; recharge au retour dans l'appli ou au prochain amarrage. Garde-fou : crédits ≥ 100 M → 2 500 ¢.
+
 ## Pièges connus
 - `netroom.js` : ne jamais passer l'objet `mine` directement à `up()` (il est gelé par `Object.freeze`, la présence ne se mettrait plus à jour).
 - En test headless (SwiftShader) les images sont lentes : appeler `placeShip()/updCam()` à la main avant une capture.
