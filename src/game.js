@@ -13,13 +13,19 @@ const tg=S.docked?0:isBrake()?Math.max(minSpd,10):isBoost()?boostSpd()*(surf?.6:
 fwd();S.vel.lerp(_v.copy(_f).multiplyScalar(S.spd),damp(3.2,dt));S.pos.addScaledVector(S.vel,dt);
 S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.75,damp(5,dt))}
 // ----- caméra -----
-const camUp=new V3(0,1,0),camLook=new V3();let camInit=true,fovK=0;
+const camUp=new V3(0,1,0),camLook=new V3();let camInit=true,fovK=0;const CAMQ=new QT(),CAMS={y:0,p:0,a:0,ls:0};
 function updCam(dt){if(S.docked&&mode=='space'&&TAB=='atelier'&&!S.dead){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
-if(ckActive()){ckCam(dt);return}const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(3,dt));const off=_v.set(0,7.5,27+fovK*8).applyQuaternion(S.q).add(S.pos);
-if(camInit){camera.position.copy(off);camInit=false}else camera.position.lerp(off,damp(8,dt));
-_u.set(0,1,0).applyQuaternion(S.q);camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);camLook.copy(S.pos).addScaledVector(fwd(),70);camera.lookAt(camLook);
+if(ckActive()){ckCam(dt);return}
+// 3e personne : caméra plus éloignée, rotation amortie (elle balance dans les virages), recul à l'accélération, vibrations au boost
+const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(2.4,dt));const sk=Math.max(1,ship.userData.body.scale.z),spK=clamp(S.spd/Math.max(1,cruise()),0,2.8),srf=mode=='surf'?.84:1;
+if(camInit){CAMQ.copy(S.q);CAMS.ls=S.spd;camInit=false}else CAMQ.slerp(S.q,damp(5,dt));
+CAMS.y=lerp(CAMS.y,S.yawV||0,damp(3.5,dt));CAMS.p=lerp(CAMS.p,S.pitchV||0,damp(3.5,dt));const acc=dt>0?(S.spd-CAMS.ls)/dt:0;CAMS.ls=S.spd;CAMS.a=lerp(CAMS.a,clamp(acc*.025,-4,6),damp(2.5,dt));
+const back=(35+spK*3+fovK*10+CAMS.a)*sk*srf,up=(9.5+fovK*1.5)*sk*srf;
+camera.position.copy(_v.set(-CAMS.y*5*sk,up+CAMS.p*2.4*sk,back).applyQuaternion(CAMQ).add(S.pos));
+_u.set(0,1,0).applyQuaternion(S.q);camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);camLook.copy(S.pos).addScaledVector(fwd(),90);camera.lookAt(camLook);
+const vib=(fovK*.3+Math.max(0,spK-1.05)*.06)*sk;if(vib>.01){camera.position.x+=rv(vib);camera.position.y+=rv(vib);camera.position.z+=rv(vib)}
 if(shake>0){camera.position.x+=rv(shake);camera.position.y+=rv(shake);shake=Math.max(0,shake-dt*2.5)}
-const base=innerWidth<innerHeight?76:(DESK?60:54);if(Math.abs(camera.fov-(base+fovK*14))>.05){camera.fov=base+fovK*14;camera.updateProjectionMatrix()}sky.position.copy(camera.position)}
+const base=innerWidth<innerHeight?74:(DESK?60:54),fv=base+fovK*20+Math.max(0,spK-1)*3;if(Math.abs(camera.fov-fv)>.05){camera.fov=fv;camera.updateProjectionMatrix()}sky.position.copy(camera.position)}
 function placeShip(dt){ship.position.copy(S.pos);ship.quaternion.copy(S.q);const ud=ship.userData;ud.body.rotation.z=S.bank;ud.body.rotation.x=(S.pitchV||0)*.18;
 const k=S.thr;for(const f of ud.flames){f.fl.scale.set(1,1,.3+k*(.7+Math.random()*.3));f.fl.material.opacity=.35+k*.25;f.gs.scale.setScalar(2.6+k*1.6)}
 ud.shield.material.uniforms.op.value=Math.max(0,shieldT);if(ud.plasma){const hk=S.heat||0;ud.plasma.visible=hk>.02;PLU.k.value=hk;ud.plasma.scale.set(6+hk*2,4.5+hk*1.5,14+hk*10);ud.plasma.position.z=2+hk*3}ud.shield.rotation.y+=dt;const bl=Math.sin(t*5)>.6;ud.nl.visible=ud.nr.visible=bl;

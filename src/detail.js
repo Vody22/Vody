@@ -65,8 +65,9 @@ const m=new THREE.Points(g,new THREE.PointsMaterial({size:.9,map:GLOW,color:0xa8
 function updDust(){const D=DUST;D.m.visible=mode=='space';if(!D.m.visible)return;const c=camera.position,B=D.B,hb=B/2;for(let i=0;i<D.n;i++){for(let a=0;a<3;a++){const k=i*3+a,cc=a==0?c.x:a==1?c.y:c.z;let v=D.p[k];const d=v-cc;if(d>hb)v-=B*Math.ceil((d-hb)/B);else if(d<-hb)v+=B*Math.ceil((-hb-d)/B);D.p[k]=v}}D.g.attributes.position.needsUpdate=true}
 // ----- étalonnage « cinéma » (PC) -----
 let GRADE=null;
-function setupGrade(){if(!composer)return;GRADE=new THREE.ShaderPass({uniforms:{tDiffuse:{value:null},tm:{value:0},res:{value:new THREE.Vector2(innerWidth,innerHeight)}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-fragmentShader:`uniform sampler2D tDiffuse;uniform float tm;uniform vec2 res;varying vec2 vUv;void main(){vec2 uv=vUv,d=uv-.5;float r2=dot(d,d);vec2 off=d*.002*r2*4.;vec3 c=vec3(texture2D(tDiffuse,uv+off).r,texture2D(tDiffuse,uv).g,texture2D(tDiffuse,uv-off).b);
+function setupGrade(){if(!composer)return;GRADE=new THREE.ShaderPass({uniforms:{tDiffuse:{value:null},tm:{value:0},bst:{value:0},res:{value:new THREE.Vector2(innerWidth,innerHeight)}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+fragmentShader:`uniform sampler2D tDiffuse;uniform float tm,bst;uniform vec2 res;varying vec2 vUv;void main(){vec2 uv=vUv,d=uv-.5;float r2=dot(d,d);vec2 off=d*(.002+bst*.006)*r2*4.;vec3 c=vec3(texture2D(tDiffuse,uv+off).r,texture2D(tDiffuse,uv).g,texture2D(tDiffuse,uv-off).b);
+if(bst>.01){vec3 acc=c;float ws=1.;for(int i=1;i<7;i++){float k=float(i)/6.,w=1.-k*.55;acc+=texture2D(tDiffuse,uv-d*k*bst*.075*smoothstep(.02,.3,r2)).rgb*w;ws+=w;}c=acc/ws;}
 c=c*c*(3.-2.*c)*.18+c*.82;float l=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(l),c,1.12);c+=(1.-l)*vec3(-.006,.004,.018)+l*vec3(.018,.006,-.012);
 c*=1.-smoothstep(.18,.75,r2*1.5)*.32;float g=fract(sin(dot(uv*res+fract(tm*7.3)*91.,vec2(12.9898,78.233)))*43758.5453);c+=(g-.5)*.022;gl_FragColor=vec4(c,1.);}`});composer.addPass(GRADE)}
-function updDetail(){updTrails();updDust();if(mode=='surf')updGrass();if(GRADE){GRADE.uniforms.tm.value=t;GRADE.uniforms.res.value.set(innerWidth,innerHeight)}}
+function updDetail(){updTrails();updDust();if(mode=='surf')updGrass();if(GRADE){GRADE.uniforms.tm.value=t;GRADE.uniforms.bst.value=mode=='space'&&!S.docked?fovK*clamp(S.spd/Math.max(1,boostSpd()),0,1):0;GRADE.uniforms.res.value.set(innerWidth,innerHeight)}}

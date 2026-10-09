@@ -6,7 +6,7 @@
 import os, sys, time
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 S = D + 'src/'
-MODS = ['core','audio','gfx','models','world','game','surface','fx','ultra','detail','content','lasers','parts','cockpit','story','netroom','mp','hud']
+MODS = ['core','audio','gfx','models','world','game','surface','fx','ultra','detail','content','lasers','parts','cockpit','speed','story','netroom','mp','hud']
 EXS = ['CopyShader','LuminosityHighPassShader','EffectComposer','RenderPass','ShaderPass','UnrealBloomPass']
 sh = open(S+'shell.html').read()
 game = ''.join(open(S+m+'.js').read()+'\n' for m in MODS)

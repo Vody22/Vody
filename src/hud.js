@@ -23,10 +23,10 @@ function label(p,txt,col,maxD){const s=proj(p);if(!s.front||s.d>maxD)return;OX.f
 function overlay(){const W=innerWidth,H=innerHeight;OX.clearRect(0,0,W,H);OX.shadowColor='rgba(0,0,0,.75)';OX.shadowBlur=4;
 if(CLOUDW>.01&&mode=='surf'){OX.fillStyle=`rgba(${CLOUDC},${CLOUDW*.88})`;OX.fillRect(0,0,W,H)}if(S.heat>.02){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.75);g.addColorStop(0,'rgba(255,120,30,0)');g.addColorStop(1,`rgba(255,110,30,${S.heat*.55})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}
 if(shieldT>0&&ckActive()&&S.sh>0){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.75);g.addColorStop(0,'rgba(80,160,255,0)');g.addColorStop(1,`rgba(90,170,255,${shieldT*.45})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}if(hurt>0){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.7);g.addColorStop(0,'rgba(255,0,0,0)');g.addColorStop(1,`rgba(255,30,30,${hurt*.9})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}
-if(S.dead)return;
+speedVeil(W,H);if(S.dead)return;
 // étiquettes
 if(mode=='space'){for(const p of planets)if(G.disc.has(p.name))label({x:p.x,y:p.y+p.r*1.25,z:p.z},p.name,'rgba(170,215,255,.9)',14000);for(const s of suns)label({x:s.x,y:s.y+s.r*1.5,z:s.z},'★ '+s.name,'#ffd890',22000);for(const st of stations)if(!(G.m&&G.m.tg===st)&&st!==hud.mk)label({x:st.x,y:st.y+110,z:st.z},st.n,'#ffc845',4000)}
-lensFlares();
+lensFlares();if(ckActive())ckHUD(W,H);
 // réticule
 fwd();const aim=proj(_w.copy(S.pos).addScaledVector(_f,320));if(aim.front){OX.strokeStyle='rgba(160,230,255,.75)';OX.lineWidth=1.5;OX.beginPath();OX.arc(aim.x,aim.y,11,0,TAU);for(const[a,b]of[[0,-1],[0,1],[-1,0],[1,0]]){OX.moveTo(aim.x+a*15,aim.y+b*15);OX.lineTo(aim.x+a*22,aim.y+b*22)}OX.stroke();OX.fillStyle='rgba(160,230,255,.9)';OX.fillRect(aim.x-1,aim.y-1,2,2)}
 if(lock){const s=proj(lock.pos);if(s.front){const r=clamp(1800/s.d*((lock.r||8)/6),12,60),c=lock.mhp?'#ff5050':'#e8f4ff';OX.strokeStyle=c;OX.lineWidth=2;for(const[a,b]of[[-1,-1],[1,-1],[1,1],[-1,1]]){OX.beginPath();OX.moveTo(s.x+a*r,s.y+b*r*.55);OX.lineTo(s.x+a*r,s.y+b*r);OX.lineTo(s.x+a*r*.55,s.y+b*r);OX.stroke()}if(lock.mhp){OX.fillStyle='rgba(0,0,0,.5)';OX.fillRect(s.x-r,s.y+r+5,r*2,4);OX.fillStyle=c;OX.fillRect(s.x-r,s.y+r+5,r*2*clamp(lock.hp/lock.mhp,0,1),4)}}}
@@ -59,7 +59,7 @@ function stepFX(dt){shieldT=Math.max(0,shieldT-dt*1.8);hurt=Math.max(0,hurt-dt);
 let last=performance.now();
 function frame(now){requestAnimationFrame(frame);const dt=clamp((now-last)/1000,0,.05);last=Math.max(last,now);DT=dt;t+=dt;hint-=dt;
 try{if(!isPaused()){if(mode=='space')updSpace(dt);else SURF.update(dt);updContent(dt)}updContentAlways(dt);updMP(dt)}catch(e){console.error(e)}
-SPK.update(dt);FIRE.update(dt);updFlashes(dt);updFXS(dt);updFX(dt);updFade(dt);placeShip(dt);updCam(dt);updSpeedLines(dt,mode=='space'&&!S.docked?fovK:0,S.spd);updDetail();stepFX(dt);updParts(dt);updCockpit(dt);
+SPK.update(dt);FIRE.update(dt);updFlashes(dt);updFXS(dt);updFX(dt);updFade(dt);placeShip(dt);updCam(dt);updSpeedLines(dt,mode=='space'&&!S.docked?fovK:0,S.spd);updDetail();stepFX(dt);updParts(dt);updCockpit(dt);updStreaks(dt);
 if(engG&&AC)engG.gain.setTargetAtTime(S.dead?0:S.thr*.05+(isBoost()&&!S.docked?.07:0),AC.currentTime,.08);if(engLP&&AC)engLP.frequency.setTargetAtTime(160+S.spd*2.2,AC.currentTime,.1);
 TM.value=t;camera.updateMatrixWorld();if(typeof updGodRays=='function')updGodRays();renderFrame();overlay();if(FADE.v>.003){OX.fillStyle=`rgba(${FADE.col},${FADE.v})`;OX.fillRect(0,0,innerWidth,innerHeight)}hud()}
 if(DESK){try{NEB.material.map=gpuNebula();NEB.material.needsUpdate=true}catch(e){console.warn(e)}setupEnv(NEB);setupPost();setupGrade()}
