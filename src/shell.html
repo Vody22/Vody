@@ -118,13 +118,72 @@ body.atelier #tabX{max-height:min(32vh,300px)}body.desk.atelier #shop{left:auto;
 #talpanel{--edge2:rgba(255,205,110,.6);--edge:rgba(255,205,110,.28);width:min(calc(100vw - 72px),380px)}.tal{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(150,222,255,.08);opacity:.85}.tal.on{opacity:1}.tal.lk{opacity:.5}.tal b{font-family:var(--hf);font-size:12.5px}.tal small{display:block;color:#a9c6da;font-size:10.5px;line-height:1.35}.tal button{min-width:38px;padding:7px 10px}.pips{display:flex;gap:3px;margin-top:3px}.pips i{width:12px;height:4px;background:rgba(205,242,255,.15)}.pips i.f{background:var(--amber);box-shadow:0 0 5px var(--amber)}
 #profb.pts::after{content:'';position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber)}
 @media (prefers-reduced-motion:reduce){#land{animation:none}.bar.low i{animation:none}}
+
+/* ===== mode photo ===== */
+body.ph>*:not(#c):not(#phui){visibility:hidden!important}
+#phui{display:none;position:fixed;inset:0;z-index:70;color:#e8f2ff;font-family:var(--hf)}
+body.ph #phui{display:block}
+#phview{position:absolute;inset:0;touch-action:none;cursor:grab}
+#phblur,#phframe,#phflash{position:absolute;inset:0;pointer-events:none}
+#phblur.edge{-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);-webkit-mask-image:radial-gradient(ellipse at center,transparent 32%,#000 80%);mask-image:radial-gradient(ellipse at center,transparent 32%,#000 80%)}
+#phblur.mini{-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);-webkit-mask-image:linear-gradient(#000,transparent 30%,transparent 62%,#000);mask-image:linear-gradient(#000,transparent 30%,transparent 62%,#000)}
+#phframe{background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,var(--vig,0)) 100%)}
+#phframe.cine{box-shadow:inset 0 10vh 0 #000,inset 0 -10vh 0 #000}
+@media (orientation:landscape){#phframe.cine{box-shadow:inset 0 max(0px,calc((100vh - 100vw/2.39)/2)) 0 #000,inset 0 calc(-1*max(0px,calc((100vh - 100vw/2.39)/2))) 0 #000}}
+#phframe.pola{border:4.5vmin solid #f6f3ec;border-bottom-width:16vmin}
+#phframe.pola i{position:absolute;bottom:-10.5vmin;left:0;right:0;text-align:center;color:#55555c;font:600 2.8vmin var(--hf)}
+#phframe.sign i{position:absolute;left:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);font:500 13px var(--hf);text-shadow:0 1px 6px #000}
+#phframe.sign b{display:block;font-size:20px;letter-spacing:.08em}
+#phflash{background:#fff;opacity:0}#phflash.go{animation:phfl .45s ease-out}
+@keyframes phfl{0%{opacity:.9}100%{opacity:0}}
+#phtop{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);left:calc(env(safe-area-inset-left,0px) + 10px);right:calc(env(safe-area-inset-right,0px) + 10px);display:flex;align-items:center;justify-content:space-between;gap:8px}
+#phtop b{letter-spacing:.22em;font-size:12px;color:var(--ice);text-shadow:0 1px 4px #000}
+#phhint{position:absolute;top:calc(env(safe-area-inset-top,0px) + 56px);left:0;right:0;text-align:center;font-size:12px;color:#a9bfd8;pointer-events:none;text-shadow:0 1px 4px #000}
+#phbot{position:absolute;left:0;right:0;bottom:0;padding:26px calc(env(safe-area-inset-right,0px) + 12px) calc(env(safe-area-inset-bottom,0px) + 12px) calc(env(safe-area-inset-left,0px) + 12px);display:flex;align-items:flex-end;gap:12px;background:linear-gradient(transparent,rgba(4,8,16,.88) 40%)}
+#phopts{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.phrow{display:flex;align-items:center;gap:8px;font-size:12px}.phrow>span{width:46px;flex:none;color:#a9bfd8}
+.phch{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.phch::-webkit-scrollbar{display:none}
+.phch button{flex:none;padding:7px 10px;font-size:12px}.phch button.on{box-shadow:inset 0 0 0 1px var(--amber);color:var(--amber)}
+.phrow input[type=range]{flex:1;min-width:50px;accent-color:#7fd8ff}
+#phshot{flex:none;width:70px;height:70px;padding:0;border-radius:50%;clip-path:none;box-shadow:0 0 0 4px #fff,0 0 22px rgba(255,255,255,.45);background:radial-gradient(#fff 58%,rgba(255,255,255,.15) 60%);margin:0 4px 4px}
+#phshot:active{transform:scale(.92)}
+#phres{display:none;position:absolute;inset:0;background:rgba(3,6,12,.94);flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+#phres.on{display:flex}
+#phres img{max-width:92vw;max-height:62vh;box-shadow:0 0 0 1px rgba(160,200,255,.35),0 10px 40px rgba(0,0,0,.6);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+#phres p{font-size:12px;color:#a9bfd8;text-align:center;max-width:420px;margin:0}
+#phres div{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+#phres a{font:600 13px var(--hf);color:var(--ice);padding:9px 12px;background:var(--ink2);box-shadow:inset 0 0 0 1px var(--edge2);text-decoration:none;clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px)}
+#phob{top:calc(env(safe-area-inset-top,0px) + 376px)}
+@media (orientation:landscape) and (max-height:520px){#phob{top:calc(env(safe-area-inset-top,0px) + 10px);right:calc(env(safe-area-inset-right,0px) + 396px)}#phbot{padding-top:14px}.phch button{padding:6px 9px}#phshot{width:60px;height:60px}}
+
+/* ===== menu d'accueil ===== */
+body.m3>*:not(#c):not(#menu3):not(#opts){visibility:hidden!important}
+body.m3 #opts{z-index:80}
+#menu3{position:fixed;inset:0;z-index:65;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 7vh) 20px calc(env(safe-area-inset-bottom,0px) + 5vh);pointer-events:none;transition:opacity .6s;background:radial-gradient(ellipse at 50% 105%,rgba(2,4,10,.8),transparent 55%),linear-gradient(rgba(2,4,10,.55),transparent 32%)}
+#menu3.out{opacity:0}
+#menu3 button{pointer-events:auto}
+.m3top{text-align:center;animation:m3in 1.6s cubic-bezier(.2,.8,.2,1) both}
+.m3logo{display:flex;align-items:baseline;justify-content:center;gap:.22em;font:700 clamp(34px,10vw,78px)/1 var(--hf);letter-spacing:.14em;filter:drop-shadow(0 0 18px rgba(120,190,255,.55))}
+.m3logo b{background:linear-gradient(100deg,#bcdcff 30%,#fff 45%,#bcdcff 60%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:m3sh 5s linear infinite}
+.m3logo span{font-size:.5em;color:var(--amber);letter-spacing:.08em}
+.m3tag{margin-top:12px;font:600 clamp(11px,2.9vw,14px) var(--hf);letter-spacing:.34em;color:#a9c0da;text-transform:uppercase;text-shadow:0 1px 6px #000}
+.m3bot{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(86vw,360px);animation:m3up 1.2s .5s cubic-bezier(.2,.8,.2,1) both}
+.m3card{font:500 13px var(--hf);color:#d4e4f5;padding:7px 12px;background:rgba(6,12,24,.65);box-shadow:inset 0 0 0 1px var(--edge)}
+#m3play{width:100%;padding:16px;font-size:18px;letter-spacing:.18em;text-transform:uppercase;color:#0a121c;background:linear-gradient(#ffd98a,#ffb43d);animation:m3pulse 2.4s ease-in-out infinite}
+.m3row{display:flex;gap:10px;width:100%}.m3row button{flex:1;padding:11px 8px}
+.m3ver{font:500 11px var(--hf);color:#7088a3;letter-spacing:.05em}
+@keyframes m3in{from{opacity:0;transform:scale(1.15);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
+@keyframes m3up{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes m3sh{from{background-position:150% 0}to{background-position:-100% 0}}
+@keyframes m3pulse{0%,100%{filter:drop-shadow(0 0 10px rgba(255,190,80,.35))}50%{filter:drop-shadow(0 0 22px rgba(255,190,80,.7))}}
+@media (orientation:landscape) and (max-height:520px){#menu3{padding-top:calc(env(safe-area-inset-top,0px) + 4vh);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 3vh)}.m3logo{font-size:46px}.m3bot{gap:7px}#m3play{padding:11px}}
 </style></head><body>
 <canvas id="c"></canvas><canvas id="ov"></canvas>
 <div id="hud"><div class="pan" id="pl"><div class="row"><span class="lab h" title="Coque"><svg class="i"><use href="#i-hull"/></svg></span><div class="bar" id="hpbar"><i id="hpb"></i></div><span class="num" id="hpt"></span></div><div class="row" id="shrow" style="display:none"><span class="lab s" title="Bouclier"><svg class="i"><use href="#i-shield"/></svg></span><div class="bar" id="shbar"><i id="shb"></i></div><span class="num" id="sht"></span></div><div class="row"><span class="lab c" title="Soute"><svg class="i"><use href="#i-cargo"/></svg></span><div class="bar" id="orebar"><i id="orb"></i></div><span class="num" id="ort"></span></div><div class="row" id="lvrow"><span class="lvt" id="lvt"></span><div class="xbar"><i id="xpb"></i></div><span id="xpg"></span></div><div class="row" id="pwr" title="Énergie : touche pour changer (1/2/3 sur PC)"></div><div id="wpn"></div><div id="info"></div></div><div class="pan" id="pr"><div id="cr"></div><div id="sub"></div><div class="chip" id="zone"></div><div class="chip" id="want" style="display:none"></div></div></div>
 <button id="optb" class="ic" title="Options (O)"><svg class="i"><use href="#i-gear"/></svg></button><button id="profb" class="ic" title="Profil (P)"><svg class="i"><use href="#i-user"/></svg></button><button id="cxb" class="ic" title="Journal de bord (J)"><svg class="i"><use href="#i-book"/></svg></button><div id="achb"></div>
 <div id="toast"></div>
 <div id="shop"><div id="shopT"></div><div id="tabs"></div><div id="tabStation"><button id="mis"></button><button class="up" id="u1"></button><button class="up" id="u2"></button><button class="up" id="u3"></button></div><div id="tabX"></div></div>
-<div id="help"><kbd>Souris</kbd> diriger · <kbd>Clic</kbd> tirer · <kbd>Clic droit</kbd>/<kbd>Z</kbd>/<kbd>Maj</kbd> boost · <kbd>S</kbd> frein<br><kbd>E</kbd> atterrir · amarrer · repartir · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> améliorer (à quai) · <kbd>F</kbd> mission<br><kbd>Q</kbd>/molette arme · <kbd>C</kbd> carte · <kbd>Entrée</kbd> dialogue<br><kbd>T</kbd> discuter · <kbd>G</kbd> qualité · <kbd>I</kbd> inverser · <kbd>V</kbd> cockpit · <kbd>F</kbd> sortir à pied · <kbd>M</kbd> son · <kbd>O</kbd> options · <kbd>R</kbd> tonneau · <kbd>X</kbd> leurres · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> énergie (en vol)<br><kbd>P</kbd> profil · <kbd>K</kbd> talents · <kbd>J</kbd> journal · <kbd>H</kbd> cacher l'aide</div><button id="land"></button><button id="baseb"></button><button class="b" id="brake"><svg class="i"><use href="#i-brake"/></svg><span>Frein</span></button><button class="b" id="boost"><svg class="i"><use href="#i-boost"/></svg><span>Boost</span></button><button class="b" id="fire"><svg class="i"><use href="#i-fire"/></svg><span>Feu</span></button><button class="b" id="dodge"></button><button class="b" id="flare"></button>
+<div id="help"><kbd>Souris</kbd> diriger · <kbd>Clic</kbd> tirer · <kbd>Clic droit</kbd>/<kbd>Z</kbd>/<kbd>Maj</kbd> boost · <kbd>S</kbd> frein<br><kbd>E</kbd> atterrir · amarrer · repartir · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> améliorer (à quai) · <kbd>F</kbd> mission<br><kbd>Q</kbd>/molette arme · <kbd>C</kbd> carte · <kbd>Entrée</kbd> dialogue<br><kbd>T</kbd> discuter · <kbd>G</kbd> qualité · <kbd>I</kbd> inverser · <kbd>V</kbd> cockpit · <kbd>F</kbd> sortir à pied · <kbd>M</kbd> son · <kbd>O</kbd> options · <kbd>R</kbd> tonneau · <kbd>X</kbd> leurres · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> énergie (en vol)<br><kbd>P</kbd> profil · <kbd>K</kbd> talents · <kbd>J</kbd> journal · <kbd>B</kbd> mode photo · <kbd>H</kbd> cacher l'aide</div><button id="land"></button><button id="baseb"></button><button class="b" id="brake"><svg class="i"><use href="#i-brake"/></svg><span>Frein</span></button><button class="b" id="boost"><svg class="i"><use href="#i-boost"/></svg><span>Boost</span></button><button class="b" id="fire"><svg class="i"><use href="#i-fire"/></svg><span>Feu</span></button><button class="b" id="dodge"></button><button class="b" id="flare"></button>
 <button id="mapb" class="ic" title="Carte (C)"><svg class="i"><use href="#i-map"/></svg></button><button id="wbtn" title="Changer d'arme"></button>
 <div id="bossbar"><div id="bossN"></div><div class="bar"><i id="bossB"></i></div></div>
 <div id="dlg"><div id="dlgI"></div><div><div id="dlgN"></div><div id="dlgT"></div><small>Touche pour continuer ▶</small></div></div>

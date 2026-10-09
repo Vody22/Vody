@@ -84,6 +84,8 @@ for(let i=0;i<4;i++)AMAT.push(new THREE.MeshStandardMaterial({color:new THREE.Co
 const OREG=new THREE.OctahedronGeometry(1.4);
 // ----- planètes -----
 const ptype=p=>p.ring?'Géante gazeuse':p.hue<25||p.hue>335?'Volcanique':p.hue<70?'Désertique':p.hue<160?'Jungle':p.hue<250?'Océanique':p.hue<290?'Glacée':'Cristalline';
+// variantes (graphismes 3) : archipel tropical, forêt de cristal, ruines anciennes
+const pvar=p=>{if(!p||p.ring)return '';const ty=ptype(p),k=hs((p.x|0)+7,(p.z|0)+3,21);return ty=='Océanique'&&k<.5?'archipel':ty=='Cristalline'?'cristal':(ty=='Désertique'||ty=='Jungle')&&k<.35?'ruines':''},PVARN={archipel:'Archipel tropical',cristal:'Forêt de cristal',ruines:'Ruines anciennes'};
 const PVS=`varying vec2 vUv;varying vec3 vN;varying vec3 vW;void main(){vUv=uv;vN=normalize(mat3(modelMatrix)*normal);vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`;
 const PFS=`float phs(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}float pvn(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(phs(i),phs(i+vec3(1.,0.,0.)),f.x),mix(phs(i+vec3(0.,1.,0.)),phs(i+vec3(1.,1.,0.)),f.x),f.y),mix(mix(phs(i+vec3(0.,0.,1.)),phs(i+vec3(1.,0.,1.)),f.x),mix(phs(i+vec3(0.,1.,1.)),phs(i+vec3(1.,1.,1.)),f.x),f.y),f.z);}
 uniform sampler2D map;uniform sampler2D night;uniform vec3 sunDir;uniform vec3 sunCol;uniform float hasNight;uniform vec3 atm;varying vec2 vUv;varying vec3 vN;varying vec3 vW;
@@ -92,15 +94,15 @@ col*=.88+.24*(pvn(n*26.)*.6+pvn(n*64.)*.4);vec3 V=normalize(cameraPosition-vW);f
 const CFS=`uniform sampler2D map;uniform vec3 sunDir;uniform vec3 sunCol;uniform float off;varying vec2 vUv;varying vec3 vN;varying vec3 vW;void main(){vec4 c=texture2D(map,vec2(vUv.x+off,vUv.y));float d=dot(normalize(vN),sunDir);gl_FragColor=vec4(c.rgb*(0.03+sunCol*max(d,0.)),c.a*smoothstep(-0.35,0.1,d)*0.9+c.a*0.1);}`;
 const AVS=`varying vec3 vNV;varying vec3 vN;void main(){vNV=normalize(normalMatrix*normal);vN=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
 const AFS=`uniform vec3 atm;uniform vec3 sunDir;varying vec3 vNV;varying vec3 vN;void main(){float i=pow(clamp(0.78-dot(vNV,vec3(0.,0.,1.)),0.,1.),3.2);float l=smoothstep(-0.35,0.5,dot(vN,sunDir));gl_FragColor=vec4(atm*i*1.25*(0.12+l),1.);}`;
-function* planetTexGen(p){const TW=LOWQ?384:512,TH=TW/2,ty=ptype(p),h=p.hue,sd=seedOf(p.x,p.y,p.z,5),lq=ty=='Océanique'?.5:ty=='Désertique'?.3:.4;
+function* planetTexGen(p){const TW=LOWQ?384:512,TH=TW/2,ty=ptype(p),pv=pvar(p),h=p.hue,sd=seedOf(p.x,p.y,p.z,5),lq=ty=='Océanique'?(pv=='archipel'?.64:.5):ty=='Désertique'?.3:.4;
 const c=mkC(TW,TH),g=c.getContext('2d'),im=g.createImageData(TW,TH),d=im.data,nc=mkC(TW,TH),ng=nc.getContext('2d'),nim=ng.createImageData(TW,TH),nd=nim.data,cc=mkC(TW,TH),cg=cc.getContext('2d'),cim=cg.createImageData(TW,TH),cd=cim.data;
-const inhab=!p.ring&&ty!='Volcanique'&&hs(p.x|0,p.z|0,8)<.6;
+const inhab=pv=='ruines'||(!p.ring&&ty!='Volcanique'&&hs(p.x|0,p.z|0,8)<.6),ru=pv=='ruines';
 for(let y=0;y<TH;y++){const lat=(y/TH-.5)*Math.PI,cl=Math.cos(lat),sy=Math.sin(lat);for(let x=0;x<TW;x++){const lon=x/TW*TAU,X=cl*Math.cos(lon),Y=-sy,Z=cl*Math.sin(lon),k=(y*TW+x)*4;let col,v;
 if(p.ring){v=.5+.32*Math.sin(Y*16+fbm3(X*2,Y*2,Z*2,sd,3)*5)+(fbm3(X*5,Y*5,Z*5,sd+9,2)-.5)*.3;col=hsl(h+v*35,.5,.28+v*.34)}
 else{v=fbm3(X*2.2,Y*2.2,Z*2.2,sd,6);v=clamp(.5+(v-.5)*1.5,0,1);const pole=Math.abs(Y)>.86-v*.08;
-if(ty=='Glacée')col=v<lq?hsl(195,.55,.62+v*.2):hsl(205,.15,.75+v*.2);else if(v<lq)col=ty=='Volcanique'?hsl(18+v*40,1,.45+v*.2):ty=='Océanique'?hsl(205,.75,.18+v*.35):ty=='Cristalline'?hsl(h+40,.6,.35+v*.4):hsl(h+25,.55,.18+v*.3);
+if(ty=='Glacée')col=v<lq?hsl(195,.55,.62+v*.2):hsl(205,.15,.75+v*.2);else if(v<lq)col=ty=='Volcanique'?hsl(18+v*40,1,.45+v*.2):ty=='Océanique'?(pv=='archipel'&&v>lq-.07?hsl(176,.7,.42+(v-lq+.07)*3):hsl(205,.75,.18+v*.35)):ty=='Cristalline'?hsl(h+40,.6,.35+v*.4):hsl(h+25,.55,.18+v*.3);
 else col=ty=='Volcanique'?hsl(h+(v-.5)*30,.3,.1+v*.28):hsl(h+(v-.5)*40,ty=='Désertique'?.5:.38,.2+v*.42);if(pole&&ty!='Volcanique'&&ty!='Désertique')col=hsl(200,.1,.88);
-if(inhab&&v>lq+.02&&!pole){const q=noise3(X*40,Y*40,Z*40,sd+4);if(q>.72){const b=(q-.72)*3.6*(fbm3(X*6,Y*6,Z*6,sd+5,2)>.5?1:.25);nd[k]=255*b;nd[k+1]=190*b;nd[k+2]=90*b}}}
+if(inhab&&v>lq+.02&&!pole){const q=noise3(X*40,Y*40,Z*40,sd+4);if(q>.72){const b=(q-.72)*3.6*(fbm3(X*6,Y*6,Z*6,sd+5,2)>.5?1:.25);nd[k]=(ru?70:255)*b;nd[k+1]=(ru?230:190)*b;nd[k+2]=(ru?255:90)*b}}}
 d[k]=col[0];d[k+1]=col[1];d[k+2]=col[2];d[k+3]=255;nd[k+3]=255;
 if(!p.ring){const cv=fbm3(X*2.5+3,Y*3.5,Z*2.5,sd+50,4),a=clamp((cv-(ty=='Désertique'?.6:.5))/.15,0,1),tint=ty=='Volcanique'?.35:1;cd[k]=cd[k+1]=cd[k+2]=255*tint;cd[k+3]=a*a*(3-2*a)*230}}if((y&3)==3)yield}
 g.putImageData(im,0,0);ng.putImageData(nim,0,0);cg.putImageData(cim,0,0);

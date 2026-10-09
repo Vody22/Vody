@@ -176,7 +176,7 @@ $('mapb').onclick=openMap;$('mapx').onclick=closeMap;$('mapzi').onclick=()=>mapZ
 addEventListener('keydown',e=>{if(e.target.tagName=='INPUT')return;if(e.code=='KeyC'&&!e.repeat)openMap();if(e.code=='Escape'&&MAP.open)closeMap()});addEventListener('resize',()=>{if(MAP.open){sizeMap();drawMap()}});
 // ----- intégration -----
 function storyTarget(){const s=SG();if(!s||!CHAPTERS[s.ch])return null;return CHAPTERS[s.ch].tg()}
-const isPaused=()=>DLG.open||MAP.open;
+const isPaused=()=>DLG.open||MAP.open||window.XPAUSE>0;
 function updContent(dt){G.time=(G.time||0)+dt;storyTick(dt);updEvents(dt);updBoss(dt)}
 function updContentAlways(dt){updDlg(dt);updMusic();bossBar();if(MAP.open&&Math.random()<.2)drawMap();updShop();setH('wpn',wpnHUD());setD('wbtn',G.w.length>1&&!DESK?'flex':'none');if(G.w.length>1)setH('wbtn',ICO(WSVG[curW()]||'canon'))}
 function contentInfo(){let s='';const c=SG()&&SG().ch<8&&CHAPTERS[SG().ch];if(c)s+=`<span style="color:#c9f">★ ${c.txt()}</span>`;if(SG()&&SG().ch==1&&scanT>0)s+=` <b style="color:#c9f">scan ${Math.min(100,scanT/3*100|0)}%</b>`;
