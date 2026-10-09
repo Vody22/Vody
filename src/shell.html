@@ -177,6 +177,23 @@ body.m3 #opts{z-index:80}
 @keyframes m3sh{from{background-position:150% 0}to{background-position:-100% 0}}
 @keyframes m3pulse{0%,100%{filter:drop-shadow(0 0 10px rgba(255,190,80,.35))}50%{filter:drop-shadow(0 0 22px rgba(255,190,80,.7))}}
 @media (orientation:landscape) and (max-height:520px){#menu3{padding-top:calc(env(safe-area-inset-top,0px) + 4vh);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 3vh)}.m3logo{font-size:46px}.m3bot{gap:7px}#m3play{padding:11px}}
+
+/* ===== carte galactique 3D ===== */
+body.gm3>*:not(#c):not(#gm3){visibility:hidden!important}
+#gm3{display:none;position:fixed;inset:0;z-index:7;color:#e8f2ff}
+body.gm3 #gm3{display:block}
+#gm3c{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#gm3top{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:0;right:0;text-align:center;pointer-events:none;text-shadow:0 1px 4px #000}
+#gm3top b{display:block;font:700 15px var(--hf);letter-spacing:.32em;color:var(--ice)}
+#gm3top span{font:500 11px var(--hf);color:#a9c0da}
+#gm3info{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 68px);padding:9px 14px;background:rgba(6,12,24,.86);box-shadow:inset 0 0 0 1px var(--edge2);font:600 14px var(--hf);text-align:center;max-width:90vw;pointer-events:none}
+#gm3info small{display:block;font-weight:500;font-size:12px;color:#a9c0da;margin-top:3px}
+#gm3btns{position:absolute;right:calc(env(safe-area-inset-right,0px) + 12px);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;gap:6px}
+#gm3btns button{padding:10px 12px}
+#map3b{color:var(--amber)}
+/* écran qui grésille */
+#hud.glitch{animation:gl3 .1s steps(2) infinite}
+@keyframes gl3{0%{transform:translate(3px,-1px)}50%{transform:translate(-3px,2px)}100%{transform:translate(1px,0)}}
 </style></head><body>
 <canvas id="c"></canvas><canvas id="ov"></canvas>
 <div id="hud"><div class="pan" id="pl"><div class="row"><span class="lab h" title="Coque"><svg class="i"><use href="#i-hull"/></svg></span><div class="bar" id="hpbar"><i id="hpb"></i></div><span class="num" id="hpt"></span></div><div class="row" id="shrow" style="display:none"><span class="lab s" title="Bouclier"><svg class="i"><use href="#i-shield"/></svg></span><div class="bar" id="shbar"><i id="shb"></i></div><span class="num" id="sht"></span></div><div class="row"><span class="lab c" title="Soute"><svg class="i"><use href="#i-cargo"/></svg></span><div class="bar" id="orebar"><i id="orb"></i></div><span class="num" id="ort"></span></div><div class="row" id="lvrow"><span class="lvt" id="lvt"></span><div class="xbar"><i id="xpb"></i></div><span id="xpg"></span></div><div class="row" id="pwr" title="Énergie : touche pour changer (1/2/3 sur PC)"></div><div id="wpn"></div><div id="info"></div></div><div class="pan" id="pr"><div id="cr"></div><div id="sub"></div><div class="chip" id="zone"></div><div class="chip" id="want" style="display:none"></div></div></div>
