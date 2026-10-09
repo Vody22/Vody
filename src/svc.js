@@ -32,3 +32,12 @@ async function api(path,body){const r=await fetch(path,body?{method:'POST',heade
 if(TAB=='ships'){const hid=[];for(const id in HULLS)if(HULLS[id].uniq&&!G.owned.includes(id)){hid.push([id,HULLS[id]]);delete HULLS[id]}try{return _sv()}finally{for(const[id,H]of hid)HULLS[id]=H}}return _sv()}}
 {const _bp=buyPart;buyPart=function(s,id){const o=PARTS[s]&&PARTS[s].o[id];if(o&&o.uniq&&!G.pown.includes(s+':'+id)){toast('Pièce unique : elle se gagne, elle ne s\'achète pas');return}_bp(s,id)}}
 {const _bs=buyShip;buyShip=function(id){const H=HULLS[id];if(H&&H.uniq&&!G.owned.includes(id)){toast('Vaisseau unique : il se gagne, il ne s\'achète pas');return}_bs(id)}}
+// ----- garde-fou : plus jamais d'argent illimité (ancienne version restée ouverte, vieille sauvegarde…) -----
+TICK.push(()=>{if(!ARGENT_ILLIMITE&&G.cr>=1e8){G.cr=2500;toast('💰 Argent illimité désactivé : tu repars avec 2 500 ¢');save()}});
+// ----- mise à jour automatique : si une nouvelle version est publiée, elle s'installe au retour dans l'appli ou au prochain amarrage -----
+const UPD={cur:(document.querySelector('meta[name="sf-build"]')||{}).content||'',ready:false,busy:false};
+async function updCheck(){if(!API_OK||!UPD.cur||UPD.busy||UPD.ready)return;UPD.busy=true;try{const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});const tx=await r.text(),m=tx.match(/name="sf-build" content="([^"]+)"/);if(m&&m[1]!==UPD.cur){UPD.ready=true;toast('✨ Nouvelle version disponible : elle s\'installe à ton prochain amarrage')}}catch(e){}UPD.busy=false}
+function updApply(){if(!UPD.ready)return;save();try{if(typeof cloudSave=='function')cloudSave(false)}catch(e){}setTimeout(()=>location.reload(),600)}
+addEventListener('visibilitychange',()=>{if(document.hidden)return;updCheck().then(()=>{if(UPD.ready&&(S.docked||mode=='space'&&!en.length))updApply()})});
+setInterval(updCheck,10*60e3);setTimeout(updCheck,30000);
+{const _dk=dock;dock=function(st){_dk(st);if(UPD.ready){toast('✨ Installation de la nouvelle version…');updApply()}}}

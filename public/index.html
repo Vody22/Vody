@@ -136,7 +136,7 @@ body.atelier #tabX{max-height:min(32vh,300px)}body.desk.atelier #shop{left:auto;
 <button id="mppvp"></button><div id="mplist"></div>
 <form id="mpform"><input id="mpmsg" maxlength="120" placeholder="Écris un message…" autocomplete="off"><button>Envoyer</button></form></div>
 <div id="loading">STARFARER 3D<small>Chargement…</small></div>
-<meta name="sf-build" content="20261009-103132"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261009-103951"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -1105,7 +1105,7 @@ const ARGENT_ILLIMITE=false,CR_INF=999999999;let SELLK=1,TRAVK=1,GQL=0;try{GQL=c
 const SK='starfarer3d-v1';
 function save(){try{localStorage.setItem(SK,JSON.stringify({cr:G.cr,u:G.u,disc:[...G.disc],kills:G.kills,done:G.done,loot:G.loot,ore:S.ore,p:S.pos.toArray(),q:S.q.toArray(),ship:G.ship,owned:G.owned,w:G.w,wi:G.wi,ammo:G.ammo,cargo:G.cargo,story:G.story,time:G.time,vst:G.vst,dpos:G.dpos,parts:G.parts,pown:G.pown,pexp:G.pexp,pq:G.pq,xp:G.xp,rep:G.rep,bp:G.bp,stash:G.stash,bases:G.bases,stats:G.stats,x:G.x,eco:2}))}catch(e){}}
 function load(){try{let d=JSON.parse(localStorage.getItem(SK)||'null');if(!d){const o=JSON.parse(localStorage.getItem('starfarer-save-v1')||'null');if(o){G.cr=o.cr|0;G.u=o.u||[1,1,1];G.kills=o.kills|0;G.done=o.done|0;return 'old'}return false}
-G.cr=d.cr|0;G.u=d.u;G.disc=new Set(d.disc);G.kills=d.kills|0;G.done=d.done|0;G.loot=d.loot||{};S.ore=d.ore|0;S.pos.fromArray(d.p);S.q.fromArray(d.q);for(const k of['ship','owned','w','wi','ammo','cargo','story','time','vst','dpos','parts','pown','pexp','pq','xp','rep','bp','stash','bases','stats','x'])if(d[k]!=null)G[k]=d[k];if(typeof G.x!='object'||!G.x||Array.isArray(G.x))G.x={};if(!d.eco&&!ARGENT_ILLIMITE){if(G.cr>=CR_INF||G.cr>200000)G.cr=2500;G.ecoReset=1}if(typeof G.rep!='object'||!G.rep)G.rep={};for(const f of['alliance','guilde','carto'])G.rep[f]=+G.rep[f]||0;if(!Array.isArray(G.bp))G.bp=[];if(typeof G.stash!='object'||!G.stash)G.stash={};if(typeof G.bases!='object'||!G.bases)G.bases={};G.xp=+G.xp||0;if(typeof G.parts!='object'||!G.parts)G.parts={};for(const k in G.parts)if(!PARTS[k]||!PARTS[k].o[G.parts[k]])delete G.parts[k];if(!Array.isArray(G.pown))G.pown=[];S.hp=maxhp();return true}catch(e){return false}}
+G.cr=d.cr|0;G.u=d.u;G.disc=new Set(d.disc);G.kills=d.kills|0;G.done=d.done|0;G.loot=d.loot||{};S.ore=d.ore|0;S.pos.fromArray(d.p);S.q.fromArray(d.q);for(const k of['ship','owned','w','wi','ammo','cargo','story','time','vst','dpos','parts','pown','pexp','pq','xp','rep','bp','stash','bases','stats','x'])if(d[k]!=null)G[k]=d[k];if(typeof G.x!='object'||!G.x||Array.isArray(G.x))G.x={};if(!d.eco&&!ARGENT_ILLIMITE){if(G.cr>=CR_INF||G.cr>200000)G.cr=2500;G.ecoReset=1}if(!ARGENT_ILLIMITE&&G.cr>=1e8){G.cr=2500;G.ecoReset=1}if(typeof G.rep!='object'||!G.rep)G.rep={};for(const f of['alliance','guilde','carto'])G.rep[f]=+G.rep[f]||0;if(!Array.isArray(G.bp))G.bp=[];if(typeof G.stash!='object'||!G.stash)G.stash={};if(typeof G.bases!='object'||!G.bases)G.bases={};G.xp=+G.xp||0;if(typeof G.parts!='object'||!G.parts)G.parts={};for(const k in G.parts)if(!PARTS[k]||!PARTS[k].o[G.parts[k]])delete G.parts[k];if(!Array.isArray(G.pown))G.pown=[];S.hp=maxhp();return true}catch(e){return false}}
 setInterval(()=>{if(mode=='space'&&!S.dead)save()},5000);addEventListener('visibilitychange',()=>{if(document.hidden)save()});addEventListener('pagehide',save);
 
 // ===== COMMANDES =====
@@ -3894,6 +3894,15 @@ async function api(path,body){const r=await fetch(path,body?{method:'POST',heade
 if(TAB=='ships'){const hid=[];for(const id in HULLS)if(HULLS[id].uniq&&!G.owned.includes(id)){hid.push([id,HULLS[id]]);delete HULLS[id]}try{return _sv()}finally{for(const[id,H]of hid)HULLS[id]=H}}return _sv()}}
 {const _bp=buyPart;buyPart=function(s,id){const o=PARTS[s]&&PARTS[s].o[id];if(o&&o.uniq&&!G.pown.includes(s+':'+id)){toast('Pièce unique : elle se gagne, elle ne s\'achète pas');return}_bp(s,id)}}
 {const _bs=buyShip;buyShip=function(id){const H=HULLS[id];if(H&&H.uniq&&!G.owned.includes(id)){toast('Vaisseau unique : il se gagne, il ne s\'achète pas');return}_bs(id)}}
+// ----- garde-fou : plus jamais d'argent illimité (ancienne version restée ouverte, vieille sauvegarde…) -----
+TICK.push(()=>{if(!ARGENT_ILLIMITE&&G.cr>=1e8){G.cr=2500;toast('💰 Argent illimité désactivé : tu repars avec 2 500 ¢');save()}});
+// ----- mise à jour automatique : si une nouvelle version est publiée, elle s'installe au retour dans l'appli ou au prochain amarrage -----
+const UPD={cur:(document.querySelector('meta[name="sf-build"]')||{}).content||'',ready:false,busy:false};
+async function updCheck(){if(!API_OK||!UPD.cur||UPD.busy||UPD.ready)return;UPD.busy=true;try{const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});const tx=await r.text(),m=tx.match(/name="sf-build" content="([^"]+)"/);if(m&&m[1]!==UPD.cur){UPD.ready=true;toast('✨ Nouvelle version disponible : elle s\'installe à ton prochain amarrage')}}catch(e){}UPD.busy=false}
+function updApply(){if(!UPD.ready)return;save();try{if(typeof cloudSave=='function')cloudSave(false)}catch(e){}setTimeout(()=>location.reload(),600)}
+addEventListener('visibilitychange',()=>{if(document.hidden)return;updCheck().then(()=>{if(UPD.ready&&(S.docked||mode=='space'&&!en.length))updApply()})});
+setInterval(updCheck,10*60e3);setTimeout(updCheck,30000);
+{const _dk=dock;dock=function(st){_dk(st);if(UPD.ready){toast('✨ Installation de la nouvelle version…');updApply()}}}
 
 // ===== CODEX ET SUCCÈS : encyclopédie qui se remplit en jouant, statistiques, 46 succès avec récompenses et titres =====
 const CX=GX('cx',{});for(const k of['pl','sp','en','an','ch','fac','log','der'])if(typeof CX[k]!='object'||!CX[k])CX[k]={};
