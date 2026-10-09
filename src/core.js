@@ -50,9 +50,9 @@ const danger=()=>Math.min(4,Math.floor(S.pos.length()/9000));
 // argent illimité pour tout le monde (mettre false pour revenir à l'économie normale)
 const ARGENT_ILLIMITE=true,CR_INF=999999999;
 const SK='starfarer3d-v1';
-function save(){try{localStorage.setItem(SK,JSON.stringify({cr:G.cr,u:G.u,disc:[...G.disc],kills:G.kills,done:G.done,loot:G.loot,ore:S.ore,p:S.pos.toArray(),q:S.q.toArray(),ship:G.ship,owned:G.owned,w:G.w,wi:G.wi,ammo:G.ammo,cargo:G.cargo,story:G.story,time:G.time,vst:G.vst,dpos:G.dpos,parts:G.parts,pown:G.pown}))}catch(e){}}
+function save(){try{localStorage.setItem(SK,JSON.stringify({cr:G.cr,u:G.u,disc:[...G.disc],kills:G.kills,done:G.done,loot:G.loot,ore:S.ore,p:S.pos.toArray(),q:S.q.toArray(),ship:G.ship,owned:G.owned,w:G.w,wi:G.wi,ammo:G.ammo,cargo:G.cargo,story:G.story,time:G.time,vst:G.vst,dpos:G.dpos,parts:G.parts,pown:G.pown,pexp:G.pexp,pq:G.pq}))}catch(e){}}
 function load(){try{let d=JSON.parse(localStorage.getItem(SK)||'null');if(!d){const o=JSON.parse(localStorage.getItem('starfarer-save-v1')||'null');if(o){G.cr=o.cr|0;G.u=o.u||[1,1,1];G.kills=o.kills|0;G.done=o.done|0;return 'old'}return false}
-G.cr=d.cr|0;G.u=d.u;G.disc=new Set(d.disc);G.kills=d.kills|0;G.done=d.done|0;G.loot=d.loot||{};S.ore=d.ore|0;S.pos.fromArray(d.p);S.q.fromArray(d.q);for(const k of['ship','owned','w','wi','ammo','cargo','story','time','vst','dpos','parts','pown'])if(d[k]!=null)G[k]=d[k];if(typeof G.parts!='object'||!G.parts)G.parts={};for(const k in G.parts)if(!PARTS[k]||!PARTS[k].o[G.parts[k]])delete G.parts[k];if(!Array.isArray(G.pown))G.pown=[];S.hp=maxhp();return true}catch(e){return false}}
+G.cr=d.cr|0;G.u=d.u;G.disc=new Set(d.disc);G.kills=d.kills|0;G.done=d.done|0;G.loot=d.loot||{};S.ore=d.ore|0;S.pos.fromArray(d.p);S.q.fromArray(d.q);for(const k of['ship','owned','w','wi','ammo','cargo','story','time','vst','dpos','parts','pown','pexp','pq'])if(d[k]!=null)G[k]=d[k];if(typeof G.parts!='object'||!G.parts)G.parts={};for(const k in G.parts)if(!PARTS[k]||!PARTS[k].o[G.parts[k]])delete G.parts[k];if(!Array.isArray(G.pown))G.pown=[];S.hp=maxhp();return true}catch(e){return false}}
 setInterval(()=>{if(mode=='space'&&!S.dead)save()},5000);addEventListener('visibilitychange',()=>{if(document.hidden)save()});addEventListener('pagehide',save);
 
 // ===== COMMANDES =====

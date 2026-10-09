@@ -9,7 +9,7 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 
 ## Structure
 - `src/shell.html` : HTML/CSS/HUD, avec les marqueurs `%%THREE%%` et `%%GAME%%`.
-- `src/*.js` : modules concaténés dans cet ordre (voir `build.py`) : core, audio, gfx, models, world, game, surface, fx, ultra, detail, content, lasers, parts, cockpit, speed, sounds, visuals, ground, story, netroom, mp, hud. Tout est au niveau global (pas de modules ES).
+- `src/*.js` : modules concaténés dans cet ordre (voir `build.py`) : core, audio, gfx, models, world, game, surface, fx, ultra, detail, content, lasers, parts, cockpit, speed, sounds, visuals, chars, ground, story, explore, netroom, mp, hud. Tout est au niveau global (pas de modules ES).
 - `core.js` : `PARTS` (pièces de l'Atelier) et `PM(clé)` = multiplicateurs des pièces installées (coque, vitesse, cadence, bouclier…).
 - `parts.js` : visuels des pièces (enveloppe `buildShip(P, aLeLaser)`), onglet 🔧 Atelier, aperçu, achat. `lasers.js` : tirs lumineux, rayon laser (shader), éclairs/impacts, son du laser. `cockpit.js` : vue cockpit (touche V / bouton 👁), tableau de bord 3D posé devant la caméra, écrans dessinés sur canvas, viseur tête haute `ckHUD`, mouvements de tête. `speed.js` : poussière en traînées (sensation de vitesse), souffle et voile du boost. `sounds.js` : sons des armes par type de canon, rugissement du boost (`nzf` = bruit filtré ; ne pas nommer `nz`, déjà pris par la musique dans story.js). `visuals.js` : couronne solaire. `ground.js` : planètes — avant-poste (piste = station au sol), PNJ et marchand, filons de minerai, mode à pied (`FOOT`), caméra et commandes à pied.
 - `src/three-examples/` : post-process Three.js r128 (bloom…) incorporés tels quels.
@@ -21,6 +21,8 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 
 ## Mécaniques
 - Minerais (`fer`, `titane`, `cristal`, `or`) : dans `GOODS` (min:1), stockés dans `G.cargo`, butin typé via `spawnDrops(p,n,min)`. Astéroïdes : `astHit` (story.js), fragments. Filons : `GR.deps` (ground.js).
+- `chars.js` : personnages articulés `buildHuman(o)` (rôles merchant/mechanic/miner/guard/scientist/alien, casque, visière, outil) et `animHuman` (marche, course, respiration, gestes, regard). Utilisés pour le joueur à pied, les PNJ et l'astronaute des autres joueurs.
+- `explore.js` : points d'intérêt des planètes (épaves récupérables, caisses, bunker + terminal, monolithe, campement avec donneur de quêtes, plantes rares, faune scannable, oiseaux), quêtes `G.pq`, brouillard d'exploration `G.pexp` (64×64, base64) et carte de planète (`drawMap`/`openMap` surchargés en mode surface). Butin déjà pris : `G.loot[planète]` (ids `k#` caisses, `w#` épaves, `sp#` espèces).
 - Station au sol : objet `GR.st` avec `ground:true` (et `foot:true` quand on parle au marchand à pied → seuls Marché/Armes).
 
 ## Pièges connus

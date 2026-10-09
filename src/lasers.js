@@ -20,12 +20,12 @@ function boltMesh(c,big){const M=boltMats(c,big),g=new THREE.Group(),k=big?1.5:1
 for(const[m,sz,z]of[[M.head,5.2,-3.4],[M.t1,3.6,0],[M.t2,2.6,3.6]]){const h=new THREE.Sprite(m);h.scale.setScalar(sz*k);h.position.z=z*k;g.add(h)}return g}
 // ----- petites lueurs éphémères (bouche des canons, impacts) -----
 const FXS=[],fxPool=[];
-function fxSprite(p,col,size,life,grow,parent){let s=fxPool.pop();if(!s)s=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW2,transparent:true,blending:ADDB,depthWrite:false}));
+function fxGlow(p,col,size,life,grow,parent){let s=fxPool.pop();if(!s)s=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW2,transparent:true,blending:ADDB,depthWrite:false}));
 s.material.color.set(col);s.material.opacity=1;s.position.copy(p);s.scale.setScalar(size);(parent||curScene()).add(s);FXS.push({s,l:life,ml:life,size,grow:grow||1.6});return s}
 function updFXS(dt){for(let i=FXS.length-1;i>=0;i--){const f=FXS[i];f.l-=dt;const k=f.l/f.ml;if(k<=0){f.s.parent&&f.s.parent.remove(f.s);fxPool.push(f.s);FXS.splice(i,1);continue}f.s.material.opacity=k*k;f.s.scale.setScalar(f.size*(1+(1-k)*(f.grow-1)))}}
 const _lz1=new V3(),_lz2=new V3(),_lz3=new V3(),_lzc=new THREE.Color();
-function muzzleFlash(l,col){const b=ship.userData.body;_lz1.set(l[0],l[1],l[2]);fxSprite(_lz1,col,5.5,.08,1.5,b);fxSprite(_lz1,0xffffff,2.4,.06,1.3,b)}
-function impactFX(p,col,k=1){fxSprite(p,col,15*k,.24,2.3);fxSprite(p,0xffffff,5.5*k,.12,1.8);_lzc.set(col);const n=Math.round(9*k);
+function muzzleFlash(l,col){const b=ship.userData.body;_lz1.set(l[0],l[1],l[2]);fxGlow(_lz1,col,5.5,.08,1.5,b);fxGlow(_lz1,0xffffff,2.4,.06,1.3,b)}
+function impactFX(p,col,k=1){fxGlow(p,col,15*k,.24,2.3);fxGlow(p,0xffffff,5.5*k,.12,1.8);_lzc.set(col);const n=Math.round(9*k);
 for(let i=0;i<n;i++){_lz2.set(rv(1),rv(1),rv(1)).normalize().multiplyScalar(50+Math.random()*110);SPK.emit(p.x,p.y,p.z,_lz2.x,_lz2.y,_lz2.z,.22+Math.random()*.3,Math.min(1,_lzc.r+.3),Math.min(1,_lzc.g+.3),Math.min(1,_lzc.b+.3),.32)}}
 // recul des canons et rotation des canons rotatifs
 let KICK=0;function gunKick(){KICK=1}

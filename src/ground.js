@@ -1,33 +1,24 @@
 // ===== SUR LES PLANÈTES : sortir du vaisseau, marcher, avant-postes, marchands, PNJ, filons de minerai =====
 const FOOT={on:false,pos:new V3(),vel:new V3(),vy:0,yaw:0,cy:0,cp:.18,ph:0,fuel:1,sp:new V3(),sq:new QT(),model:null,grounded:true,tcd:0,drag:null,lastLook:0,mineT:null,beam:null,talk:null};
 const OPN={ty:null};let GR=null; // GR : contenu de la planète courante (avant-poste, PNJ, filons…)
-// ----- astronaute (joueur et PNJ) -----
-function buildAstro(suit=0xe8ecf0,acc=0xff8a2a,tool=true){const g=new THREE.Group(),M=new THREE.MeshStandardMaterial({color:suit,metalness:.2,roughness:.55}),D=new THREE.MeshStandardMaterial({color:0x2a2f36,metalness:.5,roughness:.5}),A=new THREE.MeshStandardMaterial({color:acc,metalness:.3,roughness:.45}),
-V=new THREE.MeshStandardMaterial({color:0x0c141c,metalness:.9,roughness:.06,emissive:0x0a2232});const add=(geo,m,x,y,z,par=g)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=DESK;par.add(o);return o};
-const legs=[],arms=[];for(const s of[-1,1]){const hip=new THREE.Group();hip.position.set(s*.16,.95,0);g.add(hip);add(new THREE.CylinderGeometry(.11,.1,.5,8),M,0,-.25,0,hip);const kn=new THREE.Group();kn.position.y=-.5;hip.add(kn);add(new THREE.CylinderGeometry(.1,.09,.42,8),M,0,-.21,0,kn);add(new THREE.BoxGeometry(.2,.12,.32),D,0,-.44,-.05,kn);add(new THREE.BoxGeometry(.21,.05,.1),A,0,-.08,-.1,kn);legs.push({hip,kn})}
-add(new THREE.CylinderGeometry(.27,.23,.62,12),M,0,1.27,0);add(new THREE.BoxGeometry(.5,.13,.36),D,0,.98,0);add(new THREE.BoxGeometry(.44,.54,.26),D,0,1.32,.25);for(const s of[-1,1])add(new THREE.CylinderGeometry(.07,.07,.46,8),A,s*.13,1.32,.4);
-add(new THREE.BoxGeometry(.16,.07,.02),new THREE.MeshBasicMaterial({color:0x5ff0ff}),0,1.4,-.26);add(new THREE.BoxGeometry(.34,.08,.06),A,0,1.55,-.2);
-for(const s of[-1,1]){const sh=new THREE.Group();sh.position.set(s*.34,1.5,0);g.add(sh);add(new THREE.SphereGeometry(.11,10,8),A,0,0,0,sh);add(new THREE.CylinderGeometry(.08,.075,.4,8),M,0,-.22,0,sh);const el=new THREE.Group();el.position.y=-.42;sh.add(el);add(new THREE.CylinderGeometry(.075,.07,.36,8),M,0,-.18,0,el);add(new THREE.SphereGeometry(.085,8,6),D,0,-.38,0,el);arms.push({sh,el})}
-let tl=null;if(tool){tl=new THREE.Group();tl.position.set(0,-.4,-.08);arms[1].el.add(tl);add(new THREE.BoxGeometry(.07,.1,.34),D,0,0,-.12,tl);add(new THREE.CylinderGeometry(.03,.03,.12,8).rotateX(Math.PI/2),MAT.metal,0,.02,-.33,tl);const tip=sprite(0x5ff0ff,.35);tip.position.set(0,.02,-.4);tl.add(tip)}
-add(new THREE.SphereGeometry(.24,16,12),M,0,1.8,0);const vz=add(new THREE.SphereGeometry(.205,16,10,0,TAU,0,Math.PI*.62),V,0,1.8,-.06);vz.rotation.x=-Math.PI/2;vz.scale.set(1,1,.82);
-const lamp=sprite(0xfff0c0,.5);lamp.position.set(.17,1.9,-.18);g.add(lamp);add(new THREE.CylinderGeometry(.012,.012,.3,4),D,-.15,2.05,.05);
-g.userData={legs,arms,tool:tl};return g}
-function animAstro(m,ph,spd,air,aim){const u=m.userData,k=Math.min(1,spd/7),sw=Math.sin(ph)*k*.75;if(air){u.legs[0].hip.rotation.x=-.5;u.legs[1].hip.rotation.x=.25;u.legs[0].kn.rotation.x=.7;u.legs[1].kn.rotation.x=.4}
-else{u.legs[0].hip.rotation.x=sw;u.legs[1].hip.rotation.x=-sw;u.legs[0].kn.rotation.x=Math.max(0,Math.sin(ph-1))*k*.9;u.legs[1].kn.rotation.x=Math.max(0,Math.sin(ph+2.1))*k*.9}
-u.arms[0].sh.rotation.x=-sw*.8;u.arms[0].el.rotation.x=-.3-k*.2;if(aim){u.arms[1].sh.rotation.x=-1.45;u.arms[1].el.rotation.x=-.1}else{u.arms[1].sh.rotation.x=sw*.8;u.arms[1].el.rotation.x=-.3-k*.2}m.children.forEach(c=>{})}
+// ----- astronaute (joueur et PNJ) : voir chars.js -----
+function buildAstro(suit,acc,tool){return buildHuman({suit,acc,tool,closed:false})}
+function animAstro(m,ph,spd,air,aim){animHuman(m,ph,spd,air,aim,0,null)}
 // ----- textures de l'avant-poste -----
 const PADT=(()=>{const c=mkC(256),g=c.getContext('2d');g.fillStyle='#2a2e34';g.fillRect(0,0,256,256);for(let i=0;i<300;i++){g.fillStyle=`rgba(255,255,255,${Math.random()*.04})`;g.fillRect(Math.random()*256,Math.random()*256,2+Math.random()*10,2)}
 g.strokeStyle='#ffc41a';g.lineWidth=10;g.beginPath();g.arc(128,128,112,0,TAU);g.stroke();g.lineWidth=4;g.beginPath();g.arc(128,128,82,0,TAU);g.stroke();g.fillStyle='#f2f2f2';g.font='900 120px system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText('H',128,134);
 for(let i=0;i<24;i++){if(i%2)continue;const a=i/24*TAU;g.fillStyle='#ffc41a';g.save();g.translate(128,128);g.rotate(a);g.fillRect(118,-6,10,12);g.restore()}const t=new THREE.CanvasTexture(c);return t})();
 function signTex(txt,col='#ffd257'){const c=mkC(256,64),g=c.getContext('2d');g.fillStyle='rgba(6,14,26,.9)';g.fillRect(0,0,256,64);g.strokeStyle=col;g.lineWidth=3;g.strokeRect(3,3,250,58);g.fillStyle=col;g.font='800 30px system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,128,34);return new THREE.CanvasTexture(c)}
 // ----- PNJ -----
-const ROLES=[{r:'Marchande',n:['Yara','Tess','Mila','Noor'],suit:0xd9a632,acc:0x6b3fa0,merchant:1,lines:['Bienvenue ! Minerais, cristaux, marchandises… je rachète tout.','Le titane se vend bien chez les industriels.','Approche, approche, mes prix sont les meilleurs de la planète !']},
-{r:'Mécanicien',n:['Bolt','Rivet','Gus','Kaï'],suit:0x5a6a7a,acc:0xff8a2a,repair:1,lines:['Ton vaisseau a besoin d\'un coup de clé ? C\'est fait, offert par la maison.','J\'ai réparé ta coque et rechargé ton bouclier.','Évite les geysers, ils grillent les réacteurs.']},
-{r:'Mineuse',n:['Zara','Inès','Riko','Sol'],suit:0xc8643a,acc:0x2a2f36,lines:['Les filons qui brillent cachent les meilleurs minerais.','Tire sur un filon ou utilise ton outil de minage : touche FEU tout près.','Le laser de ton vaisseau mine deux fois plus vite.']},
-{r:'Garde',n:['Kessel','Brann','Vex','Orik'],suit:0x2d4a6e,acc:0xff3a3a,lines:['Des tourelles pirates rôdent dans le coin. Reste sur tes gardes.','Les tourelles rouges, c\'est les pirates. Détruis-les sans hésiter.','L\'avant-poste est sûr, tant que je suis là.']},
-{r:'Scientifique',n:['Ilo','Dr Vance','Ama','Theo'],suit:0xf0f4f8,acc:0x3fa8ff,lines:['Les artefacts dorés valent une fortune. Il y en a sûrement près des ruines.','Ce monde a une atmosphère fascinante… pense à ton casque.','Les cristaux d\'énergie alimentent tous nos boucliers.']}];
+const ROLES=[{r:'Marchande',k:'merchant',n:['Yara','Tess','Mila','Noor'],suit:0xd9a632,acc:0x6b3fa0,merchant:1,lines:['Bienvenue ! Minerais, cristaux, marchandises… je rachète tout.','Le titane se vend bien chez les industriels.','Approche, approche, mes prix sont les meilleurs de la planète !']},
+{r:'Mécanicien',k:'mechanic',n:['Bolt','Rivet','Gus','Kaï'],suit:0x5a6a7a,acc:0xff8a2a,repair:1,lines:['Ton vaisseau a besoin d\'un coup de clé ? C\'est fait, offert par la maison.','J\'ai réparé ta coque et rechargé ton bouclier.','Évite les geysers, ils grillent les réacteurs.']},
+{r:'Mineuse',k:'miner',n:['Zara','Inès','Riko','Sol'],suit:0xc8643a,acc:0x2a2f36,lines:['Les filons qui brillent cachent les meilleurs minerais.','Tire sur un filon ou utilise ton outil de minage : touche FEU tout près.','Le laser de ton vaisseau mine deux fois plus vite.']},
+{r:'Garde',k:'guard',n:['Kessel','Brann','Vex','Orik'],suit:0x2d4a6e,acc:0xff3a3a,lines:['Des tourelles pirates rôdent dans le coin. Reste sur tes gardes.','Les tourelles rouges, c\'est les pirates. Détruis-les sans hésiter.','L\'avant-poste est sûr, tant que je suis là.']},
+{r:'Scientifique',k:'scientist',n:['Ilo','Dr Vance','Ama','Theo'],suit:0xf0f4f8,acc:0x3fa8ff,lines:['Les artefacts dorés valent une fortune. Il y en a sûrement près des ruines.','Ce monde a une atmosphère fascinante… pense à ton casque.','Les cristaux d\'énergie alimentent tous nos boucliers.']},
+{r:'Voyageur extraterrestre',k:'alien',n:['Zorg','Kliik','Ühm','Xa-Lo'],suit:0x6fd08a,acc:0xb070ff,skin:0x6fd08a,robe:0x2a4a8a,glow:0xb070ff,lines:['Zorg vient d\'une étoile que tes cartes ne montrent pas. Bienvenue, petit humain.','Les monolithes chantent pour ceux qui savent écouter.','Vos vaisseaux sont si… bruyants. Charmant.']}];
 const gAt=(x,z)=>{let y=GR.h(x,z);if(GR.pad&&Math.hypot(x-GR.pad.x,z-GR.pad.z)<24)y=Math.max(y,GR.pad.y);return y};
-function mkNpc(role,x,z,rr,fixed){const R=ROLES[role],m=buildAstro(R.suit,R.acc,false);m.position.set(x,GR.h(x,z),z);GR.sc.add(m);const n={m,pos:m.position,role,R,name:R.n[rr()*R.n.length|0],home:new V3(x,0,z),tg:null,wait:rr()*3,ph:rr()*9,fixed,yaw:rr()*TAU,say:null,sayT:0,li:0};GR.npcs.push(n);return n}
+const SKINS=[0xf1c8a8,0xd9a07a,0xa86a48,0x6e4630,0xe8b896],HAIRS=[0x2a1810,0x5a3a20,0x101010,0xc89048,0x803020];
+function mkNpc(role,x,z,rr,fixed){const R=ROLES[role],m=buildHuman({role:R.k,suit:R.suit,acc:R.acc,skin:R.skin||SKINS[rr()*5|0],hair:HAIRS[rr()*5|0],helmet:R.k=='miner'||R.k=='guard',closed:R.k=='guard',visor:R.k=='guard'?0x502020:undefined,robe:R.robe,glow:R.glow});m.position.set(x,GR.h(x,z),z);GR.sc.add(m);const n={m,pos:m.position,role,R,name:R.n[rr()*R.n.length|0],home:new V3(x,0,z),tg:null,wait:rr()*3,ph:rr()*9,fixed,yaw:rr()*TAU,say:null,sayT:0,li:0};GR.npcs.push(n);return n}
 // ----- construction de l'avant-poste et des filons à l'arrivée sur une planète -----
 const MINS_BY={Volcanique:['or','fer'],Glacée:['cristal','titane'],Désertique:['titane','fer','or'],Cristalline:['cristal','cristal','titane'],Jungle:['fer','titane'],Océanique:['fer','titane','cristal']};
 SURF.onEnter=function(F,sc){const rr=rng(seedOf(F.p.x,F.p.y,F.p.z,31));GR={sc,h:F.h,F,npcs:[],deps:[],col:[],lights:[],op:null,st:null,lastLabel:''};FOOT.on=false;
@@ -61,7 +52,7 @@ const sg2=new THREE.Mesh(new THREE.PlaneGeometry(10,2.5),new THREE.MeshBasicMate
 const ECONS={Volcanique:'Minière',Désertique:'Minière',Jungle:'Agricole',Océanique:'Agricole',Cristalline:'High-tech',Glacée:'Industrielle'};
 GR.st={n:'Avant-poste '+F.p.name,ground:true,x:F.p.x+7,y:F.p.y,z:F.p.z,econ:ECONS[F.ty]||'Industrielle'};
 GR.merchant=mkNpc(0,ox+mx,oz+mz+1.9,rr,true);GR.merchant.yaw=0;
-const walk=[[20,-20],[-25,-14],[-30,10],[30,-10],[10,50],[-14,-46],[48,8],[0,40]];for(let i=1;i<=4;i++){const w=walk[(i*3)%walk.length];const n=mkNpc(i,ox+w[0],oz+w[1],rr,false);n.path=walk.map(q=>new V3(ox+q[0],0,oz+q[1]))}}
+const walk=[[20,-20],[-25,-14],[-30,10],[30,-10],[10,50],[-14,-46],[48,8],[0,40]];for(let i=1;i<=5;i++){const w=walk[(i*3)%walk.length];const n=mkNpc(i,ox+w[0],oz+w[1],rr,false);n.path=walk.map(q=>new V3(ox+q[0],0,oz+q[1]))}}
 // filons de minerai autour
 const mins=MINS_BY[F.ty]||['fer','titane'],cx=O?O.x:0,cz=O?O.z:0;for(let i=0;i<16;i++){let x=0,z=0,ok=false;for(let k=0;k<20&&!ok;k++){const a=rr()*TAU,d=(i<6?140:200)+rr()*(i<6?220:900);x=cx+Math.cos(a)*d;z=cz+Math.sin(a)*d;ok=F.h(x,z)>3&&Math.abs(x)<F.HALF*.85&&Math.abs(z)<F.HALF*.85}if(!ok)continue;mkDeposit(x,z,mins[rr()*mins.length|0],rr)}};
 function mkDeposit(x,z,min,rr){const y=GR.h(x,z),g=new THREE.Group();g.position.set(x,y,z);const c=MINC[min],rm=new THREE.MeshStandardMaterial({color:0x5a5650,roughness:.95,flatShading:true}),cm=new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:.55,metalness:.3,roughness:.2});
@@ -77,7 +68,7 @@ SURF.radar=blip=>{if(!GR)return;if(GR.op)blip(GR.op,'#ffc845',3.4,true);for(cons
 SURF.tick=function(dt,F){if(!GR)return;for(const L of GR.lights)L.s.visible=L.blink?Math.sin(t*3)>0:Math.sin(t*4+L.ph)>-.2;
 for(const D of GR.deps)D.g.children[D.g.children.length-1].scale.setScalar(8+Math.sin(t*3+D.pos.x)*1.5);
 const me=FOOT.on?FOOT.pos:S.pos;for(const n of GR.npcs){const near=n.pos.distanceTo(me)<7;if(!n.fixed&&!near){n.wait-=dt;if(n.wait<=0){if(!n.tg)n.tg=n.path[Math.random()*n.path.length|0].clone();const dx=n.tg.x-n.pos.x,dz=n.tg.z-n.pos.z,d=Math.hypot(dx,dz);if(d<1.5){n.tg=null;n.wait=2+Math.random()*4}else{const sp=2.2;n.pos.x+=dx/d*sp*dt;n.pos.z+=dz/d*sp*dt;n.yaw=Math.atan2(-dx,-dz);n.ph+=dt*sp*1.6}}}
-if(near){n.yaw=Math.atan2(-(me.x-n.pos.x),-(me.z-n.pos.z))}n.pos.y=gAt(n.pos.x,n.pos.z);n.m.rotation.y=lerp(n.m.rotation.y,n.yaw,damp(6,dt));animAstro(n.m,n.ph,!n.fixed&&!near&&n.wait<=0?2.2:0,false,false);if(n.sayT>0)n.sayT-=dt}
+if(near){n.yaw=Math.atan2(-(me.x-n.pos.x),-(me.z-n.pos.z))}n.pos.y=gAt(n.pos.x,n.pos.z);n.m.rotation.y=lerp(n.m.rotation.y,n.yaw,damp(6,dt));{let lk=null;if(near){lk=Math.atan2(-(me.x-n.pos.x),-(me.z-n.pos.z))-n.m.rotation.y;lk=Math.atan2(Math.sin(lk),Math.cos(lk))}animHuman(n.m,n.ph,!n.fixed&&!near&&n.wait<=0?2.2:0,false,false,n.sayT,lk)}if(n.sayT>0)n.sayT-=dt}
 // le vaisseau se pose sur la piste → services de station
 if(GR.pad&&!FOOT.on&&!S.ascent&&!S.dead){const P=GR.pad,dxz=Math.hypot(S.pos.x-P.x,S.pos.z-P.z);if(S.padLeave&&dxz>45)S.padLeave=0;
 if(!S.docked&&!S.padLeave&&dxz<22&&S.pos.y-P.y<18&&S.spd<70)groundDock(GR.st,false);
@@ -93,7 +84,7 @@ function canExit(){if(mode!='surf'||FOOT.on||S.dead||S.ascent||S.entry||!GR)retu
 function footEnter(){if(!canExit())return;const g=GR.h(S.pos.x,S.pos.z);if(g<0){toast('Impossible de sortir au-dessus du liquide — pose-toi sur la terre ferme');return}
 const P=GR.pad,onPad=P&&Math.hypot(S.pos.x-P.x,S.pos.z-P.z)<23;if(S.docked&&!S.docked.foot)S.docked=null;fwd();const yaw=Math.atan2(-_f.x,-_f.z);FOOT.sq.setFromEuler(new THREE.Euler(0,yaw,0));FOOT.sp.set(S.pos.x,(onPad?P.y:g)+4.4,S.pos.z);
 const side=new V3(Math.cos(yaw),0,-Math.sin(yaw));FOOT.pos.copy(FOOT.sp).addScaledVector(side,8);FOOT.pos.y=GR.h(FOOT.pos.x,FOOT.pos.z);if(onPad)FOOT.pos.y=Math.max(FOOT.pos.y,P.y);FOOT.vel.set(0,0,0);FOOT.vy=0;FOOT.yaw=yaw;FOOT.cy=yaw;FOOT.cp=.18;FOOT.fuel=1;
-if(!FOOT.model){FOOT.model=buildAstro(new THREE.Color().setHSL(((typeof MP!='undefined'?MP.hue:200))/360,.35,.75).getHex(),0xff8a2a,true)}if(FOOT.model.parent!==GR.sc)GR.sc.add(FOOT.model);FOOT.model.visible=true;
+if(!FOOT.model){FOOT.model=buildHuman({suit:new THREE.Color().setHSL(((typeof MP!='undefined'?MP.hue:200))/360,.3,.78).getHex(),acc:0xff8a2a,tool:true,skin:0xe0b090,closed:false})}if(FOOT.model.parent!==GR.sc)GR.sc.add(FOOT.model);FOOT.model.visible=true;
 FOOT.on=true;S.spd=0;S.vel.set(0,0,0);S.thr=0;clearWeapons();camInit=true;SFX.buy();tone(300,180,.25,'sine',.08);toast('🚶 Tu marches sur '+GR.F.p.name+' — '+(DESK?'ZQSD pour marcher, clic pour viser, E pour interagir':'joystick pour marcher, glisse à droite pour regarder'))}
 function footLeave(silent){if(!FOOT.on)return;FOOT.on=false;if(FOOT.model)FOOT.model.visible=false;hideBeam(FOOT.beam);if(S.docked&&S.docked.foot)S.docked=null;if(!silent){S.pos.copy(FOOT.sp);S.q.copy(FOOT.sq);S.vel.set(0,0,0);S.spd=0;camInit=true;SFX.buy();toast('🚀 À bord — prêt à décoller')}try{if(document.pointerLockElement)document.exitPointerLock()}catch(e){}}
 // ----- déplacement à pied -----
@@ -120,9 +111,10 @@ if(K.KeyF&&!FOOT.kf&&nearShip())footLeave();FOOT.kf=K.KeyF}
 const nearShip=()=>FOOT.on&&FOOT.pos.distanceTo(_g3.copy(FOOT.sp).setY(FOOT.pos.y))<11;
 function nearNpc(){if(!GR)return null;let b=null,bd=5.5;for(const n of GR.npcs){const d=n.pos.distanceTo(FOOT.pos);if(d<bd){bd=d;b=n}}return b}
 function nearDep(){if(!GR)return null;let b=null,bd=9;for(const D of GR.deps){const d=Math.hypot(D.pos.x-FOOT.pos.x,D.pos.z-FOOT.pos.z);if(d<bd){bd=d;b=D}}return b}
-function footPrompt(){if(nearShip())return'🚀 REMONTER À BORD';const n=nearNpc();if(n)return(n.R.merchant?'🛒 MARCHAND':'💬 PARLER')+' · '+n.name;const D=nearDep();if(D)return'⛏ MINER (maintiens '+(DESK?'le clic':'OUTIL')+')';return''}
-function footAction(){if(nearShip()){footLeave();return}const n=nearNpc();if(n){talk(n);return}}
-function talk(n){const L=n.R.lines;n.say=L[n.li++%L.length];n.sayT=4.5;SFX.tick();tone(520+n.role*60,640+n.role*60,.08,'triangle',.05);
+function nearInter(){if(!GR||!GR.inter)return null;let b=null,bd=1e9;for(const I of GR.inter){if(I.done)continue;const d=Math.hypot(I.pos.x-FOOT.pos.x,I.pos.z-FOOT.pos.z);if(d<I.r&&d<bd&&Math.abs(I.pos.y-FOOT.pos.y)<6){bd=d;b=I}}return b}
+function footPrompt(){if(nearShip())return'🚀 REMONTER À BORD';const n=nearNpc();if(n)return(n.R.merchant?'🛒 MARCHAND':n.quest?'❗ QUÊTE':'💬 PARLER')+' · '+n.name;const I=nearInter();if(I)return I.label();const D=nearDep();if(D)return'⛏ MINER (maintiens '+(DESK?'le clic':'OUTIL')+')';return''}
+function footAction(){if(nearShip()){footLeave();return}const n=nearNpc();if(n){talk(n);return}const I=nearInter();if(I){I.act();SFX.tick()}}
+function talk(n){if(n.quest){questTalk(n);return}const L=n.R.lines;n.say=L[n.li++%L.length];n.sayT=4.5;SFX.tick();tone(520+n.role*60,640+n.role*60,.08,'triangle',.05);
 if(n.R.merchant)groundDock(GR.st,true);if(n.R.repair){S.hp=maxhp();S.sh=PM('sh');SFX.win()}}
 // ----- outil : rayon de minage près d'un filon, sinon pistolet blaster -----
 function footTool(dt,TG){FOOT.tcd-=dt;const D=nearDep(),fire=isFire()&&!S.docked;const hand=FOOT.model.userData.tool;
@@ -130,7 +122,7 @@ if(fire&&D){const o=hand.getWorldPosition(_g1);if(!FOOT.beam)FOOT.beam=mkBeam(0x
 hideBeam(FOOT.beam);if(!fire||FOOT.tcd>0)return;FOOT.tcd=.24;const o=hand.getWorldPosition(_g1).clone();let dir=_g2.set(-Math.sin(FOOT.cy)*Math.cos(FOOT.cp*.6),Math.sin(-FOOT.cp*.6+.05),-Math.cos(FOOT.cy)*Math.cos(FOOT.cp*.6)).normalize().clone();
 let best=null,ba=.3;for(const T of TG){if(T.dead||T.isDep)continue;const v=_g3.copy(T.pos).sub(o),d=v.length();if(d>450)continue;const a=Math.acos(clamp(v.dot(dir)/d,-1,1));if(a<ba){ba=a;best=T}}if(best)dir=best.pos.clone().sub(o).normalize();
 const m=mkPB(0xff7a40);m.scale.setScalar(.45);m.position.copy(o);m.lookAt(o.clone().sub(dir));PB.push({m,p:m.position,v:dir.multiplyScalar(420),l:1.3,d:1.4,c:0xff7a40});muzzleFlash2(o);tone(jit(900),260,.08,'square',.03)}
-function muzzleFlash2(p){fxSprite(p,0xff9a50,1.6,.08,1.5)}
+function muzzleFlash2(p){fxGlow(p,0xff9a50,1.6,.08,1.5)}
 // ----- caméra à pied -----
 function footCam(dt){const P=FOOT.pos;if(COCKPIT){camera.position.set(P.x,P.y+1.72,P.z);camera.quaternion.setFromEuler(new THREE.Euler(-FOOT.cp*.8,FOOT.cy,0,'YXZ'))}
 else{const tg=_g1.set(P.x,P.y+1.6,P.z),fw=_g2.set(-Math.sin(FOOT.cy),0,-Math.cos(FOOT.cy)),dist=6.5,cp=FOOT.cp;const want=_g3.copy(tg).addScaledVector(fw,-dist*Math.cos(cp)).add(new V3(0,dist*Math.sin(cp)+.5,0)).addScaledVector(new V3(Math.cos(FOOT.cy),0,-Math.sin(FOOT.cy)),.9);
