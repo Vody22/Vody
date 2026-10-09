@@ -60,5 +60,5 @@ const _dnOv=overlay;overlay=function(){const keep=CLOUDC;if(mode=='surf'&&CLOUDC
 // rayons de soleil atténués la nuit
 if(typeof updGodRays=='function'){const _gr=updGodRays;updGodRays=function(){_gr();if(GRP&&mode=='surf')GRP.uniforms.str.value*=.1+.9*DN.day}}
 // heure locale dans le panneau d'infos
-const _dnCI=contentInfo;contentInfo=function(){const s=_dnCI();if(mode!='surf'||!GR||!GR.F||!GR.F.skyU)return s;const h=dnHour(),hh=Math.floor(h),mm=Math.floor((h-hh)*60),ic=DN.night>.5?'🌙':DN.set>.35?(h<12?'🌅':'🌇'):'☀️',lb=DN.night>.5?'Nuit':DN.set>.35?(h<12?'Lever du soleil':'Coucher du soleil'):'Jour';
+const _dnCI=contentInfo;contentInfo=function(){const s=_dnCI();if(mode!='surf'||!GR||!GR.F||!GR.F.skyU)return s;const h=dnHour(),hh=Math.floor(h),mm=Math.floor((h-hh)*60),ic=ICO(DN.night>.5?'moon':DN.set>.35?'dawn':'sun'),lb=DN.night>.5?'Nuit':DN.set>.35?(h<12?'Lever du soleil':'Coucher du soleil'):'Jour';
 return(s?s+'<br>':'')+`<span style="opacity:.85">${ic} ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} · ${lb}</span>`};

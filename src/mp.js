@@ -56,7 +56,7 @@ if(MP.panel&&Math.random()<.1)mpPanel()}
 function mpTargets(){if(!MP.room||!MP.pvp)return[];const r=[];for(const o of MP.others.values()){if(!o.pos||!o.pvp||o.dead)continue;if(!o.tgt)o.tgt={r:10,foe:1,max:1600,cone:.22,w:.8,isPlayer:1,hit:(d,pp)=>mpHit(o,d,pp)};o.tgt.pos=o.pos;r.push(o.tgt)}return r}
 // ----- surimpression : noms, radar -----
 function mpOverlay(){if(!MP.room)return;for(const o of MP.others.values()){if(!o.pos)continue;const s=proj(o.pos);const d=o.pos.distanceTo(S.pos),col=`hsl(${o.hue},80%,70%)`;
-if(s.front&&s.x>0&&s.x<innerWidth&&s.y>0&&s.y<innerHeight){OX.fillStyle=col;OX.font='700 12px system-ui';OX.textAlign='center';OX.fillText((o.pvp?'⚔ ':'')+mpName(o),s.x,s.y-26);OX.font='600 10px system-ui';OX.fillStyle='rgba(220,235,255,.8)';OX.fillText((d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m')+' · '+SHIPN[o.ship],s.x,s.y-13);
+if(s.front&&s.x>0&&s.x<innerWidth&&s.y>0&&s.y<innerHeight){OX.fillStyle=col;OX.font="700 12px 'Chakra Petch',system-ui";OX.textAlign='center';OX.fillText((o.pvp?'⚔ ':'')+mpName(o),s.x,s.y-26);OX.font="600 10px 'Chakra Petch',system-ui";OX.fillStyle='rgba(220,235,255,.8)';OX.fillText((d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m')+' · '+SHIPN[o.ship],s.x,s.y-13);
 OX.fillStyle='rgba(0,0,0,.5)';OX.fillRect(s.x-18,s.y-8,36,3);OX.fillStyle=o.hp<.3?'#f55':'#6f9';OX.fillRect(s.x-18,s.y-8,36*o.hp,3)}else if(d<8000)edgeMarker(o.pos,col,'','👤')}}
 function mpRadar(blip){if(!MP.room)return;for(const o of MP.others.values())if(o.pos)blip(o.pos,`hsl(${o.hue},85%,65%)`,3,true)}
 // ----- interface -----

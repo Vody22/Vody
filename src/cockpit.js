@@ -58,11 +58,11 @@ const ENN={pirate:'Pirate',chasseur:'Chasseur',lourd:'Croiseur lourd',boss:'Chef
 function ckDraw(){const S2=CK.scr;if(!S2)return;
 // central : vitesse, coque, bouclier, arme
 {const{x,w,h}=S2.c;x.fillStyle='#03101a';x.fillRect(0,0,w,h);x.strokeStyle='rgba(80,220,255,.5)';x.lineWidth=2;x.strokeRect(2,2,w-4,h-4);
-x.fillStyle='#7fdcff';x.font='700 12px system-ui';x.textAlign='left';x.fillText('VITESSE',12,20);x.font='800 38px system-ui';x.fillStyle='#e8fbff';x.fillText(Math.round(S.spd),12,58);x.font='700 12px system-ui';x.fillStyle='#7fdcff';x.fillText('m/s',12,74);
-const bar=(lab,v,c,y)=>{x.fillStyle='#8fb4c8';x.font='700 10px system-ui';x.fillText(lab,118,y);x.fillStyle='rgba(255,255,255,.1)';x.fillRect(118,y+4,124,8);x.fillStyle=c;x.fillRect(118,y+4,124*clamp(v,0,1),8)};
+x.fillStyle='#7fdcff';x.font="700 12px 'Chakra Petch',system-ui";x.textAlign='left';x.fillText('VITESSE',12,20);x.font="800 38px 'Chakra Petch',system-ui";x.fillStyle='#e8fbff';x.fillText(Math.round(S.spd),12,58);x.font="700 12px 'Chakra Petch',system-ui";x.fillStyle='#7fdcff';x.fillText('m/s',12,74);
+const bar=(lab,v,c,y)=>{x.fillStyle='#8fb4c8';x.font="700 10px 'Chakra Petch',system-ui";x.fillText(lab,118,y);x.fillStyle='rgba(255,255,255,.1)';x.fillRect(118,y+4,124,8);x.fillStyle=c;x.fillRect(118,y+4,124*clamp(v,0,1),8)};
 const mh=maxhp();bar('COQUE '+Math.max(0,Math.round(S.hp)),S.hp/mh,S.hp/mh<.3?'#ff5050':'#4dff8f',18);const ms=PM('sh');if(ms>0)bar('BOUCLIER '+Math.ceil(S.sh||0),(S.sh||0)/ms,'#5fa8ff',44);
 if(G.w.includes('laser'))bar('CHALEUR LASER',LZ.heat,LZ.over>0?'#ff4040':LZ.heat>.7?'#ffa040':'#60e8ff',ms>0?70:44);
-const W2=WPN[curW()];x.fillStyle='#ffd257';x.font='800 13px system-ui';x.fillText(W2.ic+' '+W2.n.toUpperCase()+(W2.am?'  '+G.ammo[W2.am]:''),12,h-14);x.textAlign='right';x.fillStyle=ZC[danger()];x.font='700 10px system-ui';x.fillText(mode=='surf'?'SURFACE':ZN[danger()].toUpperCase(),w-10,h-14);S2.c.tx.needsUpdate=true}
+const W2=WPN[curW()];x.fillStyle='#ffd257';x.font="800 13px 'Chakra Petch',system-ui";x.fillText(W2.ic+' '+W2.n.toUpperCase()+(W2.am?'  '+G.ammo[W2.am]:''),12,h-14);x.textAlign='right';x.fillStyle=ZC[danger()];x.font="700 10px 'Chakra Petch',system-ui";x.fillText(mode=='surf'?'SURFACE':ZN[danger()].toUpperCase(),w-10,h-14);S2.c.tx.needsUpdate=true}
 // gauche : radar vu de dessus
 {const{x,w,h}=S2.l,cx=w/2,cy=h/2+4,R=h/2-12,RG=2600;x.fillStyle='#03101a';x.fillRect(0,0,w,h);x.strokeStyle='rgba(80,220,255,.5)';x.lineWidth=2;x.strokeRect(2,2,w-4,h-4);
 x.strokeStyle='rgba(90,220,255,.35)';x.lineWidth=1;for(const k of[1,.5]){x.beginPath();x.arc(cx,cy,R*k,0,TAU);x.stroke()}x.beginPath();x.moveTo(cx-R,cy);x.lineTo(cx+R,cy);x.moveTo(cx,cy-R);x.lineTo(cx,cy+R);x.stroke();
@@ -70,15 +70,15 @@ const a=(t*2)%TAU;x.fillStyle='rgba(90,220,255,.18)';x.beginPath();x.moveTo(cx,c
 const inv=S.q.clone().invert(),bl=(p,c,s)=>{const v=_v.set(p.x-S.pos.x,p.y-S.pos.y,p.z-S.pos.z).applyQuaternion(inv);const d=Math.hypot(v.x,v.z);if(d>RG*1.2)return;const k=Math.min(1,d/RG)*R/(d||1);x.fillStyle=c;x.beginPath();x.arc(cx+v.x*k,cy+v.z*k,s,0,TAU);x.fill()};
 if(mode=='space'){for(const su of suns){const v=_v.set(su.x-S.pos.x,su.y-S.pos.y,su.z-S.pos.z).applyQuaternion(inv),d=Math.hypot(v.x,v.z)||1,k=Math.min(R-6,d/RG*R)/d;x.fillStyle='#ffd27a';starPath(x,cx+v.x*k,cy+v.z*k,6,2.5);x.fill()}for(const st of stations)bl(st,'#ffc845',3);for(const e of en)bl(e.pos,'#ff4a4a',2.6)}else{const I=SURF.info();for(const T of I.tur)bl(T.pos,'#ff4a4a',2.6);for(const c2 of I.crys)bl(c2.pos,'#5ff',1.6)}
 if(typeof MP!='undefined'&&MP.room)for(const o of MP.others.values())if(o.pos)bl(o.pos,`hsl(${o.hue},85%,65%)`,2.6);if(G.m&&G.m.tg&&G.m.tg.x!=null)bl(G.m.tg,'#5f9',3);
-x.fillStyle='#fff';x.beginPath();x.moveTo(cx,cy-5);x.lineTo(cx-4,cy+4);x.lineTo(cx+4,cy+4);x.fill();x.fillStyle='#7fdcff';x.font='700 10px system-ui';x.textAlign='left';x.fillText('RADAR',8,15);S2.l.tx.needsUpdate=true}
+x.fillStyle='#fff';x.beginPath();x.moveTo(cx,cy-5);x.lineTo(cx-4,cy+4);x.lineTo(cx+4,cy+4);x.fill();x.fillStyle='#7fdcff';x.font="700 10px 'Chakra Petch',system-ui";x.textAlign='left';x.fillText('RADAR',8,15);S2.l.tx.needsUpdate=true}
 // droite : cible verrouillée
 {const{x,w,h}=S2.r;x.fillStyle='#03101a';x.fillRect(0,0,w,h);x.strokeStyle=lock?'rgba(255,90,90,.7)':'rgba(80,220,255,.5)';x.lineWidth=2;x.strokeRect(2,2,w-4,h-4);x.textAlign='left';
-if(lock){const d=lock.pos.distanceTo(S.pos),e=en.find(q=>q===lock),nm=lock.isPlayer?'Pilote':lock.bossPart?'Némésis':e?ENN[e.ty]||'Pirate':'Tourelle';x.fillStyle='#ff7070';x.font='800 11px system-ui';x.fillText('◎ CIBLE VERROUILLÉE',8,18);
-x.fillStyle='#fff';x.font='800 17px system-ui';x.fillText(nm,8,44);x.fillStyle='#bcd';x.font='700 12px system-ui';x.fillText(d>=1000?(d/1000).toFixed(2)+' km':Math.round(d)+' m',8,64);
+if(lock){const d=lock.pos.distanceTo(S.pos),e=en.find(q=>q===lock),nm=lock.isPlayer?'Pilote':lock.bossPart?'Némésis':e?ENN[e.ty]||'Pirate':'Tourelle';x.fillStyle='#ff7070';x.font="800 11px 'Chakra Petch',system-ui";x.fillText('◎ CIBLE VERROUILLÉE',8,18);
+x.fillStyle='#fff';x.font="800 17px 'Chakra Petch',system-ui";x.fillText(nm,8,44);x.fillStyle='#bcd';x.font="700 12px 'Chakra Petch',system-ui";x.fillText(d>=1000?(d/1000).toFixed(2)+' km':Math.round(d)+' m',8,64);
 const f=e&&e.mhp?clamp(e.hp/e.mhp,0,1):lock.hp!=null&&lock.mhp?clamp(lock.hp/lock.mhp,0,1):null;if(f!=null){x.fillStyle='rgba(255,255,255,.1)';x.fillRect(8,76,w-16,9);x.fillStyle='#ff5a5a';x.fillRect(8,76,(w-16)*f,9)}
 const pulse=Math.sin(t*8)>0;if(pulse){x.strokeStyle='#ff5a5a';x.lineWidth=2;x.strokeRect(w-38,h-38,26,26)}}
-else{x.fillStyle='#7fdcff';x.font='800 11px system-ui';x.fillText('AUCUNE CIBLE',8,18);x.fillStyle='#8fb4c8';x.font='600 10px system-ui';x.fillText('Vise un ennemi pour',8,44);x.fillText('le verrouiller',8,58);
-x.fillStyle='#5f7d90';x.font='600 9px system-ui';x.fillText(`X ${Math.round(S.pos.x)}  Y ${Math.round(S.pos.y)}`,8,h-24);x.fillText(`Z ${Math.round(S.pos.z)}`,8,h-12)}S2.r.tx.needsUpdate=true}}
+else{x.fillStyle='#7fdcff';x.font="800 11px 'Chakra Petch',system-ui";x.fillText('AUCUNE CIBLE',8,18);x.fillStyle='#8fb4c8';x.font="600 10px 'Chakra Petch',system-ui";x.fillText('Vise un ennemi pour',8,44);x.fillText('le verrouiller',8,58);
+x.fillStyle='#5f7d90';x.font="600 9px 'Chakra Petch',system-ui";x.fillText(`X ${Math.round(S.pos.x)}  Y ${Math.round(S.pos.y)}`,8,h-24);x.fillText(`Z ${Math.round(S.pos.z)}`,8,h-12)}S2.r.tx.needsUpdate=true}}
 // ----- caméra : la tête du pilote bouge (accélérations, virages, vibrations), le cockpit reste fixé au vaisseau -----
 const _ck=new V3(),_ckq=new QT(),_cke=new THREE.Euler();Object.assign(CK,{hx:0,hy:0,hz:0,roll:0,ls:0});
 function ckCam(dt){const ud=ship.userData,b=ud.body,bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(2.4,dt));ship.updateMatrixWorld(true);
@@ -104,7 +104,7 @@ for(let k=0;k<3;k++){x.beginPath();x.arc(cx,cy,10+k*14+r()*8,r()*TAU,r()*TAU+2);
 function ckHUD(W,H){const fr=S.hp/maxhp();if(fr<.45){OX.save();OX.beginPath();OX.rect(0,0,W,H*(W<H?.75:.69));OX.clip();OX.globalAlpha=clamp((.45-fr)/.45,0,1)*.8;OX.drawImage(CRK,0,0,W,H);OX.restore()}
 const q=camera.quaternion,F=_ck.set(0,0,-1).applyQuaternion(q).clone(),R=new V3(1,0,0).applyQuaternion(q),U=new V3(0,1,0).applyQuaternion(q);
 const cx=W/2,cy=H/2,ppd=(H/2)/(camera.fov/2),pitch=Math.asin(clamp(F.y,-1,1))*180/Math.PI,roll=Math.atan2(R.y,U.y),col='rgba(110,255,190,.88)',S12=Math.max(10,Math.min(13,W/60));
-OX.save();OX.strokeStyle=col;OX.fillStyle=col;OX.lineWidth=1.4;OX.shadowColor='rgba(40,255,150,.9)';OX.shadowBlur=5;OX.font=`700 ${S12}px system-ui`;
+OX.save();OX.strokeStyle=col;OX.fillStyle=col;OX.lineWidth=1.4;OX.shadowColor='rgba(40,255,150,.9)';OX.shadowBlur=5;OX.font=`700 ${S12}px 'Chakra Petch',system-ui`;
 // échelle d'assiette (référence : plan de la galaxie)
 const bw=Math.min(W*.3,260),bh=Math.min(H*.42,300);OX.save();OX.beginPath();OX.rect(cx-bw/2,cy-bh/2,bw,bh);OX.clip();OX.translate(cx,cy);OX.rotate(roll);OX.textAlign='center';
 for(let a=-90;a<=90;a+=10){const y=(pitch-a)*ppd;if(Math.abs(y)>bh)continue;const hw=a==0?bw*.55:bw*.22,gp=bw*.07;if(a<0)OX.setLineDash([5,4]);OX.beginPath();OX.moveTo(-hw,y);OX.lineTo(-gp,y);OX.moveTo(gp,y);OX.lineTo(hw,y);if(a!=0){OX.moveTo(-hw,y);OX.lineTo(-hw,y+(a>0?6:-6));OX.moveTo(hw,y);OX.lineTo(hw,y+(a>0?6:-6))}OX.stroke();OX.setLineDash([]);if(a!=0){OX.fillText(Math.abs(a),-hw-14,y+4);OX.fillText(Math.abs(a),hw+14,y+4)}}OX.restore();
@@ -113,15 +113,15 @@ const hd=((Math.atan2(F.x,-F.z)*180/Math.PI)+360)%360,tw=Math.min(W*.42,340),ty=
 for(let d=Math.floor((hd-40)/5)*5;d<=hd+40;d+=5){const x=cx+(d-hd)*tw/80,big=d%30==0;OX.beginPath();OX.moveTo(x,ty);OX.lineTo(x,ty-(big?9:4));OX.stroke();if(big){const v=((d%360)+360)%360;OX.fillText(v==0?'N':v==90?'E':v==180?'S':v==270?'O':String(v/10).padStart(2,'0'),x,ty-12)}}OX.restore();
 OX.beginPath();OX.moveTo(cx,ty+2);OX.lineTo(cx-5,ty+9);OX.lineTo(cx+5,ty+9);OX.closePath();OX.fill();
 // vitesse (gauche) et accélération ressentie
-const lx=cx-bw/2-Math.min(70,W*.12),rx=cx+bw/2+Math.min(70,W*.12);OX.textAlign='center';OX.strokeRect(lx-30,cy-13,60,24);OX.font=`800 ${S12+3}px system-ui`;OX.fillText(Math.round(S.spd),lx,cy+5);OX.font=`700 ${S12-1}px system-ui`;OX.fillText('M/S',lx,cy+26);
+const lx=cx-bw/2-Math.min(70,W*.12),rx=cx+bw/2+Math.min(70,W*.12);OX.textAlign='center';OX.strokeRect(lx-30,cy-13,60,24);OX.font=`800 ${S12+3}px 'Chakra Petch',system-ui`;OX.fillText(Math.round(S.spd),lx,cy+5);OX.font=`700 ${S12-1}px 'Chakra Petch',system-ui`;OX.fillText('M/S',lx,cy+26);
 const gf=1+Math.abs(S.yawV||0)*S.spd*.012+Math.abs(S.pitchV||0)*S.spd*.01;OX.fillText('G '+gf.toFixed(1),lx,cy-22);const tb=clamp((S.thr||0)/2.6,0,1);OX.strokeRect(lx-40,cy-40,6,80);OX.fillRect(lx-40,cy+40-80*tb,6,80*tb);
 // droite : distance de la cible ou altitude
-let rv2='—',rl='CIBLE';if(lock)rv2=Math.round(lock.pos.distanceTo(S.pos))+'';else if(mode=='surf'){rl='ALT';rv2=Math.round(S.pos.y-SURF.height(S.pos.x,S.pos.z))+''}OX.strokeRect(rx-30,cy-13,60,24);OX.font=`800 ${S12+3}px system-ui`;OX.fillText(rv2,rx,cy+5);OX.font=`700 ${S12-1}px system-ui`;OX.fillText(rl,rx,cy+26);
+let rv2='—',rl='CIBLE';if(lock)rv2=Math.round(lock.pos.distanceTo(S.pos))+'';else if(mode=='surf'){rl='ALT';rv2=Math.round(S.pos.y-SURF.height(S.pos.x,S.pos.z))+''}OX.strokeRect(rx-30,cy-13,60,24);OX.font=`800 ${S12+3}px 'Chakra Petch',system-ui`;OX.fillText(rv2,rx,cy+5);OX.font=`700 ${S12-1}px 'Chakra Petch',system-ui`;OX.fillText(rl,rx,cy+26);
 // vecteur vitesse (où tu vas réellement)
 if(S.spd>5){const vp=proj(_ck.copy(S.pos).addScaledVector(S.vel,1/Math.max(1,S.spd)*600));if(vp.front){OX.beginPath();OX.arc(vp.x,vp.y,6,0,TAU);OX.moveTo(vp.x-6,vp.y);OX.lineTo(vp.x-15,vp.y);OX.moveTo(vp.x+6,vp.y);OX.lineTo(vp.x+15,vp.y);OX.moveTo(vp.x,vp.y-6);OX.lineTo(vp.x,vp.y-12);OX.stroke()}}
 // point de visée anticipée pour les canons
 if(lock&&lock.vel&&curW()=='canon'){const d=lock.pos.distanceTo(S.pos),lp=proj(_ck.copy(lock.pos).addScaledVector(lock.vel,d/950)),tp=proj(lock.pos);if(lp.front&&tp.front){OX.setLineDash([3,4]);OX.beginPath();OX.moveTo(tp.x,tp.y);OX.lineTo(lp.x,lp.y);OX.stroke();OX.setLineDash([]);OX.beginPath();OX.arc(lp.x,lp.y,8,0,TAU);OX.stroke();OX.fillRect(lp.x-1.5,lp.y-1.5,3,3)}}
 // alertes
 const warn=[];if(fr<.3)warn.push(['⚠ ALERTE COQUE','#ff5050']);if(PM('sh')>0&&(S.sh||0)<1)warn.push(['BOUCLIER HORS LIGNE','#ffb040']);if(LZ.over>0)warn.push(['SURCHAUFFE LASER','#ff8040']);if(isBoost()&&!S.docked)warn.push(['» BOOST «','#9fd8ff']);
-OX.font=`800 ${S12}px system-ui`;warn.forEach(([txt,c],i)=>{if(c!='#9fd8ff'&&Math.sin(t*8)<-.2)return;OX.fillStyle=c;OX.shadowColor=c;OX.fillText(txt,cx,cy-bh/2-12-i*17)});OX.restore()}
+OX.font=`800 ${S12}px 'Chakra Petch',system-ui`;warn.forEach(([txt,c],i)=>{if(c!='#9fd8ff'&&Math.sin(t*8)<-.2)return;OX.fillStyle=c;OX.shadowColor=c;OX.fillText(txt,cx,cy-bh/2-12-i*17)});OX.restore()}
 

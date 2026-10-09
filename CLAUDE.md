@@ -8,8 +8,9 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - `netlify.toml` : publication de la racine, pas de commande de build côté Netlify.
 
 ## Structure
-- `src/shell.html` : HTML/CSS/HUD, avec les marqueurs `%%THREE%%` et `%%GAME%%`.
-- `src/*.js` : modules concaténés dans cet ordre (voir `build.py`) : core, audio, gfx, models, world, game, surface, fx, ultra, detail, content, lasers, parts, cockpit, speed, sounds, visuals, chars, ground, story, explore, planet2, daynight, gfxplus, weather2, netroom, mp, hud. Tout est au niveau global (pas de modules ES).
+- `src/shell.html` : HTML/CSS/HUD, avec les marqueurs `%%FONTS%%`, `%%THREE%%` et `%%GAME%%`. Style « instruments de bord » : panneaux à coins coupés (clip-path), jauges segmentées (mask), jetons CSS dans `:root` (`--ice`, `--amber`, `--hf`…).
+- `src/fonts/` : police Chakra Petch (OFL) réduite au latin, intégrée en base64 par `build.py` (pas de chargement externe).
+- `src/*.js` : modules concaténés dans cet ordre (voir `build.py`) : core, audio, gfx, models, world, game, surface, fx, ultra, detail, content, lasers, parts, cockpit, speed, sounds, visuals, chars, ground, story, explore, planet2, daynight, gfxplus, weather2, netroom, mp, hud, ui. Tout est au niveau global (pas de modules ES).
 - `core.js` : `PARTS` (pièces de l'Atelier) et `PM(clé)` = multiplicateurs des pièces installées (coque, vitesse, cadence, bouclier…).
 - `parts.js` : visuels des pièces (enveloppe `buildShip(P, aLeLaser)`), onglet 🔧 Atelier, aperçu, achat. `lasers.js` : tirs lumineux, rayon laser (shader), éclairs/impacts, son du laser. `cockpit.js` : vue cockpit (touche V / bouton 👁), tableau de bord 3D posé devant la caméra, écrans dessinés sur canvas, viseur tête haute `ckHUD`, mouvements de tête. `speed.js` : poussière en traînées (sensation de vitesse), souffle et voile du boost. `sounds.js` : sons des armes par type de canon, rugissement du boost (`nzf` = bruit filtré ; ne pas nommer `nz`, déjà pris par la musique dans story.js). `visuals.js` : couronne solaire. `ground.js` : planètes — avant-poste (piste = station au sol), PNJ et marchand, filons de minerai, mode à pied (`FOOT`), caméra et commandes à pied.
 - `src/three-examples/` : post-process Three.js r128 (bloom…) incorporés tels quels.
@@ -27,6 +28,7 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - `daynight.js` : jour/nuit sur les planètes (`DN`, journée de 12 min réglée sur l'horloge réelle, `DN.force` pour forcer l'heure en test), ciel en shader avec étoiles, lune, phare/lampe frontale (SpotLight toujours présent pour éviter les recompilations), reflets d'environnement propres à la planète (`planetEnv`).
 - `gfxplus.js` : entrée atmosphérique (traînée, son, refroidissement à l'arrivée), vaisseaux (relief des panneaux `HULLN`, reflets sur mobile, fumée/étincelles/feu selon les dégâts), distorsion de chaleur (passe GRADE, PC), explosions (`bigBoom` : onde de choc, débris, lumières en réserve `poolLight` — ne jamais créer de PointLight à la volée), espace (nébuleuses, ceintures d'astéroïdes décoratives, trafic autour des stations), libération de la géométrie en quittant une planète.
 - `weather2.js` : tempêtes cycliques (`wxStorm`), éclairs et tonnerre, éclaboussures, voiles de sable/neige, tourbillons de poussière, brume des vallées, traces de pas, poussière du jetpack et du vaisseau en rase-mottes.
+- `ui.js` (dernier module) : icônes SVG maison (`ICONS`, sprite injecté dans la page), `ICO(nom)` pour les insérer dans du HTML, `actLabel()` (emoji + MAJUSCULES → icône + phrase), `btnSet(id,icône,libellé)` pour les boutons tactiles. Les toasts restent en texte (emojis).
 - Station au sol : objet `GR.st` avec `ground:true` (et `foot:true` quand on parle au marchand à pied → seuls Marché/Armes).
 
 ## Pièges connus
