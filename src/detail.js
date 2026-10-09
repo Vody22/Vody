@@ -10,13 +10,19 @@ float dH(vec2 p){return snoise(vec3(p*.09,1.3))*.6+snoise(vec3(p*.37,7.1))*.3+sn
 float camD=length(cameraPosition-vWP),near=1.-smoothstep(120.,900.,camD);vec3 wp=vWP;float slope=1.-clamp(vWN.y,0.,1.);
 float n1=snoise(wp*.012),n2=snoise(wp*.06),n3=snoise(wp*.31);
 vec3 dc=diffuseColor.rgb;
-if(ttype<.5){dc*=.85+.2*n1+.12*n2*near;float cr=smoothstep(.55,.72,snoise(wp*.045))*near;dc=mix(dc,vec3(.9,.25,.04),cr*.55*(1.-slope));}
+if(ttype<.5){dc*=.85+.2*n1+.12*n2*near;float cr=smoothstep(.55,.72,snoise(wp*.045));dc=mix(dc,vec3(.9,.25,.04),cr*.55*(1.-slope)*near);float vein=(1.-smoothstep(0.,.05,abs(snoise(wp*.03+vec3(0.,tm*.01,0.)))))*(1.-slope)*smoothstep(25.,2.,wp.y);totalEmissiveRadiance+=vec3(1.,.32,.05)*(cr*.5+vein)*(.7+.3*sin(tm*1.4+wp.x*.05))*1.3;}
 else if(ttype<1.5){float rip=sin(wp.x*.55+wp.z*.25+n2*3.)*.5+.5;dc*=.88+.14*n1+.1*rip*near*(1.-slope);}
 else if(ttype<3.5){float pch=smoothstep(-.2,.6,n1);dc*=.78+.3*pch+.14*n2*near;dc=mix(dc,dc*vec3(1.12,1.05,.75),smoothstep(.3,.8,n2)*.4*(1.-slope));}
 else if(ttype<4.5){dc*=.93+.07*n1+.05*n2*near;}
 else{dc*=.86+.18*n1+.1*n2*near;dc+=vec3(.25,.18,.4)*smoothstep(.75,.9,n3)*near*.6;}
 float strata=sin(wp.y*.32+n1*7.+n2*2.5)*.5+.5;dc=mix(dc,dc*(.86+.2*strata)*(.9+.2*n3),smoothstep(.35,.65,slope)*(ttype>3.5&&ttype<4.5?.4:1.));
-dc*=.94+.1*n3*near;diffuseColor.rgb=dc;`)
+float mac=snoise(wp*.0035);dc*=mix(vec3(1.),vec3(1.08,.97,.88),smoothstep(-.4,.7,mac)*.55);
+float rk=smoothstep(.3,.52,slope+n2*.06),crk=smoothstep(0.,.05,abs(snoise(wp*vec3(.08,.18,.08))));dc*=mix(1.,.45+.55*crk,rk*near*.85);
+float sn=0.;if(ttype>1.5&&ttype<3.5||ttype>4.5){sn=smoothstep(165.,205.,wp.y+n1*24.)*(1.-smoothstep(.32,.6,slope));dc=mix(dc,vec3(.9,.93,.98),sn);}
+if(ttype>.5&&ttype<4.){float wet=(1.-smoothstep(.4,3.2,wp.y))*step(-3.,wp.y);dc*=1.-wet*.38;}
+if(ttype>3.5&&ttype<4.5)sn=1.;float gl=pow(max(0.,snoise(wp*2.7+cameraPosition*.015)),16.)*near*sn;
+if(ttype>4.5)totalEmissiveRadiance+=vec3(.55,.3,1.)*smoothstep(.82,.95,n3)*near*.9;
+dc*=.94+.1*n3*near;diffuseColor.rgb=dc;totalEmissiveRadiance+=vec3(gl)*1.4;`)
 .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
 ${hq?`{float fade=1.-smoothstep(80.,700.,length(cameraPosition-vWP));if(fade>.01){float e=.6;vec2 p=vWP.xz;float h0=dH(p),hx=dH(p+vec2(e,0.)),hz=dH(p+vec2(0.,e));vec3 nW=normalize(vWN-vec3(hx-h0,0.,hz-h0)*(ttype>3.5&&ttype<4.5?1.2:2.4)*fade);normal=normalize((viewMatrix*vec4(nW,0.)).xyz);}}`:''}`)
 .replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
@@ -65,8 +71,9 @@ const m=new THREE.Points(g,new THREE.PointsMaterial({size:.9,map:GLOW,color:0xa8
 function updDust(){const D=DUST;D.m.visible=mode=='space';if(!D.m.visible)return;const c=camera.position,B=D.B,hb=B/2;for(let i=0;i<D.n;i++){for(let a=0;a<3;a++){const k=i*3+a,cc=a==0?c.x:a==1?c.y:c.z;let v=D.p[k];const d=v-cc;if(d>hb)v-=B*Math.ceil((d-hb)/B);else if(d<-hb)v+=B*Math.ceil((-hb-d)/B);D.p[k]=v}}D.g.attributes.position.needsUpdate=true}
 // ----- étalonnage « cinéma » (PC) -----
 let GRADE=null;
-function setupGrade(){if(!composer)return;GRADE=new THREE.ShaderPass({uniforms:{tDiffuse:{value:null},tm:{value:0},bst:{value:0},res:{value:new THREE.Vector2(innerWidth,innerHeight)}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-fragmentShader:`uniform sampler2D tDiffuse;uniform float tm,bst;uniform vec2 res;varying vec2 vUv;void main(){vec2 uv=vUv,d=uv-.5;float r2=dot(d,d);vec2 off=d*(.002+bst*.006)*r2*4.;vec3 c=vec3(texture2D(tDiffuse,uv+off).r,texture2D(tDiffuse,uv).g,texture2D(tDiffuse,uv-off).b);
+function setupGrade(){if(!composer)return;GRADE=new THREE.ShaderPass({uniforms:{tDiffuse:{value:null},tm:{value:0},bst:{value:0},res:{value:new THREE.Vector2(innerWidth,innerHeight)},hz0:{value:new V3()},hz1:{value:new V3()},hz2:{value:new V3()}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+fragmentShader:`uniform sampler2D tDiffuse;uniform float tm,bst;uniform vec2 res;uniform vec3 hz0,hz1,hz2;varying vec2 vUv;vec2 hzf(vec3 h,vec2 uv){vec2 dd=(uv-h.xy)*vec2(res.x/res.y,1.);float f=h.z*exp(-dot(dd,dd)*650.);return vec2(sin(uv.y*170.+tm*31.),cos(uv.x*150.+tm*27.))*f*.0024;}
+void main(){vec2 uv=vUv;uv+=hzf(hz0,vUv)+hzf(hz1,vUv)+hzf(hz2,vUv);vec2 d=uv-.5;float r2=dot(d,d);vec2 off=d*(.002+bst*.006)*r2*4.;vec3 c=vec3(texture2D(tDiffuse,uv+off).r,texture2D(tDiffuse,uv).g,texture2D(tDiffuse,uv-off).b);
 if(bst>.01){vec3 acc=c;float ws=1.;for(int i=1;i<7;i++){float k=float(i)/6.,w=1.-k*.55;acc+=texture2D(tDiffuse,uv-d*k*bst*.075*smoothstep(.02,.3,r2)).rgb*w;ws+=w;}c=acc/ws;}
 c=c*c*(3.-2.*c)*.18+c*.82;float l=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(l),c,1.12);c+=(1.-l)*vec3(-.006,.004,.018)+l*vec3(.018,.006,-.012);
 c*=1.-smoothstep(.18,.75,r2*1.5)*.32;float g=fract(sin(dot(uv*res+fract(tm*7.3)*91.,vec2(12.9898,78.233)))*43758.5453);c+=(g-.5)*.022;gl_FragColor=vec4(c,1.);}`});composer.addPass(GRADE)}

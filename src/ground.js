@@ -21,7 +21,7 @@ const SKINS=[0xf1c8a8,0xd9a07a,0xa86a48,0x6e4630,0xe8b896],HAIRS=[0x2a1810,0x5a3
 function mkNpc(role,x,z,rr,fixed){const R=ROLES[role],m=buildHuman({role:R.k,suit:R.suit,acc:R.acc,skin:R.skin||SKINS[rr()*5|0],hair:HAIRS[rr()*5|0],helmet:R.k=='miner'||R.k=='guard',closed:R.k=='guard',visor:R.k=='guard'?0x502020:undefined,robe:R.robe,glow:R.glow});m.position.set(x,GR.h(x,z),z);GR.sc.add(m);const n={m,pos:m.position,role,R,name:R.n[rr()*R.n.length|0],home:new V3(x,0,z),tg:null,wait:rr()*3,ph:rr()*9,fixed,yaw:rr()*TAU,say:null,sayT:0,li:0};GR.npcs.push(n);return n}
 // ----- construction de l'avant-poste et des filons à l'arrivée sur une planète -----
 const MINS_BY={Volcanique:['or','fer'],Glacée:['cristal','titane'],Désertique:['titane','fer','or'],Cristalline:['cristal','cristal','titane'],Jungle:['fer','titane'],Océanique:['fer','titane','cristal']};
-SURF.onEnter=function(F,sc){const rr=rng(seedOf(F.p.x,F.p.y,F.p.z,31));GR={sc,h:F.h,F,npcs:[],deps:[],col:[],lights:[],op:null,st:null,lastLabel:''};FOOT.on=false;
+SURF.onEnter=function(F,sc){const rr=rng(seedOf(F.p.x,F.p.y,F.p.z,31));GR={sc,h:F.h,F,npcs:[],deps:[],col:[],lights:[],lamps:[],op:null,st:null,lastLabel:''};FOOT.on=false;
 const O=F.op;if(O){const ox=O.x,oz=O.z,oy=F.h(ox,oz);GR.op={x:ox,y:oy,z:oz};const metal=new THREE.MeshStandardMaterial({color:0x8a939e,metalness:.7,roughness:.35}),dark=new THREE.MeshStandardMaterial({color:0x3a414a,metalness:.6,roughness:.5}),white=new THREE.MeshStandardMaterial({color:0xdfe5ea,metalness:.3,roughness:.45}),
 win=new THREE.MeshStandardMaterial({color:0xb8c2d0,metalness:.5,roughness:.3,emissive:0xffffff,emissiveMap:WINT,emissiveIntensity:.9,map:WINT}),orange=new THREE.MeshStandardMaterial({color:0xff8a2a,metalness:.3,roughness:.5});
 const add=(geo,m,x,y,z,ry=0)=>{const o=new THREE.Mesh(geo,m);o.position.set(ox+x,oy+y,oz+z);o.rotation.y=ry;o.castShadow=o.receiveShadow=DESK;sc.add(o);return o},col=(x,z,r)=>GR.col.push({x:ox+x,z:oz+z,r});
@@ -41,7 +41,7 @@ for(const[x,z]of[[-8,-58],[2,-62],[12,-58]]){add(new THREE.CylinderGeometry(3,3,
 add(new THREE.CylinderGeometry(.6,.9,14,8),metal,66,7,40);{const dsh=add(new THREE.SphereGeometry(7,20,10,0,TAU,0,Math.PI*.32),white,66,15,40);dsh.rotation.x=-.9;dsh.material=white}col(66,40,2);
 for(let i=0;i<4;i++){add(new THREE.BoxGeometry(9,.3,5),new THREE.MeshStandardMaterial({map:SOLT,color:0xffffff,metalness:.5,roughness:.25,emissive:0x0a1a40}),-80+i*10,3.4,-6).rotation.x=-.5;add(new THREE.CylinderGeometry(.25,.25,3.4,6),metal,-80+i*10,1.7,-6)}
 // lampadaires
-for(let i=0;i<8;i++){const a=i/8*TAU+.2,x=Math.cos(a)*84,z=Math.sin(a)*84;add(new THREE.CylinderGeometry(.25,.35,8,6),metal,x,4,z);const l=sprite(0xffe2a0,6);l.position.set(ox+x,oy+8.4,oz+z);sc.add(l)}
+for(let i=0;i<8;i++){const a=i/8*TAU+.2,x=Math.cos(a)*84,z=Math.sin(a)*84;add(new THREE.CylinderGeometry(.25,.35,8,6),metal,x,4,z);const l=sprite(0xffe2a0,6);l.position.set(ox+x,oy+8.4,oz+z);sc.add(l);GR.lamps.push(l)}
 // échoppe du marchand
 const mx=36,mz=30;add(new THREE.BoxGeometry(8,1.2,2.4),dark,mx,.6,mz);add(new THREE.BoxGeometry(8.4,.16,2.8),metal,mx,1.25,mz);for(const s of[-1,1])add(new THREE.CylinderGeometry(.12,.12,4,6),metal,mx+s*3.9,2,mz-1.2);
 const aw=add(new THREE.BoxGeometry(9,.16,4.4),new THREE.MeshStandardMaterial({color:0x6b3fa0,roughness:.6}),mx,4.1,mz+.4);aw.rotation.x=-.18;
