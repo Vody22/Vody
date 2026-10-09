@@ -15,13 +15,13 @@ const NA=['Kor','Vel','Zan','Thy','Ark','Nyx','Omi','Sol','Ria','Bel'],SU=['ia',
 const TM={value:0};
 // ===== ÉTAT =====
 const S={pos:new V3(0,30,900),vel:new V3(),q:new QT(),hp:100,ore:0,thr:0,spd:0,bank:0,pitchV:0,docked:null,heatT:-9};
-const G={cr:0,u:[1,1,1],disc:new Set(),kills:0,m:null,done:0,loot:{},ship:'eclaireur',owned:['eclaireur'],w:['canon'],wi:0,ammo:{missile:0,mine:0},cargo:{},story:null,time:0,vst:[{n:'Base Alpha',x:0,y:0,z:0}],dpos:{},parts:{},pown:[]};
+const G={cr:1500,xp:0,rep:{alliance:0,guilde:0,carto:0},bp:[],stash:{},bases:{},u:[1,1,1],disc:new Set(),kills:0,m:null,done:0,loot:{},ship:'eclaireur',owned:['eclaireur'],w:['canon'],wi:0,ammo:{missile:0,mine:0},cargo:{},story:null,time:0,vst:[{n:'Base Alpha',x:0,y:0,z:0}],dpos:{},parts:{},pown:[]};
 let t=0,mode='space',hint=10,DT=.016;
 const HULLS={eclaireur:{n:'Éclaireur',hp:1,spd:1,turn:1,cap:15,dmg:1,price:0,desc:'Polyvalent et fiable, ton premier vaisseau.'},
-intercepteur:{n:'Intercepteur Vif',hp:.8,spd:1.3,turn:1.4,cap:10,dmg:1,price:1200,desc:'Le plus rapide et le plus agile du secteur.'},
-cargo:{n:'Cargo Mule',hp:1.4,spd:.85,turn:.75,cap:45,dmg:.8,price:1500,desc:'Soute énorme : le roi du commerce.'},
-faucon:{n:'Chasseur Faucon',hp:1.6,spd:.95,turn:.95,cap:20,dmg:1.5,price:3200,desc:'Blindé et lourdement armé.'},
-leviathan:{n:'Croiseur Léviathan',hp:2.5,spd:.8,turn:.7,cap:35,dmg:2.1,price:7500,desc:'Une forteresse volante.'}};
+intercepteur:{n:'Intercepteur Vif',hp:.8,spd:1.3,turn:1.4,cap:10,dmg:1,price:9000,lv:3,desc:'Le plus rapide et le plus agile du secteur.'},
+cargo:{n:'Cargo Mule',hp:1.4,spd:.85,turn:.75,cap:45,dmg:.8,price:12000,lv:3,desc:'Soute énorme : le roi du commerce.'},
+faucon:{n:'Chasseur Faucon',hp:1.6,spd:.95,turn:.95,cap:20,dmg:1.5,price:28000,lv:7,rep:['alliance',2],desc:'Blindé et lourdement armé.'},
+leviathan:{n:'Croiseur Léviathan',hp:2.5,spd:.8,turn:.7,cap:35,dmg:2.1,price:75000,lv:12,rep:['alliance',3],desc:'Une forteresse volante.'}};
 const HS=()=>HULLS[G.ship]||HULLS.eclaireur;
 // ----- pièces de vaisseau (Atelier) -----
 const PARTS={
@@ -47,12 +47,12 @@ const ZN=['Zone sûre','Zone frontière','Zone hostile','Zone dangereuse','Zone 
 const danger=()=>Math.min(4,Math.floor(S.pos.length()/9000));
 
 // ===== SAUVEGARDE =====
-// argent illimité pour tout le monde (mettre false pour revenir à l'économie normale)
-const ARGENT_ILLIMITE=true,CR_INF=999999999;
+// économie réelle (true = crédits infinis pour tout le monde)
+const ARGENT_ILLIMITE=false,CR_INF=999999999;let SELLK=1,TRAVK=1,GQL=0;try{GQL=clamp(+localStorage.getItem('sf-gq')||0,0,2)}catch(e){}
 const SK='starfarer3d-v1';
-function save(){try{localStorage.setItem(SK,JSON.stringify({cr:G.cr,u:G.u,disc:[...G.disc],kills:G.kills,done:G.done,loot:G.loot,ore:S.ore,p:S.pos.toArray(),q:S.q.toArray(),ship:G.ship,owned:G.owned,w:G.w,wi:G.wi,ammo:G.ammo,cargo:G.cargo,story:G.story,time:G.time,vst:G.vst,dpos:G.dpos,parts:G.parts,pown:G.pown,pexp:G.pexp,pq:G.pq}))}catch(e){}}
+function save(){try{localStorage.setItem(SK,JSON.stringify({cr:G.cr,u:G.u,disc:[...G.disc],kills:G.kills,done:G.done,loot:G.loot,ore:S.ore,p:S.pos.toArray(),q:S.q.toArray(),ship:G.ship,owned:G.owned,w:G.w,wi:G.wi,ammo:G.ammo,cargo:G.cargo,story:G.story,time:G.time,vst:G.vst,dpos:G.dpos,parts:G.parts,pown:G.pown,pexp:G.pexp,pq:G.pq,xp:G.xp,rep:G.rep,bp:G.bp,stash:G.stash,bases:G.bases,stats:G.stats,eco:2}))}catch(e){}}
 function load(){try{let d=JSON.parse(localStorage.getItem(SK)||'null');if(!d){const o=JSON.parse(localStorage.getItem('starfarer-save-v1')||'null');if(o){G.cr=o.cr|0;G.u=o.u||[1,1,1];G.kills=o.kills|0;G.done=o.done|0;return 'old'}return false}
-G.cr=d.cr|0;G.u=d.u;G.disc=new Set(d.disc);G.kills=d.kills|0;G.done=d.done|0;G.loot=d.loot||{};S.ore=d.ore|0;S.pos.fromArray(d.p);S.q.fromArray(d.q);for(const k of['ship','owned','w','wi','ammo','cargo','story','time','vst','dpos','parts','pown','pexp','pq'])if(d[k]!=null)G[k]=d[k];if(typeof G.parts!='object'||!G.parts)G.parts={};for(const k in G.parts)if(!PARTS[k]||!PARTS[k].o[G.parts[k]])delete G.parts[k];if(!Array.isArray(G.pown))G.pown=[];S.hp=maxhp();return true}catch(e){return false}}
+G.cr=d.cr|0;G.u=d.u;G.disc=new Set(d.disc);G.kills=d.kills|0;G.done=d.done|0;G.loot=d.loot||{};S.ore=d.ore|0;S.pos.fromArray(d.p);S.q.fromArray(d.q);for(const k of['ship','owned','w','wi','ammo','cargo','story','time','vst','dpos','parts','pown','pexp','pq','xp','rep','bp','stash','bases','stats'])if(d[k]!=null)G[k]=d[k];if(!d.eco&&!ARGENT_ILLIMITE){if(G.cr>=CR_INF||G.cr>200000)G.cr=2500;G.ecoReset=1}if(typeof G.rep!='object'||!G.rep)G.rep={};for(const f of['alliance','guilde','carto'])G.rep[f]=+G.rep[f]||0;if(!Array.isArray(G.bp))G.bp=[];if(typeof G.stash!='object'||!G.stash)G.stash={};if(typeof G.bases!='object'||!G.bases)G.bases={};G.xp=+G.xp||0;if(typeof G.parts!='object'||!G.parts)G.parts={};for(const k in G.parts)if(!PARTS[k]||!PARTS[k].o[G.parts[k]])delete G.parts[k];if(!Array.isArray(G.pown))G.pown=[];S.hp=maxhp();return true}catch(e){return false}}
 setInterval(()=>{if(mode=='space'&&!S.dead)save()},5000);addEventListener('visibilitychange',()=>{if(document.hidden)save()});addEventListener('pagehide',save);
 
 // ===== COMMANDES =====

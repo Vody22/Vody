@@ -28,7 +28,7 @@ function mpRemove(peer){const o=MP.others.get(peer);if(!o)return;if(o.mesh&&o.me
 // ----- envoi -----
 function mpSend(force){if(!MP.room)return;if(!force&&t-MP.sendT<.1)return;MP.sendT=t;const I=mode=='surf'?SURF.info():null;
 const pr={nick:MP.nick||null,hue:MP.hue,sh:G.ship,u:G.u,m:mode,pl:I?I.name:null,p:[r1(S.pos.x),r1(S.pos.y),r1(S.pos.z)],q:[r3(S.q.x),r3(S.q.y),r3(S.q.z),r3(S.q.w)],v:[r1(S.vel.x),r1(S.vel.y),r1(S.vel.z)],th:r1(S.thr||0),hp:r3(clamp(S.hp/maxhp(),0,1)),dead:S.dead?1:0,pvp:MP.pvp?1:0,pk:MP.pk,k:G.kills,lz:LZ.on?1:0,pt:partsCode(G.parts),lw:G.w.includes('laser')?1:0,ft:FOOT.on?1:0,
-sh2:MP.shots.slice(-6),hits:MP.hits.slice(-6),chat:MP.chat,ds:MP.ds,kb:MP.kb};MP.room.presence(pr).catch(()=>{})}
+sh2:MP.shots.slice(-6),hits:MP.hits.slice(-6),chat:MP.chat,ds:MP.ds,kb:MP.kb,...(typeof mpExtraOut=='function'?mpExtraOut():{})};MP.room.presence(pr).catch(()=>{})}
 function mpShot(p,d,w){if(!MP.room)return;MP.shots.push({i:++MP.shotN,p:[r1(p.x),r1(p.y),r1(p.z)],d:[r3(d.x),r3(d.y),r3(d.z)],w:w||'c',g:G.parts.guns||'std'});if(MP.shots.length>6)MP.shots.shift()}
 function mpHit(o,d,pp){MP.hits.push({i:++MP.hitN,to:o.peer,d:Math.round(d*10)/10});if(MP.hits.length>6)MP.hits.shift();boom3(pp,8,0xffaa66,40);SFX.tick();mpSend(true)}
 function mpDied(){MP.ds++;MP.kb=(MP.lastAtk&&t-MP.lastAtkT<6)?MP.lastAtk:null;mpSend(true)}

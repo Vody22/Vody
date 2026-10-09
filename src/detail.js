@@ -36,7 +36,7 @@ const q2=[[-w*.8,0,0],[w*.8,0,0],[0,.75,-bend]].map(([x,y,z])=>[x*c-z*s+.15,y,x*
 const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));return g}
 const BLADE=bladeGeo();
 function initGrass(sc,h,ty,hu){GRASS=null;if(!(ty=='Jungle'||ty=='Océanique'||ty=='Désertique'||ty=='Cristalline'))return;
-const step=DESK?3.6:6.5,R=DESK?170:110,n=Math.ceil(Math.PI*(R/step)**2*1.05);
+const step=DESK?3.6:6.5*(GQL>=2?1.5:GQL==1?1.2:1),R=DESK?170:110,n=Math.ceil(Math.PI*(R/step)**2*1.05);
 const mat=new THREE.MeshStandardMaterial({roughness:.9,side:THREE.DoubleSide,vertexColors:false});
 mat.onBeforeCompile=sh=>{sh.uniforms.tm=TM;sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float tm;').replace('#include <begin_vertex>',`#include <begin_vertex>
 #ifdef USE_INSTANCING

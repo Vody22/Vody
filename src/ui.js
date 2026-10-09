@@ -52,7 +52,8 @@ scan:'<path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4M8 12h8"/>',
 terminal:'<rect x="3" y="4.5" width="18" height="13" rx="1"/><path d="M7 9l3 2.5L7 14M12 14h5M9 20.5h6"/>',
 leaf:'<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19l8-8"/>',
 weather:'<path d="M7 17.5h10a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 17.5z"/>',
-pad:'<path d="M3 15l9 4 9-4-9-4z"/><path d="M12 11V4M9 6.5l3-2.5 3 2.5"/>'};
+pad:'<path d="M3 15l9 4 9-4-9-4z"/><path d="M12 11V4M9 6.5l3-2.5 3 2.5"/>',
+user:'<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>'};
 document.body.insertAdjacentHTML('afterbegin','<svg width="0" height="0" style="position:absolute" aria-hidden="true">'+Object.entries(ICONS).map(([k,v])=>`<symbol id="i-${k}" viewBox="0 0 24 24">${v}</symbol>`).join('')+'</svg>');
 const ICO=(n,c)=>`<svg class="i${c?' '+c:''}"><use href="#i-${n}"/></svg>`;
 // remplace l'emoji d'en-tête d'un libellé par une icône, et met le texte en minuscules (« 📦 OUVRIR LA CAISSE » → [caisse] Ouvrir la caisse)
@@ -61,18 +62,14 @@ function actLabel(s){if(!s)return s;const kb=s.indexOf(' <kbd>'),tail=kb>=0?s.sl
 if(!icon){const m=body.match(/^(\S+)\s+(.*)$/);if(m&&!/[A-Za-zÀ-ÿ0-9]/.test(m[1])){icon=m[1]+' ';body=m[2]}}const parts=body.split(' · ');if(parts[0]===parts[0].toUpperCase()){const l=parts[0].toLowerCase();parts[0]=l.charAt(0).toUpperCase()+l.slice(1)}return icon+parts.join(' · ')+tail}
 // boutons d'action : icône + libellé
 function btnSet(id,ic,lb){const b=$(id);if(!b)return;const k=ic+'|'+lb;if(b.dataset.k===k)return;b.dataset.k=k;b.innerHTML=ICO(ic)+'<span>'+lb+'</span>'}
-// son
-{const _s=$('snd').onclick;const sndIc=()=>{$('snd').innerHTML=ICO(muted?'mute':'snd');$('snd').classList.toggle('on',muted)};$('snd').onclick=()=>{_s();sndIc()};sndIc()}
 // vue cockpit
 ckBtn=function(){const b=$('cockb');b.classList.toggle('on',COCKPIT);b.innerHTML=ICO(COCKPIT?'extcam':'cockpit');b.title=COCKPIT?'Vue extérieure (V)':'Vue cockpit (V)'};ckBtn();
 // multijoueur
 mpUI=function(){const b=$('mpb');b.style.display=MP.room?'flex':'none';const n=MP.others.size;const h=ICO('mp')+(n?`<i>${n}</i>`:'');if(b.dataset.h!==h){b.dataset.h=h;b.innerHTML=h}b.classList.toggle('off',!MP.on);if(MP.panel)mpPanel()};mpUI();
-// qualité graphique (PC)
-if(DESK){const _cq=cycleQuality;cycleQuality=function(){_cq();setH('qbtn',ICO('gear')+QN[QI])};setH('qbtn',ICO('gear')+QN[QI]);$('qbtn').onclick=cycleQuality;$('qbtn').title='Qualité graphique (G)'}
 // armes
 const WSVG={canon:'canon',missile:'missile',laser:'laser',mine:'mine'};
 wpnHUD=function(){const w=curW(),W=WPN[w];let s=`${ICO(WSVG[w]||'canon')} ${W.n}`;if(W.am)s+=` · <b>${G.ammo[W.am]}</b>`;if(w=='laser')s+=` <span class="heat"><i style="width:${(LZ.heat*100).toFixed(0)}%;background:${LZ.over>0?'#f44':LZ.heat>.7?'#fa4':'#6ef'}"></i></span>`;return s};
 // onglets de la boutique
-{const L={station:['station','Station'],ships:['ship','Vaisseaux'],weap:['canon','Armes'],market:['cargo','Marché'],atelier:['wrench','Atelier']};for(const tb of TABS)if(L[tb[0]])tb[1]=ICO(L[tb[0]][0])+L[tb[0]][1];$('tabs').innerHTML=TABS.map(([k,n])=>`<button data-tab="${k}">${n}</button>`).join('')}
+{const L={station:['station','Station'],ships:['ship','Vaisseaux'],weap:['canon','Armes'],market:['coin','Marché'],atelier:['wrench','Atelier'],craft:['tool','Fabrication'],stash:['cargo','Entrepôt']};for(const tb of TABS)if(L[tb[0]])tb[1]=ICO(L[tb[0]][0])+'<span class="tl">'+L[tb[0]][1]+'</span>';$('tabs').innerHTML=TABS.map(([k,n])=>`<button data-tab="${k}">${n}</button>`).join('')}
 // boutons tactiles (vol / à pied)
 btnSet('fire','fire','Feu');btnSet('boost','boost','Boost');btnSet('brake','brake','Frein');

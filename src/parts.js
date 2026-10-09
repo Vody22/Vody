@@ -93,7 +93,7 @@ if(s=='focus'&&!G.w.includes('laser'))h+=`<div class="hint">Ces pièces amélior
 if(s=='shield')h+=`<div class="hint">Le bouclier encaisse les tirs avant la coque et se recharge après 3 s sans dégâts.</div>`;
 h+=Object.entries(SL.o).map(([id,o])=>{const own=ownPart(s,id),eq=cur==id,pv=PREV&&PREV.s==s&&PREV.id==id;
 const sw=o.c?`<i class="sw">${o.c.map(c=>`<em style="background:#${c.toString(16).padStart(6,'0')}"></em>`).join('')}</i>`:'';
-return `<div class="srow arow${pv?' pv':''}${eq?' eq':''}" data-aprev="${s}:${id}"><div>${sw}<b>${o.n}</b>${eq?' <i class="tag">installé</i>':pv?' <i class="tag pvt">aperçu</i>':''}<small>${o.d||''}</small></div><span>${eq?'✓':own?`<button data-act="pbuy:${s}:${id}">Installer</button>`:`<button data-act="pbuy:${s}:${id}" ${G.cr<o.p?'class="dim"':''}>${o.p} ¢</button>`}</span></div>`}).join('');
+return `<div class="srow arow${pv?' pv':''}${eq?' eq':''}" data-aprev="${s}:${id}"><div>${sw}<b>${o.n}</b>${eq?' <i class="tag">installé</i>':pv?' <i class="tag pvt">aperçu</i>':''}<small>${o.d||''}</small></div><span>${eq?'✓':own?`<button data-act="pbuy:${s}:${id}">Installer</button>`:o.craft?`<button data-act="tab:craft" class="dim">Fabrication</button>`:`<button data-act="pbuy:${s}:${id}" ${G.cr<o.p?'class="dim"':''}>${o.p.toLocaleString('fr-FR')} ¢</button>`}</span></div>`}).join('');
 return h+`<div class="hint">Touche une pièce pour la voir sur ton vaisseau</div>`};
 $('shop').addEventListener('click',e=>{const b=e.target.closest('button');
 if(b){if(b.dataset.aslot){ASLOT=b.dataset.aslot;HC.shopV=null;SFX.tick();return}const a=b.dataset.act||'';if(a.startsWith('pbuy:')){const[,s,id]=a.split(':');buyPart(s,id);HC.shopV=null}return}

@@ -1,0 +1,9 @@
+{
+  "name": "starvody",
+  "private": true,
+  "description": "Starfarer 3D — fonction de sauvegarde cloud (Netlify)",
+  "type": "module",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}

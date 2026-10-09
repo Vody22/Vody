@@ -19,8 +19,8 @@ function buyShip(id){const H=HULLS[id];if(G.owned.includes(id)){if(G.ship!=id){G
 if(G.cr<H.price){toast('Pas assez de crédits');return}if(cargoUsed()>HULLS[id].cap+10*(G.u[2]-1)*HULLS[id].cap/15){toast('Vide ta soute avant de changer de vaisseau');return}
 G.cr-=H.price;G.owned.push(id);G.ship=id;S.hp=maxhp();rebuildShip();toast('Nouveau vaisseau : '+H.n+' !');SFX.win();save()}
 // ----- armes -----
-const WPN={canon:{n:'Canon',ic:'⚔',price:0,d:'Tir rapide, munitions infinies.'},missile:{n:'Missiles',ic:'🚀',price:800,am:'missile',d:'Tête chercheuse, gros dégâts de zone.'},laser:{n:'Laser',ic:'🔆',price:1600,d:'Rayon continu. Attention à la surchauffe.'},mine:{n:'Mines',ic:'💣',price:600,am:'mine',d:'Larguées derrière toi, explosent au contact.'}};
-const AMMO={missile:{n:'10 missiles',q:10,price:150},mine:{n:'5 mines',q:5,price:100}};
+const WPN={canon:{n:'Canon',ic:'⚔',price:0,d:'Tir rapide, munitions infinies.'},missile:{n:'Missiles',ic:'🚀',price:5500,lv:2,am:'missile',d:'Tête chercheuse, gros dégâts de zone.'},laser:{n:'Laser',ic:'🔆',price:12000,lv:5,d:'Rayon continu. Attention à la surchauffe.'},mine:{n:'Mines',ic:'💣',price:3500,lv:2,am:'mine',d:'Larguées derrière toi, explosent au contact.'}};
+const AMMO={missile:{n:'10 missiles',q:10,price:650},mine:{n:'5 mines',q:5,price:420}};
 const curW=()=>G.w[G.wi%G.w.length]||'canon';
 function cycleW(dir=1){if(G.w.length<2)return;G.wi=(G.wi+dir+G.w.length)%G.w.length;toast(WPN[curW()].ic+' '+WPN[curW()].n);SFX.tick()}
 const dmgMul=()=>G.u[0]*HS().dmg*PM('dmg');
@@ -57,7 +57,7 @@ const GOODS=[{id:'food',n:'Nourriture',ic:'🌾',p:22},{id:'water',n:'Eau pure',
 const ECON={Agricole:{food:.5,water:.65,fuel:1.15,metal:1.2,med:1.25,elec:1.35,lux:1.3,fer:1.1,titane:1.05},Minière:{food:1.35,water:1.3,fuel:.9,metal:.55,med:1.2,elec:1.15,lux:1.1,fer:.6,titane:.7,cristal:.85,or:.9},Industrielle:{food:1.15,water:1,fuel:.8,metal:1.25,med:1,elec:.75,lux:1.05,fer:1.35,titane:1.3,or:1.05},'High-tech':{food:1.25,water:1.15,fuel:1.1,metal:1.3,med:.65,elec:.55,lux:1.2,cristal:1.45,or:1.2,titane:1.15},Luxe:{food:1.1,water:1.2,fuel:1.05,metal:1,med:1.15,elec:1.25,lux:.6,or:1.5,cristal:1.1}};
 function stEcon(st){if(st.econ)return st.econ;const k=Object.keys(ECON);return st.n=='Base Alpha'?'Industrielle':k[Math.floor(h3(st.x|0,st.y|0,st.z|0,77)*k.length)%k.length]}
 function gPrice(st,g){const e=ECON[stEcon(st)][g.id]||1,per=Math.floor((G.time||0)/240),f=.9+.2*h3(st.x|0,g.p,per,78);return Math.max(2,Math.round(g.p*e*f))}
-const sellPrice=(st,g)=>Math.max(1,Math.round(gPrice(st,g)*.9));
+const sellPrice=(st,g)=>Math.max(1,Math.round(gPrice(st,g)*.88*(g.min?SELLK:1)));
 function cargoUsed(){let n=S.ore;for(const k in G.cargo)n+=G.cargo[k];return n}
 function trade(id,q){const st=S.docked;if(!st)return;const g=GOODS.find(x=>x.id==id);if(q>0){const p=gPrice(st,g),can=Math.min(q,cap()-cargoUsed(),Math.floor(G.cr/p));if(can<=0){toast(cargoUsed()>=cap()?'Soute pleine':'Pas assez de crédits');return}G.cr-=p*can;G.cargo[id]=(G.cargo[id]||0)+can;SFX.coin()}
 else{const have=G.cargo[id]||0,n=Math.min(-q,have);if(n<=0)return;G.cr+=sellPrice(st,g)*n;G.cargo[id]=have-n;if(!G.cargo[id])delete G.cargo[id];SFX.coin()}}

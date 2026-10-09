@@ -4,13 +4,14 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 
 ## Déploiement
 - Netlify (projet `starvody`) est relié à ce dépôt : **chaque push sur `main` met le site en ligne** (~30 s).
-- `index.html` est GÉNÉRÉ : ne pas l'éditer à la main. Modifier `src/`, puis `python3 build.py`, puis commit + push.
-- `netlify.toml` : publication de la racine, pas de commande de build côté Netlify.
+- `index.html` et `public/index.html` sont GÉNÉRÉS (identiques) : ne pas les éditer à la main. Modifier `src/`, puis `python3 build.py`, puis commit + push.
+- `netlify.toml` : Netlify publie le dossier `public/` (pas la racine, pour ne pas publier `node_modules`) et construit les fonctions de `netlify/functions/`.
+- Sauvegarde cloud : `netlify/functions/save.mjs` (route `/api/save?code=SF-XXXXXXXX`, GET/POST), stockage Netlify Blobs (`@netlify/blobs` dans `package.json`, installé par Netlify).
 
 ## Structure
 - `src/shell.html` : HTML/CSS/HUD, avec les marqueurs `%%FONTS%%`, `%%THREE%%` et `%%GAME%%`. Style « instruments de bord » : panneaux à coins coupés (clip-path), jauges segmentées (mask), jetons CSS dans `:root` (`--ice`, `--amber`, `--hf`…).
 - `src/fonts/` : police Chakra Petch (OFL) réduite au latin, intégrée en base64 par `build.py` (pas de chargement externe).
-- `src/*.js` : modules concaténés dans cet ordre (voir `build.py`) : core, audio, gfx, models, world, game, surface, fx, ultra, detail, content, lasers, parts, cockpit, speed, sounds, visuals, chars, ground, story, explore, planet2, daynight, gfxplus, weather2, netroom, mp, hud, ui. Tout est au niveau global (pas de modules ES).
+- `src/*.js` : modules concaténés dans cet ordre (voir `build.py`) : core, audio, gfx, models, world, game, surface, fx, ultra, detail, content, lasers, parts, cockpit, speed, sounds, visuals, chars, ground, story, explore, planet2, daynight, gfxplus, weather2, prog, … base, netroom, mp, mpplus, hud, ui, options (ordre exact dans `build.py`). Tout est au niveau global (pas de modules ES).
 - `core.js` : `PARTS` (pièces de l'Atelier) et `PM(clé)` = multiplicateurs des pièces installées (coque, vitesse, cadence, bouclier…).
 - `parts.js` : visuels des pièces (enveloppe `buildShip(P, aLeLaser)`), onglet 🔧 Atelier, aperçu, achat. `lasers.js` : tirs lumineux, rayon laser (shader), éclairs/impacts, son du laser. `cockpit.js` : vue cockpit (touche V / bouton 👁), tableau de bord 3D posé devant la caméra, écrans dessinés sur canvas, viseur tête haute `ckHUD`, mouvements de tête. `speed.js` : poussière en traînées (sensation de vitesse), souffle et voile du boost. `sounds.js` : sons des armes par type de canon, rugissement du boost (`nzf` = bruit filtré ; ne pas nommer `nz`, déjà pris par la musique dans story.js). `visuals.js` : couronne solaire. `ground.js` : planètes — avant-poste (piste = station au sol), PNJ et marchand, filons de minerai, mode à pied (`FOOT`), caméra et commandes à pied.
 - `src/three-examples/` : post-process Three.js r128 (bloom…) incorporés tels quels.
@@ -18,7 +19,8 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - `dev/mockpeer.js`, `dev/mockroom.js` : faux réseau (BroadcastChannel) pour tester le multijoueur en local.
 
 ## Réglages
-- `ARGENT_ILLIMITE` (core.js) : crédits infinis pour tous (affichés ∞). Les sauvegardes gardent alors 999 999 999 ¢ : si on le désactive, prévoir de ramener ces sauvegardes à un montant normal au chargement.
+- `ARGENT_ILLIMITE` (core.js) : désactivé (économie réelle). Les anciennes sauvegardes sans `eco` qui avaient 999 999 999 ¢ sont ramenées à 2 500 ¢ au chargement. Nouvelle partie : 1 500 ¢.
+- Prix de base : `HULLS`/`WPN`/`AMMO` (core/content), `PPRICE` et `CRAFT` (prog.js). `applyPerks()` recalcule les prix avec la réduction de l'Alliance (garde les prix d'origine dans `p0`).
 
 ## Mécaniques
 - Minerais (`fer`, `titane`, `cristal`, `or`) : dans `GOODS` (min:1), stockés dans `G.cargo`, butin typé via `spawnDrops(p,n,min)`. Astéroïdes : `astHit` (story.js), fragments. Filons : `GR.deps` (ground.js).
@@ -29,6 +31,10 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - `gfxplus.js` : entrée atmosphérique (traînée, son, refroidissement à l'arrivée), vaisseaux (relief des panneaux `HULLN`, reflets sur mobile, fumée/étincelles/feu selon les dégâts), distorsion de chaleur (passe GRADE, PC), explosions (`bigBoom` : onde de choc, débris, lumières en réserve `poolLight` — ne jamais créer de PointLight à la volée), espace (nébuleuses, ceintures d'astéroïdes décoratives, trafic autour des stations), libération de la géométrie en quittant une planète.
 - `weather2.js` : tempêtes cycliques (`wxStorm`), éclairs et tonnerre, éclaboussures, voiles de sable/neige, tourbillons de poussière, brume des vallées, traces de pas, poussière du jetpack et du vaisseau en rase-mottes.
 - `ui.js` (dernier module) : icônes SVG maison (`ICONS`, sprite injecté dans la page), `ICO(nom)` pour les insérer dans du HTML, `actLabel()` (emoji + MAJUSCULES → icône + phrase), `btnSet(id,icône,libellé)` pour les boutons tactiles. Les toasts restent en texte (emojis).
+- `prog.js` : niveau de pilote (`G.xp`, `lvInfo`, `gainXP`), réputation (`G.rep`, `FAC`, `rankOf`, `addRep`, avantages via `SELLK`/`TRAVK`), plans (`G.bp`, `giveBlueprint` remplace `giveRarePart`), fabrication (`CRAFT`, onglet Fabrication), entrepôt personnel (`G.stash`, 300 places), panneau Profil (touche P). Les gains d'XP sont branchés en enveloppant `hitEnemy`, `complete`, `trade`, `minToast`, `questTalk`, etc.
+- `base.js` : bases planétaires (`G.bases[planète]`, 3 max, niveau 3) : modules `BMOD` (foreuse, serre, silo, tourelle, hangar, mât), production calculée sur l'heure réelle (`baseTick`), terminal → panneau `#bpanel`, piste privée du hangar (`groundDock` avec `base:true`), raids de drones (`BS.drones`, ajoutés à `SURF.extra`).
+- `mpplus.js` : dreadnought mondial (`WB`, toutes les 20 min pendant 8 min selon `Date.now()`, PV partagés via la présence `wb`), chasses de groupe (`G.gm`, présence `gm`), échanges entre joueurs (`TRX`, présence `tr`). Les champs de présence passent par `mpExtraOut()`.
+- `options.js` (dernier module) : panneau Options (touche O) : qualité (PC : `cycleQuality` ; mobile : `GQL` 0-2), volumes musique/effets (bus `MVOL`), sensibilité (`OPT.sens`), manette (Gamepad API, `updGamepad`), sauvegarde cloud (`CLOUD`, code `SF-XXXXXXXX` dans `sf-cloud`).
 - Station au sol : objet `GR.st` avec `ground:true` (et `foot:true` quand on parle au marchand à pied → seuls Marché/Armes).
 
 ## Pièges connus

@@ -35,7 +35,7 @@ else if(k=='fern'){const c1=C01(120,.45,.26),c2=C01(110,.5,.34);for(let i=0;i<6;
 else if(k=='pebble'){g=ROCKG[1]}
 return FLORA[k]=g}
 // ----- végétation et décors de toute la planète (appelé par SURF.enter) -----
-function addFlora(sc,ty,hu,h,r,spot,inst,HALF){const VM=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85,metalness:0,flatShading:true}),VS=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8,metalness:0,side:THREE.DoubleSide}),q=DESK?1:.6,cc=(h2,s,l)=>new THREE.Color().setHSL(((h2%360)+360)%360/360,s,l);
+function addFlora(sc,ty,hu,h,r,spot,inst,HALF){const VM=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85,metalness:0,flatShading:true}),VS=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8,metalness:0,side:THREE.DoubleSide}),q=DESK?1:(GQL>=2?.35:GQL==1?.5:.6),cc=(h2,s,l)=>new THREE.Color().setHSL(((h2%360)+360)%360/360,s,l);
 const place=(n,minH=4,maxH=1e9,lim=HALF*.88)=>{const L=[];for(let i=0;i<n;i++){const p=spot(40,lim);if(p.y<minH||p.y>maxH)continue;L.push(p)}return L};
 const std=(s0,s1,tint)=>(d,o)=>{d.position.set(o.x,o.y-.2,o.z);d.rotation.set(rv(.06),o.a,rv(.06));d.scale.setScalar(o.s)};
 const mk=(list,s0,s1,cf)=>list.map(p=>({x:p.x,y:p.y,z:p.z,s:s0+r()*(s1-s0),a:r()*TAU,c:cf()}));
@@ -88,7 +88,7 @@ const dc=ty=='Océanique'?0x0a3260:ty=='Jungle'?0x0c3530:new THREE.Color().setHS
 return new THREE.ShaderMaterial({transparent:true,defines:DESK?{HQ:''}:{},uniforms:{...base,deep:{value:new THREE.Color(dc)},shallow:{value:new THREE.Color(scc)},amb:{value:new THREE.Color(.55,.6,.66)}},vertexShader:LIQ_VS,fragmentShader:WATER_FS})}
 // ----- petits détails autour du joueur (cailloux, fougères, éclats…) -----
 let NEAR=null;
-function initNear(sc,h,ty,hu){NEAR=null;const step=DESK?2.6:4,R=DESK?90:60,n=Math.ceil(Math.PI*(R/step)**2*1.05),sets=[];
+function initNear(sc,h,ty,hu){NEAR=null;if(!DESK&&GQL>=2)return;const step=DESK?2.6:4,R=DESK?90:60,n=Math.ceil(Math.PI*(R/step)**2*1.05),sets=[];
 const add=(geo,mat,dens,s0,s1,col,yo=0,minH=1)=>{const m=new THREE.InstancedMesh(geo,mat,n);m.setColorAt(0,new THREE.Color());m.count=0;m.frustumCulled=false;m.castShadow=false;m.receiveShadow=DESK;sc.add(m);sets.push({m,dens,s0,s1,col,yo,minH})};
 const rockC=ty=='Glacée'?[205,.12,.75]:ty=='Volcanique'?[15,.1,.12]:ty=='Désertique'?[30,.3,.45]:ty=='Océanique'?[35,.12,.42]:[hu,.12,.35];
 add(ROCKG[1],new THREE.MeshStandardMaterial({roughness:.95,metalness:0,flatShading:true}),.28,.12,.55,rockC,-.05,-50);
