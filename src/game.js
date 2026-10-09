@@ -14,7 +14,7 @@ fwd();S.vel.lerp(_v.copy(_f).multiplyScalar(S.spd),damp(3.2,dt));S.pos.addScaled
 S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.75,damp(5,dt))}
 // ----- caméra -----
 const camUp=new V3(0,1,0),camLook=new V3();let camInit=true,fovK=0;const CAMQ=new QT(),CAMS={y:0,p:0,a:0,ls:0};
-function updCam(dt){if(S.docked&&mode=='space'&&TAB=='atelier'&&!S.dead){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
+function updCam(dt){if(FOOT.on&&mode=='surf'){footCam(dt);return}if(atelierOn()){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
 if(ckActive()){ckCam(dt);return}
 // 3e personne : caméra plus éloignée, rotation amortie (elle balance dans les virages), recul à l'accélération, vibrations au boost
 const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(2.4,dt));const sk=Math.max(1,ship.userData.body.scale.z),spK=clamp(S.spd/Math.max(1,cruise()),0,2.8),srf=mode=='surf'?.84:1;
@@ -26,7 +26,7 @@ _u.set(0,1,0).applyQuaternion(S.q);camUp.lerp(_u,damp(5,dt)).normalize();camera.
 const vib=(fovK*.3+Math.max(0,spK-1.05)*.06)*sk;if(vib>.01){camera.position.x+=rv(vib);camera.position.y+=rv(vib);camera.position.z+=rv(vib)}
 if(shake>0){camera.position.x+=rv(shake);camera.position.y+=rv(shake);shake=Math.max(0,shake-dt*2.5)}
 const base=innerWidth<innerHeight?74:(DESK?60:54),fv=base+fovK*20+Math.max(0,spK-1)*3;if(Math.abs(camera.fov-fv)>.05){camera.fov=fv;camera.updateProjectionMatrix()}sky.position.copy(camera.position)}
-function placeShip(dt){ship.position.copy(S.pos);ship.quaternion.copy(S.q);const ud=ship.userData;ud.body.rotation.z=S.bank;ud.body.rotation.x=(S.pitchV||0)*.18;
+function placeShip(dt){if(FOOT.on){ship.position.copy(FOOT.sp);ship.quaternion.copy(FOOT.sq);const ud=ship.userData;ud.body.rotation.set(0,0,0);for(const f of ud.flames){f.fl.scale.set(1,1,.05);f.fl.material.opacity=.1;f.gs.scale.setScalar(1.2)}ud.shield.material.uniforms.op.value=0;return}ship.position.copy(S.pos);ship.quaternion.copy(S.q);const ud=ship.userData;ud.body.rotation.z=S.bank;ud.body.rotation.x=(S.pitchV||0)*.18;
 const k=S.thr;for(const f of ud.flames){f.fl.scale.set(1,1,.3+k*(.7+Math.random()*.3));f.fl.material.opacity=.35+k*.25;f.gs.scale.setScalar(2.6+k*1.6)}
 ud.shield.material.uniforms.op.value=Math.max(0,shieldT);if(ud.plasma){const hk=S.heat||0;ud.plasma.visible=hk>.02;PLU.k.value=hk;ud.plasma.scale.set(6+hk*2,4.5+hk*1.5,14+hk*10);ud.plasma.position.z=2+hk*3}ud.shield.rotation.y+=dt;const bl=Math.sin(t*5)>.6;ud.nl.visible=ud.nr.visible=bl;
 if(S.thr>.2&&Math.random()<.5){fwd();for(const f of ud.flames){f.gs.getWorldPosition(_w);SPK.emit(_w.x,_w.y,_w.z,-_f.x*30+rv(6),-_f.y*30+rv(6),-_f.z*30+rv(6),.3,.12,.25,.45,.2)}}}
@@ -47,28 +47,56 @@ if(lock){const tp=lock.pos.clone();if(lock.vel){const tt=tp.distanceTo(p)/bs;tp.
 mpShot(p,dir,'c');const m=mkPB(col);m.position.copy(p);m.lookAt(p.clone().sub(dir));PB.push({m,p:m.position,v:dir.multiplyScalar(bs).addScaledVector(S.vel,.5),l:1.6,d:dmg,c:col});muzzleFlash(M.l,col)}gunKick();SFX.shoot()}
 const segHit=(a,b,c,r)=>{_v.copy(b).sub(a);const L2=_v.lengthSq();let k=L2?_w.copy(c).sub(a).dot(_v)/L2:0;k=clamp(k,0,1);return _w.copy(a).addScaledVector(_v,k).distanceToSquared(c)<r*r};
 function updPB(dt,targets){for(const b of PB){const a=b.p.clone();b.p.addScaledVector(b.v,dt);b.l-=dt;for(const T of targets){if(b.l<=0)break;if(segHit(a,b.p,T.pos,T.r)){b.l=0;impactFX(b.p,b.c);T.hit(b.d,b.p)}}if(b.l<=0)rmPB(b)}PB=PB.filter(b=>b.l>0)}
-function updEB(dt){for(const b of EB){if(!b.or){b.or=1;b.m.lookAt(_w.copy(b.m.position).sub(b.v))}b.m.position.addScaledVector(b.v,dt);b.l-=dt;if(b.m.position.distanceTo(S.pos)<7.5){b.l=0;damage(b.dmg);impactFX(b.m.position,S.sh>0?partOf('shield').scol||0x5ad0ff:0xff6650,.8)}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}EB=EB.filter(b=>b.l>0)}
+function updEB(dt){for(const b of EB){if(b.home&&!S.dead){const sp=b.v.length();b.v.lerp(_w.copy(S.pos).sub(b.m.position).normalize().multiplyScalar(sp),damp(1.6,dt)).setLength(Math.min(330,sp+40*dt));b.m.lookAt(_w.copy(b.m.position).sub(b.v));if(Math.random()<.7)FIRE.emit(b.m.position.x,b.m.position.y,b.m.position.z,rv(6),rv(6),rv(6),.35,1,.55,.2,.4)}if(!b.or){b.or=1;b.m.lookAt(_w.copy(b.m.position).sub(b.v))}b.m.position.addScaledVector(b.v,dt);b.l-=dt;if(b.m.position.distanceTo(S.pos)<7.5){b.l=0;damage(b.dmg);impactFX(b.m.position,S.sh>0?partOf('shield').scol||0x5ad0ff:0xff6650,.8)}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}EB=EB.filter(b=>b.l>0)}
 // dégâts : le bouclier absorbe d'abord, l'éperon annule les collisions
 function damage(n,kind){if(S.dead)return;if(kind=='col'&&PM('ram'))return;S.shT=t;if(PM('sh')>0&&S.sh>0){const a=Math.min(S.sh,n);S.sh-=a;n-=a;shieldT=1;if(n<=0){SFX.shield();return}}S.hp-=n;SFX.hit()}
 // ----- butin -----
-function spawnDrops(p,n){for(let i=0;i<n;i++){const m=new THREE.Mesh(OREG,MAT.ore);const g=sprite(0x40e0ff,9);m.add(g);m.position.copy(p).add(new V3(rv(6),rv(6),rv(6)));curScene().add(m);DROPS.push({m,p:m.position,v:new V3(rv(20),rv(20),rv(20)),l:60})}}
+const MINC={fer:0xb09a88,titane:0x9fc8e8,or:0xffc840,cristal:0x40f0ff};const DMAT={};
+function spawnDrops(p,n,min){for(let i=0;i<n;i++){const m=new THREE.Mesh(OREG,min?(DMAT[min]||(DMAT[min]=new THREE.MeshBasicMaterial({color:MINC[min]}))):MAT.ore);const g=sprite(min?MINC[min]:0x40e0ff,9);m.add(g);m.position.copy(p).add(new V3(rv(6),rv(6),rv(6)));curScene().add(m);DROPS.push({m,p:m.position,v:new V3(rv(20),rv(20),rv(20)),l:60,min})}}
+let MINQ={},MINT=0;function minToast(){const k=Object.keys(MINQ);if(!k.length)return;toast('⛏ '+k.map(x=>'+'+MINQ[x]+' '+GOODS.find(g=>g.id==x).n).join(' · '));MINQ={}}
 function updDrops(dt,mag=260){for(const d of DROPS){d.l-=dt;d.m.rotation.y+=dt*2;const dd=d.p.distanceTo(S.pos);if(dd<mag&&cargoUsed()<cap()){d.v.addScaledVector(_v.copy(S.pos).sub(d.p).normalize(),900*dt)}d.v.multiplyScalar(Math.pow(.3,dt));d.p.addScaledVector(d.v,dt);
-if(dd<16&&cargoUsed()<cap()){S.ore++;d.l=0;SFX.pick();if(cargoUsed()>=cap())toast('Soute pleine — vends le minerai dans une station')}if(d.l<=0)d.m.parent&&d.m.parent.remove(d.m)}DROPS=DROPS.filter(d=>d.l>0)}
+if(dd<16&&cargoUsed()<cap()){if(d.min){G.cargo[d.min]=(G.cargo[d.min]||0)+1;MINQ[d.min]=(MINQ[d.min]||0)+1;MINT=t}else S.ore++;d.l=0;SFX.pick();if(cargoUsed()>=cap())toast('Soute pleine — vends le minerai dans une station')}if(d.l<=0)d.m.parent&&d.m.parent.remove(d.m)}DROPS=DROPS.filter(d=>d.l>0);if(t-MINT>.6)minToast()}
 // ----- ennemis -----
 function mkEnemy(ty,pos,z){const m=1+z*.35,b={ty,pos:pos.clone(),vel:new V3(),dir:new V3(0,0,1),cd:1.5+Math.random()};
 const P={chasseur:{hp:2,sp:270,keep:160,rng:620,rate:.75,n:1,spr:0,bs:560,dmg:5,sz:11,rw:25,bc:0xfff060},lourd:{hp:12,sp:100,keep:320,rng:880,rate:2,n:5,spr:.09,bs:360,dmg:9,sz:17,rw:70,bc:0xff70f0},boss:{hp:28+G.done*3,sp:140,keep:280,rng:950,rate:1.1,n:3,spr:.1,bs:440,dmg:10,sz:26,rw:100,bc:0xc890ff},pirate:{hp:3.5,sp:180,keep:230,rng:720,rate:1.3,n:1,spr:0,bs:440,dmg:6,sz:13,rw:30,bc:0xff5040}}[ty];
 Object.assign(b,P);b.hp*=m;b.mhp=b.hp;b.rw=Math.round(b.rw*(1+z*.3));b.boss=ty=='boss';b.mesh=buildEnemy(ty);b.mesh.position.copy(b.pos);b.pos=b.mesh.position;curScene().add(b.mesh);b.max=1800;b.cone=.26;b.w=.7;b.r=b.sz;b.foe=1;b.hit=(d,p)=>hitEnemy(b,d,p);return b}
-function hitEnemy(e,d,p){e.hp-=d;boom3(p,6,0xffaa66,40);SFX.tick();e.mesh.userData.bar.visible=true;if(e.hp<=0&&!e.dead){e.dead=1;G.kills++;if(e.onKill)e.onKill();G.cr+=e.rw;boom3(e.pos,e.boss?70:e.ty=='lourd'?45:28,ENC[e.ty],e.boss?140:90,true);SFX.boom();spawnDrops(e.pos,e.boss?6:e.ty=='lourd'?3:1);e.mesh.parent&&e.mesh.parent.remove(e.mesh);if(e.boss&&G.m&&G.m.type=='boss')complete()}}
+function hitEnemy(e,d,p){e.hp-=d;e.hitT=t;boom3(p,6,0xffaa66,40);SFX.tick();e.mesh.userData.bar.visible=true;if(e.hp<=0&&!e.dead){e.dead=1;G.kills++;if(e.onKill)e.onKill();G.cr+=e.rw;boom3(e.pos,e.boss?70:e.ty=='lourd'?45:28,ENC[e.ty],e.boss?140:90,true);SFX.boom();spawnDrops(e.pos,e.boss?6:e.ty=='lourd'?3:1);e.mesh.parent&&e.mesh.parent.remove(e.mesh);if(e.boss&&G.m&&G.m.type=='boss')complete()}}
 let spawnT=8;
-function updEnemies(dt,z){const hunt=G.m&&G.m.type=='chasse';spawnT-=dt;if(spawnT<=0){spawnT=(hunt?5+Math.random()*4:12+Math.random()*9)/(1+z*.25);if(en.filter(e=>!e.boss).length<(hunt?3:2)+z&&!S.docked){const r=Math.random(),ty=z>=2&&r<.25?'lourd':z>=1&&r<.55?'chasseur':'pirate',a=Math.random()*TAU,p=S.pos.clone().add(new V3(Math.cos(a)*1100,rv(250),Math.sin(a)*1100));en.push(mkEnemy(ty,p,z));if(ty=='chasseur'&&Math.random()<.6)en.push(mkEnemy(ty,p.clone().add(new V3(30,10,30)),z))}}
-const PF=fwd().clone(),PR=_r.set(1,0,0).applyQuaternion(S.q).clone(),PU=_u.set(0,1,0).applyQuaternion(S.q).clone();
+// IA : attaque en orbite devant le joueur, passes en piqué, esquives quand on la vise, repli si blessée, ailiers en formation, rafales et missiles
+const _e1=new V3(),_e2=new V3(),_e3=new V3();
+function updEnemies(dt,z){const hunt=G.m&&G.m.type=='chasse';spawnT-=dt;if(spawnT<=0){spawnT=(hunt?5+Math.random()*4:12+Math.random()*9)/(1+z*.25);if(en.filter(e=>!e.boss).length<(hunt?3:2)+z&&!S.docked){const r=Math.random(),ty=z>=2&&r<.25?'lourd':z>=1&&r<.55?'chasseur':'pirate',a=Math.random()*TAU,p=S.pos.clone().add(new V3(Math.cos(a)*1100,rv(250),Math.sin(a)*1100));const L=mkEnemy(ty,p,z);en.push(L);if((ty=='chasseur'&&Math.random()<.7)||(ty=='pirate'&&Math.random()<.35)){const W=mkEnemy(ty,p.clone().add(new V3(30,10,30)),z);W.lead=L;W.side=Math.random()<.5?1:-1;en.push(W)}}}
+const PF=fwd().clone(),PR=_r.set(1,0,0).applyQuaternion(S.q).clone(),PU=_u.set(0,1,0).applyQuaternion(S.q).clone(),firing=isFire()&&!S.docked;
 for(const e of en){_v.copy(S.pos).sub(e.pos);const d=_v.length();_v.divideScalar(d||1);
-e.ph=(e.ph||Math.random()*TAU)+dt*(e.ty=='chasseur'?1.1:.5);const rad=e.ty=='chasseur'?150:e.ty=='lourd'?70:110,ahead=(e.ty=='lourd'?420:e.boss?360:280)+Math.sin(e.ph*.7)*60;
-const tg=_w.copy(S.pos).addScaledVector(PF,ahead).addScaledVector(PR,Math.cos(e.ph)*rad).addScaledVector(PU,Math.sin(e.ph)*rad*.6);if(S.docked)tg.copy(e.pos).addScaledVector(_v,-400);
-const toT=tg.sub(e.pos),dT=toT.length();toT.divideScalar(dT||1);e.dir.lerp(toT,damp(3.2,dt)).normalize();const sp=Math.min(e.sp+S.spd*.9,Math.max(30,dT*1.6));e.vel.copy(e.dir).multiplyScalar(sp);e.pos.addScaledVector(e.vel,dt);
-if(d<650)e.mesh.lookAt(_r.copy(e.pos).sub(_v));else e.mesh.lookAt(_r.copy(e.pos).sub(e.dir));e.mesh.userData.body.rotation.z=Math.sin(t*2+e.sz)*.25;
+e.ph=(e.ph||Math.random()*TAU)+dt*(e.ty=='chasseur'?1.1:.5);e.jk=(e.jk||0)-dt;e.run=(e.run==null?-3-Math.random()*4:e.run)-dt;e.stT=(e.stT||0)-dt;if(e.lead&&e.lead.dead)e.lead=null;
+// esquive : le joueur la vise et tire
+const aim=-_v.dot(PF);if(!e.boss&&e.jk<=-.6&&firing&&aim>.993&&d<1000&&Math.random()<dt*(e.ty=='chasseur'?4:e.ty=='pirate'?2.2:.7)){e.jk=.55+Math.random()*.45;e.jd=new V3().crossVectors(_v,Math.random()<.5?PU:PR).normalize().multiplyScalar(Math.random()<.5?1:-1)}
+if(e.hitT&&t-e.hitT<.1&&!e.boss&&e.jk<=-.6&&Math.random()<.5){e.jk=.5;e.jd=new V3().crossVectors(_v,PU).normalize().multiplyScalar(Math.random()<.5?1:-1)}
+// repli quand elle est très abîmée (une seule fois), puis retour au combat
+if(!e.boss&&!e.fled&&e.ty!='lourd'&&e.hp<e.mhp*.35){e.fled=1;e.stT=2.4+Math.random()*1.6;e.flee=1}if(e.flee&&e.stT<=0)e.flee=0;
+let tg,spd=Math.min(e.sp+S.spd*.9,Math.max(30,1e9)),tr=e.ty=='chasseur'?4.2:e.ty=='lourd'?2:e.boss?2.4:3.3;
+if(e.flee){tg=_w.copy(e.pos).addScaledVector(_v,-700).addScaledVector(PU,150);spd=e.sp*1.5+S.spd*.8}
+else if(e.lead){const ld=e.lead;_e1.crossVectors(ld.dir,PU).normalize();tg=_w.copy(ld.pos).addScaledVector(_e1,45*e.side).addScaledVector(ld.dir,-25).addScaledVector(PU,8);spd=Math.max(30,ld.vel.length()*1.05+e.pos.distanceTo(tg)*1.2)}
+else{if(e.run<=-7-Math.random()*5&&e.ty!='lourd'&&!e.boss&&d<1400)e.run=2+Math.random();
+if(e.run>0){tg=_w.copy(S.pos).addScaledVector(S.vel,.5).addScaledVector(PR,Math.cos(e.ph*3)*35).addScaledVector(PU,Math.sin(e.ph*3)*25);spd=e.sp*1.25+S.spd*.7;if(d<90)e.run=0}
+else{const rad=e.ty=='chasseur'?150:e.ty=='lourd'?70:110,ahead=(e.ty=='lourd'?420:e.boss?360:280)+Math.sin(e.ph*.7)*60;tg=_w.copy(S.pos).addScaledVector(PF,ahead).addScaledVector(PR,Math.cos(e.ph)*rad).addScaledVector(PU,Math.sin(e.ph)*rad*.6)}}
+if(e.jk>0){tg.addScaledVector(e.jd,260);spd*=1.3;tr*=1.6}
+if(S.docked)tg.copy(e.pos).addScaledVector(_v,-400);
+const toT=tg.sub(e.pos),dT=toT.length();toT.divideScalar(dT||1);_e2.copy(e.dir);e.dir.lerp(toT,damp(tr,dt)).normalize();if(!e.flee&&!e.lead&&e.run<=0)spd=Math.min(spd,Math.max(30,dT*1.6));
+e.vel.copy(e.dir).multiplyScalar(spd);e.pos.addScaledVector(e.vel,dt);
+// éviter de s'empiler
+for(const o of en){if(o===e)continue;const dd=e.pos.distanceTo(o.pos);if(dd<38&&dd>.01)e.pos.addScaledVector(_e3.copy(e.pos).sub(o.pos).normalize(),(38-dd)*dt*3)}
+// orientation + inclinaison dans les virages
+const turn=_e3.crossVectors(_e2,e.dir).dot(PU);e.bank=lerp(e.bank||0,clamp(turn*55,-1.1,1.1),damp(4,dt));
+if(d<2200&&Math.random()<.7){const k=e.boss?1.8:e.ty=='lourd'?1.3:1;_e1.copy(e.pos).addScaledVector(e.dir,-e.sz*.75);SPK.emit(_e1.x,_e1.y,_e1.z,-e.dir.x*60+rv(8),-e.dir.y*60+rv(8),-e.dir.z*60+rv(8),.3+Math.random()*.25,1,.5,.18,.45*k)}
+if(d<650&&!e.flee&&e.jk<=0)e.mesh.lookAt(_r.copy(e.pos).sub(_v));else e.mesh.lookAt(_r.copy(e.pos).sub(e.dir));e.mesh.userData.body.rotation.z=e.bank+Math.sin(t*2+e.sz)*.08;
 const bar=e.mesh.userData.bar;if(e.boss||e.ty=='lourd')bar.visible=true;bar.scale.x=10*Math.max(0,e.hp/e.mhp);
-e.cd-=dt;if(d<e.rng&&e.cd<=0&&!S.docked&&!S.dead){e.cd=e.rate*(.8+Math.random()*.4);const tt=d/e.bs,aim=S.pos.clone().addScaledVector(S.vel,tt*.85).add(new V3(rv(1),rv(1),rv(1)).multiplyScalar(d*.045)).sub(e.pos).normalize();for(let k=-(e.n-1)/2;k<=(e.n-1)/2;k++){const dir=aim.clone().applyAxisAngle(AY,k*e.spr);const m=mkEB(e.bc);m.position.copy(e.pos);EB.push({m,v:dir.multiplyScalar(e.bs),l:2.4,dmg:e.dmg})}if(d<900)SFX.eshoot()}
+// tirs : rafales pour les chasseurs, salves pour les lourds, tir anticipé
+e.cd-=dt;const facing=-_e3.set(0,0,-1).applyQuaternion(e.mesh.quaternion).dot(_v)<-.55||e.boss||e.ty=='lourd';
+const shot=()=>{const tt=d/e.bs,sp2=Math.max(.012,.045-z*.007),aimP=S.pos.clone().addScaledVector(S.vel,tt*(.85+z*.04)).add(new V3(rv(1),rv(1),rv(1)).multiplyScalar(d*sp2)).sub(e.pos).normalize();for(let k=-(e.n-1)/2;k<=(e.n-1)/2;k++){const dir=aimP.clone().applyAxisAngle(AY,k*e.spr);const m=mkEB(e.bc);m.position.copy(e.pos);EB.push({m,v:dir.multiplyScalar(e.bs),l:2.4,dmg:e.dmg})}if(d<900)SFX.eshoot()};
+if(e.burst>0){e.bT-=dt;if(e.bT<=0){e.burst--;e.bT=.11;shot()}}
+else if(d<e.rng&&e.cd<=0&&!S.docked&&!S.dead&&!e.flee&&facing){e.cd=e.rate*(.8+Math.random()*.4);if(e.ty=='chasseur'){e.burst=2;e.bT=.11}shot()}
+// missile à tête chercheuse des croiseurs lourds
+if(e.ty=='lourd'&&!S.docked&&!S.dead&&d<900){e.mc=(e.mc==null?3+Math.random()*3:e.mc)-dt;if(e.mc<=0){e.mc=6+Math.random()*4;const m=mkEB(0xff8a30);m.scale.setScalar(1.5);m.position.copy(e.pos);EB.push({m,v:_v.clone().multiplyScalar(170).addScaledVector(PU,60),l:7,dmg:14,home:1});SFX.missile();toast('⚠ Missile en approche — esquive !')}}
 if(d>3500&&!e.boss){e.dead=1;e.mesh.parent&&e.mesh.parent.remove(e.mesh)}}en=en.filter(e=>!e.dead)}
 // ----- missions -----
 function findAround(kind,minD,maxD,excl){const cx=cof(S.pos.x),cz=cof(S.pos.z),R=Math.ceil(maxD/CS),o=[];for(let i=-R;i<=R;i++)for(let j=-1;j<=1;j++)for(let l=-R;l<=R;l++){const it=cdata(cx+i,j,cz+l)[kind];if(!it||it===excl)continue;if(kind=='pl'&&(G.disc.has(it.name)||it.ring&&false))continue;const d=Math.hypot(it.x-S.pos.x,it.y-S.pos.y,it.z-S.pos.z);if(d>=minD&&d<=maxD)o.push(it)}return o.length?o[Math.random()*o.length|0]:null}
@@ -95,13 +123,13 @@ const z=danger(),L=lightFor(S.pos.x,S.pos.y,S.pos.z);sunL.position.copy(S.pos).a
 for(const p of planets){const d=S.pos.distanceTo(_v.set(p.x,p.y,p.z));if(d<p.r+14&&!(S.entry&&S.entry.p===p)){_w.copy(S.pos).sub(_v).normalize();S.pos.copy(_v).addScaledVector(_w,p.r+14);const rad=S.vel.dot(_w);if(rad<0){S.vel.addScaledVector(_w,-1.6*rad);if(rad<-60)damage(6,'col')}}
 if(d<p.r+2200&&!G.disc.has(p.name)){G.disc.add(p.name);G.dpos[p.name]=[p.x|0,p.y|0,p.z|0,p.hue|0,p.ring?1:0,p.r|0];G.cr+=10;toast('Planète découverte : '+p.name+' (+10 ¢)');SFX.disc()}}
 for(const s of suns){const d=S.pos.distanceTo(_v.set(s.x,s.y,s.z));if(d<s.r+40){_w.copy(S.pos).sub(_v).normalize();S.pos.copy(_v).addScaledVector(_w,s.r+40);S.vel.addScaledVector(_w,200)}if(d<s.r*1.9&&!S.dead){damage((1-(d-s.r)/(s.r*.9))*24*dt);if(t-S.heatT>4){S.heatT=t;toast('☀ Chaleur extrême — éloigne-toi !');SFX.alarm()}}}
-for(const a of asts){a.mesh.rotation.x+=a.sp*dt;a.mesh.rotation.y+=a.sp*.7*dt;const d=S.pos.distanceTo(a.pos),R=a.r*.95+5;if(d<R){_w.copy(S.pos).sub(a.pos).normalize();S.pos.copy(a.pos).addScaledVector(_w,R);const rad=S.vel.dot(_w);if(rad<0){S.vel.addScaledVector(_w,-1.5*rad);S.spd*=.5;if(rad<-50){damage(4,'col');boom3(S.pos,8,0xcccccc,40)}}}}
+for(const a of asts){a.mesh.rotation.x+=a.sp*dt;a.mesh.rotation.y+=a.sp*.7*dt;if(a.vel){a.pos.addScaledVector(a.vel,dt);a.vel.multiplyScalar(Math.pow(.6,dt))}const d=S.pos.distanceTo(a.pos),R=a.r*.95+5;if(d<R){_w.copy(S.pos).sub(a.pos).normalize();S.pos.copy(a.pos).addScaledVector(_w,R);const rad=S.vel.dot(_w);if(rad<0){S.vel.addScaledVector(_w,-1.5*rad);S.spd*=.5;if(rad<-50){damage(4,'col');boom3(S.pos,8,0xcccccc,40)}}}}
 // stations
 for(const st of stations){const g=st.mesh.userData;g.rot.rotation.z+=dt*.15;g.lights.forEach((l,i)=>l.visible=Math.sin(t*4+i)>.2);const tg=G.m&&G.m.tg===st;g.zone.material.color.set(tg?0x4dff8a:0xffc84a);g.zone.material.opacity=.25+.15*Math.sin(t*3);
 const d=S.pos.distanceTo(_v.set(st.x,st.y,st.z));if(S.mustLeave===st&&d>320)S.mustLeave=null;if(!S.docked&&S.mustLeave!==st&&d<230&&!S.dead)dock(st);if(S.docked===st&&d>400)S.docked=null}
 if(S.docked)S.hp=Math.min(maxhp(),S.hp+30*dt);
 // soleils animés
-for(const s of suns){const u=s.mesh.userData,k=1+Math.sin(t*1.5+s.x)*.04;u.b.scale.setScalar(s.r*3.4*k);u.SU.tm.value=t}
+for(const s of suns){const u=s.mesh.userData,k=1+Math.sin(t*1.5+s.x)*.04;u.b.scale.setScalar(s.r*3.4*k);u.SU.tm.value=t;if(u.cor)u.cor.quaternion.copy(camera.quaternion)}
 for(const p of planets){const u=p.mesh.userData;if(u.cl)u.cl.rotation.y+=dt*.012;u.sph.rotation.y+=dt*.004;for(const m of u.moons)m.piv.rotation.y+=m.sp*dt}
 // missions
 if(G.m){const m=G.m;if(m.type=='exp'&&G.disc.has(m.tg.name))complete();else if(m.type=='chasse'&&G.kills-m.k0>=m.n)complete();else if(m.type=='boss'&&!m.spawned&&S.pos.distanceTo(_v.set(m.tg.x,m.tg.y,m.tg.z))<1700){m.spawned=1;const b=mkEnemy('boss',_v.clone(),z);en.push(b);m.tg=b.pos;toast('Le chef pirate t\'a repéré !');SFX.alarm()}}

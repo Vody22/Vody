@@ -1,7 +1,7 @@
 // ===== MODE COCKPIT : vue à la première personne, tableau de bord 3D avec écrans en direct =====
 let COCKPIT=false;try{COCKPIT=localStorage.getItem('sf-cockpit')=='1'}catch(e){}
 const CK={g:null,key:'',scr:null,t:0,lights:[]};
-const ckActive=()=>COCKPIT&&!S.dead&&!(S.docked&&TAB=='atelier'&&mode=='space');
+const ckActive=()=>COCKPIT&&!S.dead&&!atelierOn()&&!(typeof FOOT!='undefined'&&FOOT.on);
 function ckToggle(){COCKPIT=!COCKPIT;try{localStorage.setItem('sf-cockpit',COCKPIT?'1':'0')}catch(e){}ckBtn();toast(COCKPIT?'👁 Vue cockpit':'🎥 Vue extérieure');camInit=true;SFX.tick()}
 function ckBtn(){const b=$('cockb');b.classList.toggle('on',COCKPIT);b.textContent=COCKPIT?'🎥':'👁';b.title=COCKPIT?'Vue extérieure':'Vue cockpit'}
 $('cockb').addEventListener('pointerdown',e=>{e.preventDefault();ckToggle()});ckBtn();
@@ -68,7 +68,7 @@ const W2=WPN[curW()];x.fillStyle='#ffd257';x.font='800 13px system-ui';x.fillTex
 x.strokeStyle='rgba(90,220,255,.35)';x.lineWidth=1;for(const k of[1,.5]){x.beginPath();x.arc(cx,cy,R*k,0,TAU);x.stroke()}x.beginPath();x.moveTo(cx-R,cy);x.lineTo(cx+R,cy);x.moveTo(cx,cy-R);x.lineTo(cx,cy+R);x.stroke();
 const a=(t*2)%TAU;x.fillStyle='rgba(90,220,255,.18)';x.beginPath();x.moveTo(cx,cy);x.arc(cx,cy,R,a-.6,a);x.closePath();x.fill();
 const inv=S.q.clone().invert(),bl=(p,c,s)=>{const v=_v.set(p.x-S.pos.x,p.y-S.pos.y,p.z-S.pos.z).applyQuaternion(inv);const d=Math.hypot(v.x,v.z);if(d>RG*1.2)return;const k=Math.min(1,d/RG)*R/(d||1);x.fillStyle=c;x.beginPath();x.arc(cx+v.x*k,cy+v.z*k,s,0,TAU);x.fill()};
-if(mode=='space'){for(const st of stations)bl(st,'#ffc845',3);for(const e of en)bl(e.pos,'#ff4a4a',2.6)}else{const I=SURF.info();for(const T of I.tur)bl(T.pos,'#ff4a4a',2.6);for(const c2 of I.crys)bl(c2.pos,'#5ff',1.6)}
+if(mode=='space'){for(const su of suns){const v=_v.set(su.x-S.pos.x,su.y-S.pos.y,su.z-S.pos.z).applyQuaternion(inv),d=Math.hypot(v.x,v.z)||1,k=Math.min(R-6,d/RG*R)/d;x.fillStyle='#ffd27a';starPath(x,cx+v.x*k,cy+v.z*k,6,2.5);x.fill()}for(const st of stations)bl(st,'#ffc845',3);for(const e of en)bl(e.pos,'#ff4a4a',2.6)}else{const I=SURF.info();for(const T of I.tur)bl(T.pos,'#ff4a4a',2.6);for(const c2 of I.crys)bl(c2.pos,'#5ff',1.6)}
 if(typeof MP!='undefined'&&MP.room)for(const o of MP.others.values())if(o.pos)bl(o.pos,`hsl(${o.hue},85%,65%)`,2.6);if(G.m&&G.m.tg&&G.m.tg.x!=null)bl(G.m.tg,'#5f9',3);
 x.fillStyle='#fff';x.beginPath();x.moveTo(cx,cy-5);x.lineTo(cx-4,cy+4);x.lineTo(cx+4,cy+4);x.fill();x.fillStyle='#7fdcff';x.font='700 10px system-ui';x.textAlign='left';x.fillText('RADAR',8,15);S2.l.tx.needsUpdate=true}
 // droite : cible verrouillée

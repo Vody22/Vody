@@ -55,7 +55,7 @@ if(mode=='surf'){for(let s=20;s<bt;s+=20){const p=o.clone().addScaledVector(dir,
 const end=o.clone().addScaledVector(dir,bt),hit=!!best||bt<range-1;B.userData.U.hot.value=hot;
 placeBeam(B,o,end,(1+Math.random()*.18)*(1+hot*.5)*(hot>0&&Math.random()<hot*.4?.5:1),hit);
 if(hit&&Math.random()<.8){_lzc.set(col);_lz2.set(rv(1),rv(1),rv(1)).normalize().multiplyScalar(60+Math.random()*80);SPK.emit(end.x,end.y,end.z,_lz2.x,_lz2.y,_lz2.z,.3+Math.random()*.3,Math.min(1,_lzc.r+.4),Math.min(1,_lzc.g+.4),Math.min(1,_lzc.b+.4),.38)}
-if(best){const a=(LZ.acc.get(best)||0)+dt*per;if(a>=1.2){best.hit(a,end);LZ.acc.set(best,0);impactFX(end,col,.7)}else LZ.acc.set(best,a)}}
+if(best){const a=(LZ.acc.get(best)||0)+dt*per*(best.isAst||best.isDep?2.5:1);if(a>=1.2){best.hit(a,end);LZ.acc.set(best,0);impactFX(end,col,.7)}else LZ.acc.set(best,a)}}
 lzSound(1,LZ.heat)}
 // bourdonnement continu du laser (au lieu de petits bips)
 let LZA=null;

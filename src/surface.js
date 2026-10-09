@@ -13,7 +13,10 @@ let F=null,F_dome=null;const _a=new V3(),_b=new V3();
 function clear(){while(sc.children.length>3)sc.remove(sc.children[3]);}
 SURF.height=(x,z)=>F?F.h(x,z):0;
 SURF.enter=function(p,entry){clearWeapons();const r=rng(seedOf(p.x,p.y,p.z,7)),n1=vnoise(r,6),n2=vnoise(r,26),n3=vnoise(r,70),ty=ptype(p),hu=p.hue,lq=ty=='Océanique'?.5:ty=='Désertique'?.18:.33;clear();
-const h=(x,z)=>{const u=(x+HALF)/SWD,v=(z+HALF)/SWD,val=n1(u,v)*.62+n2(u,v)*.3+n3(u,v)*.08,e=Math.max(Math.abs(x),Math.abs(z))/HALF;return(val-lq)*AMP+(e>.82?Math.pow((e-.82)/.18,2)*380:0)};
+const h0=(x,z)=>{const u=(x+HALF)/SWD,v=(z+HALF)/SWD,val=n1(u,v)*.62+n2(u,v)*.3+n3(u,v)*.08,e=Math.max(Math.abs(x),Math.abs(z))/HALF;return(val-lq)*AMP+(e>.82?Math.pow((e-.82)/.18,2)*380:0)};
+// avant-poste : on cherche un terrain plat au sec près de la zone d'arrivée, puis on l'aplanit
+const OP=(()=>{let best=null;for(let k=0;k<90;k++){const a=r()*TAU,d=240+r()*420,x=Math.cos(a)*d,z=Math.sin(a)*d+200,y=h0(x,z);if(y<16)continue;let sl=0;for(const[dx,dz]of[[70,0],[-70,0],[0,70],[0,-70],[50,50],[-50,-50]])sl=Math.max(sl,Math.abs(h0(x+dx,z+dz)-y));if(!best||sl<best.sl)best={x,z,y,sl}}return best})();
+const h=(x,z)=>{const y=h0(x,z);if(!OP)return y;const d=Math.hypot(x-OP.x,z-OP.z);if(d>170)return y;const k=d<105?1:1-(d-105)/65,kk=k*k*(3-2*k);return y+(OP.y-y)*kk};
 const valAt=(x,z)=>{const u=(x+HALF)/SWD,v=(z+HALF)/SWD;return n1(u,v)*.62+n2(u,v)*.3+n3(u,v)*.08};
 // relief
 const geo=new THREE.PlaneGeometry(SWD,SWD,SEG,SEG).rotateX(-Math.PI/2),pos=geo.attributes.position,cols=new Float32Array(pos.count*3);
@@ -84,19 +87,19 @@ CLOUDC=ty=='Volcanique'?'60,44,38':ty=='Désertique'?'220,180,140':'238,242,248'
 // vaisseau et particules dans cette scène
 sc.add(ship,SPK.pts,FIRE.pts);SPK.clear();FIRE.clear();ship.traverse(o=>{if(o.isMesh&&!o.material.blending)o.castShadow=DESK});if(lmat.uniforms){lmat.uniforms.sky.value.copy(fogC).lerp(new THREE.Color(0xffffff),.15);lmat.uniforms.sunCol.value.copy(L.col)}for(const o of [...crys.map(c=>c.m),...arts.map(a=>a.m),...tur.map(T=>T.g)])o.traverse(m=>{if(m.isMesh)m.castShadow=DESK});
 initGrass(sc,h,ty,hu);const ang=new V3(S.pos.x-p.x,S.pos.y-p.y,S.pos.z-p.z).normalize();
-F={sunS,sunDir,clouds:CL,dome:F_dome,p,ty,lq,h,hu,terr,liq,lmat,crys,arts,tur,vents,wx,wm,wg,wp,wd,fog:sc.fog,fogC,storm:0,flash:0,ang,hemiI:hemi.intensity,onLiq:false};
+F={sunS,sunDir,clouds:CL,dome:F_dome,p,ty,lq,h,hu,terr,liq,lmat,crys,arts,tur,vents,wx,wm,wg,wp,wd,fog:sc.fog,fogC,storm:0,flash:0,ang,hemiI:hemi.intensity,onLiq:false,op:OP,HALF,zone};if(SURF.onEnter)SURF.onEnter(F,sc);
 for(const b of PB)rmPB(b);PB=[];for(const b of EB)b.m.parent&&b.m.parent.remove(b.m);EB=[];for(const d of DROPS)d.m.parent&&d.m.parent.remove(d.m);DROPS=[];for(const e of en)e.mesh.parent&&e.mesh.parent.remove(e.mesh);en=[];
 mode='surf';S.docked=null;if(entry){S.pos.set(rv(150),660,650);S.q.setFromEuler(new THREE.Euler(-.34,0,0));S.spd=190;fwd();S.vel.copy(_f).multiplyScalar(190)}else{S.pos.set(0,Math.max(0,h(0,0))+70,0);S.q.setFromEuler(new THREE.Euler(-.15,0,0));S.vel.set(0,0,0);S.spd=40}camInit=true;
 SFX.disc();toast('Atterrissage sur '+p.name+' — '+ty.toLowerCase()+' · '+WXN[wx].toLowerCase())};
-SURF.exit=function(dead){if(!F)return;clearWeapons();GRASS=null;const p=F.p;scene.add(ship,SPK.pts,FIRE.pts);SPK.clear();FIRE.clear();for(const b of PB)rmPB(b);PB=[];for(const b of EB)b.m.parent&&b.m.parent.remove(b.m);EB=[];
+SURF.exit=function(dead){if(!F)return;if(SURF.onExit)SURF.onExit(dead);clearWeapons();GRASS=null;const p=F.p;scene.add(ship,SPK.pts,FIRE.pts);SPK.clear();FIRE.clear();for(const b of PB)rmPB(b);PB=[];for(const b of EB)b.m.parent&&b.m.parent.remove(b.m);EB=[];
 if(!dead){S.pos.set(p.x,p.y,p.z).addScaledVector(F.ang,p.r*1.6+120);S.q.setFromUnitVectors(new V3(0,0,-1),F.ang);S.vel.copy(F.ang).multiplyScalar(80);S.spd=cruise();SFX.buy()}
 clear();F=null;mode='space';camInit=true;save()};
-SURF.update=function(dt){if(!F)return;if(S.ascent)ascentUpdate(dt);else if(!S.dead)fly(dt,{rate:1.15,minSpd:8,surf:true});if(!F)return;
+SURF.update=function(dt){if(!F)return;if(S.ascent)ascentUpdate(dt);else if(!S.dead){if(FOOT.on)footUpdate(dt,F);else fly(dt,{rate:1.15,minSpd:8,surf:true})}if(!F)return;if(!FOOT.on){
 // sol, plafond, bords
 const gy=Math.max(F.h(S.pos.x,S.pos.z),F.ty=='Glacée'?0:0)+6;if(S.pos.y<gy){S.pos.y=gy;if(S.vel.y<0){if(S.vel.y<-70){damage(5,'col');boom3(S.pos,10,0xbbaa88,40)}S.vel.y*=-.3}fwd();if(_f.y<-.2){_q.setFromAxisAngle(AX,dt*1.6);S.q.multiply(_q)}}
 if(S.pos.y>720&&!S.ascent){S.pos.y-=(S.pos.y-720)*dt*2;if(!F.ceilT||t-F.ceilT>5){F.ceilT=t;toast('Altitude maximale — appuie sur DÉCOLLER pour quitter')}}
 const lim=HALF*.9;if(Math.abs(S.pos.x)>lim||Math.abs(S.pos.z)>lim){S.pos.x=clamp(S.pos.x,-lim,lim);S.pos.z=clamp(S.pos.z,-lim,lim);S.vel.multiplyScalar(.5)}
-const ground=F.h(S.pos.x,S.pos.z);F.onLiq=ground<0&&S.pos.y<26;if(F.onLiq&&F.ty=='Volcanique'){damage(9*dt);if(Math.random()<dt*6)FIRE.emit(S.pos.x,S.pos.y-4,S.pos.z,rv(10),20,rv(10),.6,1,.5,.1,.5)}
+const ground=F.h(S.pos.x,S.pos.z);F.onLiq=ground<0&&S.pos.y<26;if(F.onLiq&&F.ty=='Volcanique'){damage(9*dt);if(Math.random()<dt*6)FIRE.emit(S.pos.x,S.pos.y-4,S.pos.z,rv(10),20,rv(10),.6,1,.5,.1,.5)}}
 // liquide animé
 if(F.ty=='Volcanique'){LAVA.offset.x=t*.008;LAVA.offset.y=t*.005;F.lmat.emissiveIntensity=.75+.25*Math.sin(t*1.7)}else if(F.ty!='Glacée'){RIP.offset.x=t*.012;RIP.offset.y=t*.007;const lp=F.liq.geometry.attributes.position;for(let i=0;i<lp.count;i++){const x=lp.getX(i),z=lp.getZ(i);lp.setY(i,Math.sin(x*.012+t*1.4)*1.6+Math.cos(z*.015+t*1.1)*1.3)}lp.needsUpdate=true}
 // geysers
@@ -106,7 +109,7 @@ if(v.er>0){v.er-=dt;for(let i=0;i<6;i++)FIRE.emit(v.pos.x+rv(4),v.pos.y+6,v.pos.
 for(const c of F.crys){c.m.rotation.y+=dt*1.5;c.m.position.y=c.y0+Math.sin(t*2+c.ph)*1.5;if(c.pos.distanceTo(S.pos)<16){if(cargoUsed()+2<=cap()){S.ore+=2;c.g=1;(G.loot[F.p.name]=G.loot[F.p.name]||[]).push(c.id);SFX.pick();boom3(c.pos,14,0x88ffff,50);sc.remove(c.m)}else if(!F.full){F.full=1;toast('Soute pleine — décolle pour vendre')}}}F.crys=F.crys.filter(c=>!c.g);
 for(const a of F.arts){a.m.rotation.y+=dt;a.m.rotation.x+=dt*.6;if(a.pos.distanceTo(S.pos)<20){a.g=1;(G.loot[F.p.name]=G.loot[F.p.name]||[]).push(a.id);G.cr+=a.rw;toast('Artefact ancien récupéré ! +'+a.rw+' ¢');SFX.win();boom3(a.pos,40,0xffd060,80,true);sc.remove(a.m)}}F.arts=F.arts.filter(a=>!a.g);
 for(const T of F.tur){if(T.dead)continue;T.head.lookAt(_a.copy(T.pos).multiplyScalar(2).sub(S.pos));const d=T.pos.distanceTo(S.pos);T.cd-=dt;if(d<560&&T.cd<=0&&!S.dead){T.cd=1.6;const dir=_b.copy(S.pos).addScaledVector(S.vel,d/380*.8).sub(T.pos).normalize();const m=mkEB(0xff5040);m.position.copy(T.pos);EB.push({m,v:dir.clone().multiplyScalar(380),l:2.2,dmg:8});if(d<800)SFX.eshoot()}}F.tur=F.tur.filter(T=>!T.dead);
-const TGS=[...F.tur,...mpTargets()];lock=findLock(TGS);fireW(dt,TGS);updPB(dt,TGS);updWeapons(dt,TGS);updEB(dt);
+const TGS=[...F.tur,...mpTargets(),...(SURF.extra?SURF.extra():[])];if(FOOT.on){lock=null;footTool(dt,TGS)}else{lock=findLock(TGS);fireW(dt,TGS)}updPB(dt,TGS);updWeapons(dt,TGS);updEB(dt);
 // météo
 F.storm=.5+.5*Math.sin(t*.25+F.hu);const st=F.storm,cp=camera.position,wd=F.wd,wp=F.wp,rain=F.wx=='pluie';
 for(let i=0;i<wd.length;i++){const q=wd[i];if(rain){q.y-=(320+q.s*120)*dt;q.x-=(30+50*st)*dt}else if(F.wx=='neige'){q.y-=(18+q.s*22)*dt;q.x+=Math.sin(t+q.s*10)*10*dt}else if(F.wx=='sable'){q.x+=(160+q.s*220)*st*dt+20*dt;q.y+=Math.sin(t*2+q.s*9)*6*dt}else if(F.wx=='cendres'){q.y+=(q.s<.3?30:-14)*dt;q.x+=8*dt}else{q.x+=Math.sin(t*.5+q.s*7)*6*dt;q.y+=Math.cos(t*.4+q.s*5)*6*dt}
@@ -115,7 +118,7 @@ const x=cp.x+q.x,y=cp.y+q.y,z=cp.z+q.z;if(rain){wp.set([x,y,z,x+3+st*4,y+9,z],i*
 if(F.wx!='pluie'&&F.wx!='neige'&&F.wx!='sable'&&F.wm.material)F.wm.material.opacity=F.wx=='paillettes'?.5+.5*Math.sin(t*5):.9;
 if(F.wx=='sable'){F.fog.near=60+(1-st)*160;F.fog.far=500+(1-st)*900}
 if(F.ty=='Jungle'&&Math.random()<dt*.1){F.flash=1;setTimeout(()=>SFX.boom(),200+Math.random()*600)}F.flash=Math.max(0,F.flash-dt*3);hemi.intensity=F.hemiI+F.flash*2.2;
-dl.position.copy(S.pos).addScaledVector(F.sunDir,1300);F.sunS.position.copy(camera.position).addScaledVector(F.sunDir,4000);SURF.sunPos=F.sunS.position;updClouds(dt);dl.target.position.copy(S.pos);if(F.lmat.uniforms){const u=F.lmat.uniforms;u.fogColor.value.copy(F.fog.color);u.fogNear.value=F.fog.near;u.fogFar.value=F.fog.far;u.sunDir.value.copy(F.sunDir)}F.dome.position.copy(camera.position);
+dl.position.copy(S.pos).addScaledVector(F.sunDir,1300);F.sunS.position.copy(camera.position).addScaledVector(F.sunDir,4000);SURF.sunPos=F.sunS.position;updClouds(dt);dl.target.position.copy(S.pos);if(SURF.tick)SURF.tick(dt,F);if(F.lmat.uniforms){const u=F.lmat.uniforms;u.fogColor.value.copy(F.fog.color);u.fogNear.value=F.fog.near;u.fogFar.value=F.fog.far;u.sunDir.value.copy(F.sunDir)}F.dome.position.copy(camera.position);
 if(S.hp<=0)die()};
 function updClouds(dt){if(!F)return;let w=0;const cp=camera.position;for(const c of F.clouds){c.s.position.x+=6*dt;if(c.s.position.x>HALF)c.s.position.x-=HALF*2;const d=c.s.position.distanceTo(cp),r0=c.sz*.42;if(d<r0)w=Math.max(w,1-d/r0)}CLOUDW=Math.min(1,w*1.6)}
 SURF.info=()=>F&&{name:F.p.name,ty:F.ty,wx:WXN[F.wx],cr:F.crys.length,ar:F.arts.length,tu:F.tur.length,lava:F.onLiq&&F.ty=='Volcanique',gey:F.vents.some(v=>v.er>0&&Math.hypot(S.pos.x-v.pos.x,S.pos.z-v.pos.z)<34),arts:F.arts,tur:F.tur,crys:F.crys}})();

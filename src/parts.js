@@ -1,5 +1,6 @@
 // ===== ATELIER : pièces de vaisseau achetables une à une (visuels + boutique) =====
 let ASLOT='paint',PREV=null,ORB=0;
+const atelierOn=()=>!!S.docked&&TAB=='atelier'&&!S.dead&&(mode=='space'||(S.docked.ground&&!S.docked.foot));
 const GM={};function gm(c,op=1){const k=c+'|'+op;return GM[k]||(GM[k]=new THREE.MeshBasicMaterial({color:c,transparent:op<1,opacity:op,blending:op<1?ADDB:THREE.NormalBlending,depthWrite:op>=1}))}
 const shipParts=()=>PREV?{...G.parts,[PREV.s]:PREV.id}:G.parts;
 const cyl=(r1,r2,h,s=10,open=false)=>new THREE.CylinderGeometry(r1,r2,h,s,1,open).rotateX(Math.PI/2);
@@ -100,8 +101,8 @@ const r=e.target.closest('[data-aprev]');if(!r)return;const[s,id]=r.dataset.apre
 // ----- par image : bouclier, réparation, aperçu, canons -----
 function updParts(dt){if(ARGENT_ILLIMITE)G.cr=CR_INF;const ms=PM('sh');if(S.dead||S.docked)S.sh=ms;else if(ms>0){if(S.sh==null)S.sh=ms;if(t-(S.shT||-9)>3)S.sh=Math.min(ms,S.sh+dt*9*PM('shr'))}else S.sh=0;
 const rg=PM('regen');if(rg&&!S.dead&&S.hp<maxhp())S.hp=Math.min(maxhp(),S.hp+rg*dt);
-if(PREV&&(!S.docked||TAB!='atelier'||mode!='space')){PREV=null;rebuildShip();HC.shopV=null}
-document.body.classList.toggle('atelier',!!S.docked&&TAB=='atelier'&&mode=='space');if(S.docked&&!updParts.seen){updParts.seen=1;let k=0;try{k=localStorage.getItem('sf-atelier')}catch(e){}if(!k){setTimeout(()=>toast('🔧 Nouveau : l\'Atelier ! Personnalise ton vaisseau pièce par pièce'),1800);try{localStorage.setItem('sf-atelier','1')}catch(e){}}}
+if(PREV&&!atelierOn()){PREV=null;rebuildShip();HC.shopV=null}
+document.body.classList.toggle('atelier',atelierOn());if(S.docked&&!updParts.seen){updParts.seen=1;let k=0;try{k=localStorage.getItem('sf-atelier')}catch(e){}if(!k){setTimeout(()=>toast('🔧 Nouveau : l\'Atelier ! Personnalise ton vaisseau pièce par pièce'),1800);try{localStorage.setItem('sf-atelier','1')}catch(e){}}}
 const ud=ship.userData;if(ud.blink)ud.blink.visible=Math.sin(t*6)>0;updGuns(dt)}
 // pièces partagées en multijoueur : un chiffre par emplacement
 const partsCode=P=>PSLOTS.map(s=>Math.max(0,Object.keys(PARTS[s].o).indexOf((P||{})[s]||'std'))).join('');

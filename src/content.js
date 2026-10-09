@@ -31,9 +31,9 @@ function fireW(dt,TG){const w=curW();if(w=='canon'){LZ.on=0;fire(dt);return}fcd-
 if(w=='laser'){if(LZ.over<=0)LZ.on=1;return}if(fcd>0)return;const am=WPN[w].am;if(G.ammo[am]<=0){fcd=1.2;toast('Plus de '+(am=='missile'?'missiles':'mines')+' — achète-en en station');return}
 G.ammo[am]--;if(w=='missile'){fcd=.5;launchMissile()}else{fcd=.7;dropMine()}}
 function launchMissile(){fwd();const side=(MIS.length%2?1:-1)*3.5;_c1.set(side,-1,-4).applyQuaternion(S.q);const m=new THREE.Mesh(MISG,MISM);m.position.copy(S.pos).add(_c1);const g=sprite(0xffa040,7);g.position.z=1.8;m.add(g);curScene().add(m);
-mpShot(m.position,_f,'m');MIS.push({m,pos:m.position,vel:_f.clone().multiplyScalar(S.spd*.6+120).add(_c1.clone().normalize().multiplyScalar(40)),tg:lock,l:6,arm:.15});SFX.eshoot()}
+mpShot(m.position,_f,'m');MIS.push({m,pos:m.position,vel:_f.clone().multiplyScalar(S.spd*.6+120).add(_c1.clone().normalize().multiplyScalar(40)),tg:lock,l:6,arm:.15});SFX.missile()}
 function dropMine(){fwd();const m=new THREE.Mesh(MINEG,MINEM);for(let i=0;i<6;i++){const sp=new THREE.Mesh(new THREE.ConeGeometry(.35,1.4,5),MINEM);const d=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]][i];sp.position.set(d[0]*1.6,d[1]*1.6,d[2]*1.6);sp.lookAt(d[0]*5,d[1]*5,d[2]*5);sp.rotateX(Math.PI/2);m.add(sp)}
-const l=sprite(0xff3030,6);m.add(l);m.position.copy(S.pos).addScaledVector(_f,-14);curScene().add(m);MINES.push({m,pos:m.position,vel:_f.clone().multiplyScalar(S.spd*.15),arm:1,l:45,blink:l});SFX.tick()}
+const l=sprite(0xff3030,6);m.add(l);m.position.copy(S.pos).addScaledVector(_f,-14);curScene().add(m);MINES.push({m,pos:m.position,vel:_f.clone().multiplyScalar(S.spd*.15),arm:1,l:45,blink:l});SFX.mine()}
 function aoe(p,R,dmg,TG){for(const T of TG){if(T.dead||T.gone)continue;const d=T.pos.distanceTo(p);if(d<R+(T.r||0))T.hit(dmg*(1-.5*d/R),T.pos.clone())}}
 function updWeapons(dt,TG){const sc=curScene();
 for(const M of MIS){M.l-=dt;M.arm-=dt;let tg=M.tg;if(tg&&(tg.dead||tg.gone||(tg.hp!=null&&tg.hp<=0)))tg=M.tg=null;const sp=Math.min(720,M.vel.length()+500*dt);
@@ -53,9 +53,9 @@ function clearWeapons(){for(const M of MIS)M.m.parent&&M.m.parent.remove(M.m);fo
 function buyWeapon(id){const W=WPN[id];if(G.w.includes(id)){G.wi=G.w.indexOf(id);toast(W.ic+' '+W.n+' équipé');return}if(G.cr<W.price){toast('Pas assez de crédits');return}G.cr-=W.price;G.w.push(id);G.wi=G.w.length-1;if(W.am)G.ammo[W.am]+=AMMO[W.am].q;if(id=='laser')rebuildShip();toast('Nouvelle arme : '+W.n+' !');SFX.win();save()}
 function buyAmmo(am){const A2=AMMO[am];if(G.cr<A2.price){toast('Pas assez de crédits');return}G.cr-=A2.price;G.ammo[am]+=A2.q;SFX.coin()}
 // ----- commerce -----
-const GOODS=[{id:'food',n:'Nourriture',ic:'🌾',p:22},{id:'water',n:'Eau pure',ic:'💧',p:15},{id:'fuel',n:'Carburant',ic:'⛽',p:32},{id:'metal',n:'Alliages',ic:'🔩',p:48},{id:'med',n:'Médicaments',ic:'💊',p:70},{id:'elec',n:'Électronique',ic:'🔌',p:95},{id:'lux',n:'Produits de luxe',ic:'💎',p:170}];
-const ECON={Agricole:{food:.5,water:.65,fuel:1.15,metal:1.2,med:1.25,elec:1.35,lux:1.3},Minière:{food:1.35,water:1.3,fuel:.9,metal:.55,med:1.2,elec:1.15,lux:1.1},Industrielle:{food:1.15,water:1,fuel:.8,metal:1.25,med:1,elec:.75,lux:1.05},'High-tech':{food:1.25,water:1.15,fuel:1.1,metal:1.3,med:.65,elec:.55,lux:1.2},Luxe:{food:1.1,water:1.2,fuel:1.05,metal:1,med:1.15,elec:1.25,lux:.6}};
-function stEcon(st){const k=Object.keys(ECON);return st.n=='Base Alpha'?'Industrielle':k[Math.floor(h3(st.x|0,st.y|0,st.z|0,77)*k.length)%k.length]}
+const GOODS=[{id:'food',n:'Nourriture',ic:'🌾',p:22},{id:'water',n:'Eau pure',ic:'💧',p:15},{id:'fuel',n:'Carburant',ic:'⛽',p:32},{id:'metal',n:'Alliages',ic:'🔩',p:48},{id:'med',n:'Médicaments',ic:'💊',p:70},{id:'elec',n:'Électronique',ic:'🔌',p:95},{id:'lux',n:'Produits de luxe',ic:'💎',p:170},{id:'fer',n:'Minerai de fer',ic:'🪨',p:16,min:1},{id:'titane',n:'Titane',ic:'🔷',p:32,min:1},{id:'cristal',n:'Cristaux d\'énergie',ic:'💠',p:48,min:1},{id:'or',n:'Or',ic:'🥇',p:75,min:1}];
+const ECON={Agricole:{food:.5,water:.65,fuel:1.15,metal:1.2,med:1.25,elec:1.35,lux:1.3,fer:1.1,titane:1.05},Minière:{food:1.35,water:1.3,fuel:.9,metal:.55,med:1.2,elec:1.15,lux:1.1,fer:.6,titane:.7,cristal:.85,or:.9},Industrielle:{food:1.15,water:1,fuel:.8,metal:1.25,med:1,elec:.75,lux:1.05,fer:1.35,titane:1.3,or:1.05},'High-tech':{food:1.25,water:1.15,fuel:1.1,metal:1.3,med:.65,elec:.55,lux:1.2,cristal:1.45,or:1.2,titane:1.15},Luxe:{food:1.1,water:1.2,fuel:1.05,metal:1,med:1.15,elec:1.25,lux:.6,or:1.5,cristal:1.1}};
+function stEcon(st){if(st.econ)return st.econ;const k=Object.keys(ECON);return st.n=='Base Alpha'?'Industrielle':k[Math.floor(h3(st.x|0,st.y|0,st.z|0,77)*k.length)%k.length]}
 function gPrice(st,g){const e=ECON[stEcon(st)][g.id]||1,per=Math.floor((G.time||0)/240),f=.9+.2*h3(st.x|0,g.p,per,78);return Math.max(2,Math.round(g.p*e*f))}
 const sellPrice=(st,g)=>Math.max(1,Math.round(gPrice(st,g)*.9));
 function cargoUsed(){let n=S.ore;for(const k in G.cargo)n+=G.cargo[k];return n}
@@ -72,7 +72,7 @@ if(TAB=='weap')return Object.entries(WPN).map(([id,W])=>{const own=G.w.includes(
 if(TAB=='market'){const ec=stEcon(st);return `<div class="hint">Économie <b>${ec}</b> · Soute ${cargoUsed()}/${cap()}</div>`+GOODS.map(g=>{const p=gPrice(st,g),sp=sellPrice(st,g),e=ECON[ec][g.id],have=G.cargo[g.id]||0,tag=e<.8?'<i class="good">▼ bon prix</i>':e>1.2?'<i class="bad">▲ se vend cher</i>':'';
 return row(`<div><b>${g.ic} ${g.n}</b> ${tag}<small>Achat ${p} ¢ · Vente ${sp} ¢${have?` · en soute : ${have}`:''}</small></div>`,`<button data-act="trade:${g.id}:1">+1</button><button data-act="trade:${g.id}:5">+5</button>${have?`<button data-act="trade:${g.id}:-${have}" class="sell">Vendre</button>`:''}`)}).join('')}
 return null}
-function updShop(){if(!S.docked||mode!='space')return;for(const b of $('tabs').children)b.classList.toggle('on',b.dataset.tab==TAB);const st=TAB=='station';$('tabStation').style.display=st?'flex':'none';$('tabX').style.display=st?'none':'block';
+function updShop(){if(!S.docked||(mode!='space'&&!S.docked.ground))return;const ft=!!S.docked.foot;if(ft&&TAB!='market'&&TAB!='weap')TAB='market';for(const b of $('tabs').children){b.classList.toggle('on',b.dataset.tab==TAB);b.style.display=ft&&b.dataset.tab!='market'&&b.dataset.tab!='weap'?'none':''}const st=TAB=='station';$('tabStation').style.display=st?'flex':'none';$('tabX').style.display=st?'none':'block';
 if(!st){const v=shopView()+'|'+G.cr;if(HC.shopV!==v){HC.shopV=v;$('tabX').innerHTML=shopView()}}}
 // ----- commandes armes -----
 addEventListener('keydown',e=>{if(e.repeat||e.target.tagName=='INPUT')return;if(e.code=='KeyQ'||e.code=='Tab'){cycleW(1);e.preventDefault()}});

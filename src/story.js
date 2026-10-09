@@ -182,4 +182,12 @@ function updContentAlways(dt){updDlg(dt);updMusic();bossBar();if(MAP.open&&Math.
 function contentInfo(){let s='';const c=SG()&&SG().ch<8&&CHAPTERS[SG().ch];if(c)s+=`<span style="color:#c9f">★ ${c.txt()}</span>`;if(SG()&&SG().ch==1&&scanT>0)s+=` <b style="color:#c9f">scan ${Math.min(100,scanT/3*100|0)}%</b>`;
 if(EV){s+=(s?'<br>':'')+`<span style="color:#ff9a40">⚠ ${EVN[EV.ty]}${EV.ty=='convoy'?` — protège le convoi (${EV.pir>0?EV.pir+' pirates':'sauvé'})`:EV.ty=='wreck'?(EV.scan>0?` — fouille ${Math.min(100,EV.scan/3*100|0)}%`:' — approche-toi pour fouiller'):EV.ty=='hole'?' — approche-toi sans te faire aspirer':''}</span>`}return s}
 function contentOverlay(){if(S.dead||mode=='surf'&&!(SG()&&SG().ch==2))return;const tg=storyTarget();if(tg&&!(SG().ch==7))edgeMarker(tg,'#c890ff','','★');if(EV&&EV.pos&&EV.ty!='meteor')edgeMarker(EV.pos,'#ff9a40','','⚠');if(mode=='surf'&&fragItem)edgeMarker(fragItem.pos,'#c890ff','Fragment','★')}
-function spaceTargets(){const A=asts.map(a=>{a.max=1300;a.cone=.16;a.w=1;a.hit=a.hit||((d,p)=>{a.hp-=d;boom3(p,5,0xdddddd,35);SFX.tick();if(a.hp<=0&&!a.gone){a.gone=1;boom3(a.pos,20,0xbbbbbb,70,true);SFX.rock();spawnDrops(a.pos,(1+(a.r/14|0))+(a.ore?2:0));killAst(a)}});return a});return[...en,...bossTargets(),...evTargets(),...mpTargets(),...A]}
+function spaceTargets(){const A=asts.map(a=>{a.max=1300;a.cone=.16;a.w=1;a.isAst=1;a.hit=a.hit||((d,p)=>astHit(a,d,p));return a});return[...en,...bossTargets(),...evTargets(),...mpTargets(),...A]}
+
+// ----- minage des astéroïdes : chaque astéroïde contient un minerai, les gros se brisent en fragments -----
+function astMin(a){if(a.min)return a.min;const h=h3(a.id|0,a.v|0,a.r|0,55);return a.min=a.ore?(h<.45?'cristal':h<.8?'or':'titane'):(h<.7?'fer':'titane')}
+function astHit(a,d,p){a.hp-=d;const c=new THREE.Color(MINC[astMin(a)]);for(let i=0;i<5;i++){const v=new V3(rv(1),rv(1),rv(1)).normalize().multiplyScalar(40+Math.random()*60);SPK.emit(p.x,p.y,p.z,v.x,v.y,v.z,.4,c.r,c.g,c.b,.4)}SFX.mineTick();
+if(a.hp<=0&&!a.gone){a.gone=1;boom3(a.pos,20,0xbbbbbb,70,true);SFX.rock();const mn=astMin(a);spawnDrops(a.pos,(1+(a.r/12|0))+(a.ore?2:0),mn);
+if(a.r>16&&!a.frag)for(let k=0;k<2+(Math.random()<.5);k++){const r2=a.r*(.38+Math.random()*.14),m=new THREE.Mesh(AGEO[(a.v+k+1)%AGEO.length],AMAT[a.m]);m.scale.setScalar(r2);m.position.copy(a.pos).add(new V3(rv(a.r*.5),rv(a.r*.5),rv(a.r*.5)));scene.add(m);
+const F2={id:'f'+Math.random(),r:r2,v:a.v,m:a.m,ore:a.ore,min:mn,frag:1,mesh:m,pos:m.position,hp:r2/5,ck:a.ck,sp:(Math.random()-.5)*1.4,vel:new V3(rv(1),rv(1),rv(1)).normalize().multiplyScalar(25+Math.random()*25)};const L=SMALL.get(a.ck);if(L)L.list.push(F2);asts.push(F2)}
+killAst(a)}}

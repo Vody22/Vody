@@ -2,7 +2,7 @@
 const CS=4000,CDATA=new Map();
 function cdata(cx,cy,cz){const k=cx+','+cy+','+cz;let c=CDATA.get(k);if(c)return c;const r=rng(seedOf(cx,cy,cz,1)),ox=cx*CS,oy=cy*CS,oz=cz*CS,home=!cx&&!cy&&!cz,disk=Math.abs(cy)<=1;c={k,cx,cy,cz,pl:null,st:null,sun:null,ast:[]};
 const P=()=>({x:ox+700+r()*(CS-1400),y:oy+700+r()*(CS-1400),z:oz+700+r()*(CS-1400)});
-if(!home&&disk&&r()<.3){const q=P();c.pl={...q,r:280+r()*380,hue:r()*360,ring:r()<.28,name:NA[r()*10|0]+SU[r()*6|0]+'-'+(Math.abs(cx*7+cz*13+cy*3)%90+10)};c.pl.y=oy+CS/2+(r()-.5)*1600}
+if(!home&&disk&&r()<.3){const q=P();q.x=ox+1200+(q.x-ox-700)/(CS-1400)*(CS-2400);q.z=oz+1200+(q.z-oz-700)/(CS-1400)*(CS-2400);c.pl={...q,r:560+r()*560,hue:r()*360,ring:r()<.28,name:NA[r()*10|0]+SU[r()*6|0]+'-'+(Math.abs(cx*7+cz*13+cy*3)%90+10)};c.pl.y=oy+CS/2+(r()-.5)*1600}
 if(home)c.st={x:0,y:0,z:0,n:'Base Alpha'};else if(disk&&r()<.2){const q=P();q.n='Station '+NA[r()*10|0]+(Math.abs(cx*3+cz*5)%9+1);if(!c.pl||Math.hypot(q.x-c.pl.x,q.y-c.pl.y,q.z-c.pl.z)>c.pl.r+700)c.st=q}
 const field=r()<.18,n=field?22+r()*16|0:(disk?4:1)+r()*8|0,fc=P();for(let i=0;i<n;i++){const a=field?{x:fc.x+(r()-.5)*1500,y:fc.y+(r()-.5)*600,z:fc.z+(r()-.5)*1500}:P();a.r=8+r()*28;a.v=r()*8|0;a.m=r()*4|0;a.ore=r()<.3;a.rx=r()*TAU;a.ry=r()*TAU;a.sp=(r()-.5)*.6;
 if(home&&Math.hypot(a.x,a.y,a.z)<700)continue;if(c.pl&&Math.hypot(a.x-c.pl.x,a.y-c.pl.y,a.z-c.pl.z)<c.pl.r+a.r+80)continue;a.id=i;c.ast.push(a)}

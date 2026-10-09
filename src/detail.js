@@ -41,12 +41,12 @@ const m=new THREE.InstancedMesh(BLADE,mat,n);m.setColorAt(0,new THREE.Color(1,1,
 const base=ty=='Désertique'?[38,.35,.42]:ty=='Cristalline'?[hu+60,.55,.55]:ty=='Océanique'?[95,.45,.3]:[hu,.5,.28];
 GRASS={m,h,step,R,ty,base,ck:''};}
 const _gd=new THREE.Object3D(),_gc=new THREE.Color();
-function updGrass(){if(!GRASS)return;const G2=GRASS,cp=camera.position,cx=Math.round(cp.x/(G2.step*6)),cz=Math.round(cp.z/(G2.step*6)),k=cx+','+cz;if(k==G2.ck)return;G2.ck=k;
-const ox=cx*G2.step*6,oz=cz*G2.step*6,R=G2.R,st=G2.step;let i=0;const m=G2.m,max=m.instanceMatrix.count;
+function updGrass(){if(!GRASS)return;const G2=GRASS,cp=camera.position,cx=Math.round(cp.x/(G2.step*6)),cz=Math.round(cp.z/(G2.step*6)),k=cx+','+cz;
+const fk=(typeof FOOT!='undefined'&&FOOT.on)?.42:1;if(G2.fk!==fk){G2.fk=fk;G2.ck=k+'*'}else if(k==G2.ck.replace('*',''))return;G2.ck=k;const ox=cx*G2.step*6,oz=cz*G2.step*6,R=G2.R,st=G2.step;let i=0;const m=G2.m,max=m.instanceMatrix.count;
 for(let gx=Math.floor((ox-R)/st);gx<=Math.ceil((ox+R)/st);gx++)for(let gz=Math.floor((oz-R)/st);gz<=Math.ceil((oz+R)/st);gz++){if(i>=max)break;
 const jx=h3(gx,gz,0,41),jz=h3(gx,gz,0,42),x=(gx+jx)*st,z=(gz+jz)*st;if((x-ox)**2+(z-oz)**2>R*R)continue;const y=G2.h(x,z);if(y<3)continue;
 const sl=Math.abs(G2.h(x+2,z)-y)+Math.abs(G2.h(x,z+2)-y);if(sl>2.2)continue;const dens=noise3(x*.02,z*.02,0,43);if(dens<(G2.ty=='Désertique'?.55:.32))continue;
-const s=(G2.ty=='Désertique'?1.2:1.8)+h3(gx,gz,1,44)*2.6*(dens+.3);_gd.position.set(x,y-.2,z);_gd.rotation.set(0,h3(gx,gz,2,45)*TAU,0);_gd.scale.set(s*1.4,s,s*1.4);_gd.updateMatrix();m.setMatrixAt(i,_gd.matrix);
+const s=((G2.ty=='Désertique'?1.2:1.8)+h3(gx,gz,1,44)*2.6*(dens+.3))*G2.fk;_gd.position.set(x,y-.2,z);_gd.rotation.set(0,h3(gx,gz,2,45)*TAU,0);_gd.scale.set(s*1.4,s,s*1.4);_gd.updateMatrix();m.setMatrixAt(i,_gd.matrix);
 const b=G2.base,v=h3(gx,gz,3,46);_gc.setHSL((((b[0]+(v-.5)*30)%360)+360)%360/360,b[1],b[2]*(.75+v*.5)+(dens-.5)*.08);m.setColorAt(i,_gc);i++}
 m.count=i;m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true}
 // ----- traînées des réacteurs -----
