@@ -45,7 +45,7 @@ TRX.pend.set(id,{to,it,q,p,exp:Date.now()+120e3});trSend(to,'offer',{id,it,q,p})
 function trRefund(id,why){const o=TRX.pend.get(id);if(!o)return;TRX.pend.delete(id);const room=cap()-cargoUsed(),k=Math.min(o.q,room);if(k)G.cargo[o.it]=(G.cargo[o.it]||0)+k;if(o.q-k>0)G.stash[o.it]=(G.stash[o.it]||0)+(o.q-k);toast(why+' — marchandise récupérée');trRender()}
 function trAccept(id){const o=TRX.inc.get(id);if(!o)return;if(G.cr<o.p){toast('Pas assez de crédits');return}if(cargoUsed()+o.q>cap()){toast('Pas assez de place dans la soute');return}G.cr-=o.p;G.cargo[o.it]=(G.cargo[o.it]||0)+o.q;TRX.inc.delete(id);trSend(o.from,'acc',{id});toast('🤝 Échange conclu : +'+o.q+' '+matG(o.it).n);SFX.coin();save();trRender()}
 function trRefuse(id){const o=TRX.inc.get(id);if(!o)return;TRX.inc.delete(id);trSend(o.from,'ref',{id});trRender()}
-function trIn(o,list){const last=TRX.last.get(o.peer)||0;let mx=last;for(const m of list){if(!m||typeof m.i!='number'||m.i<=last||m.to!==MP.me)continue;mx=Math.max(mx,m.i);const g=GOODS.find(x=>x.id==m.it);
+function trIn(o,list){const last=TRX.last.get(o.peer)||0;let mx=last;for(const m of list){if(!m||typeof m.i!='number'||m.i<=last||m.to!==MP.me)continue;mx=Math.max(mx,m.i);const g=GOODS.find(x=>x.id==m.it)||(window.ILLG||[]).find(x=>x.id==m.it);
 if(m.ty=='offer'&&g){const q=clamp(m.q|0,1,999),p=clamp(m.p|0,0,1e7);TRX.inc.set(m.id,{from:o.peer,nick:mpName(o),it:m.it,q,p,exp:Date.now()+120e3});toast('📨 '+mpName(o)+' te propose '+q+' '+g.n+(p?' pour '+fmt(p)+' ¢':' (cadeau)'));SFX.disc();trRender(true)}
 else if(m.ty=='acc'){const P=TRX.pend.get(m.id);if(P){TRX.pend.delete(m.id);G.cr+=P.p;toast('🤝 '+mpName(o)+' a accepté : +'+fmt(P.p)+' ¢');SFX.coin();save();trRender()}}
 else if(m.ty=='ref')trRefund(m.id,mpName(o)+' a refusé')}TRX.last.set(o.peer,Math.max(mx,list.reduce((a,m)=>Math.max(a,m&&m.i||0),0)))}
@@ -58,7 +58,7 @@ if(TRX.pend.size)h+=`<div class="psec"><b class="pt">En attente</b><small>${[...
 el.innerHTML=h;$('trx').onclick=()=>{el.style.display='none'};el.querySelectorAll('[data-ta]').forEach(b=>b.onclick=()=>trAccept(b.dataset.ta));el.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>trRefuse(b.dataset.tr));
 const go=$('trgo');if(go)go.onclick=()=>trOffer($('trto').value,$('trit').value,+$('trq').value,+$('trp').value)}
 // ---------- réseau : champs en plus dans la présence ----------
-function mpExtraOut(){const o={tr:TRX.out.slice(-6)};if(WB.myD>0)o.wb={k:WB.k,d:Math.round(WB.myD)};if(G.gm)o.gm={id:G.gm.id,n:G.gm.n,exp:G.gm.exp,k:G.gm.k,host:G.gm.host?1:0};return o}
+function mpExtraOut(){let o;try{o={tr:TRX.out.slice(-6)}}catch(e){return{}}if(WB.myD>0)o.wb={k:WB.k,d:Math.round(WB.myD)};if(G.gm)o.gm={id:G.gm.id,n:G.gm.n,exp:G.gm.exp,k:G.gm.k,host:G.gm.host?1:0};return o}
 {const _mpp=mpPeer;mpPeer=function(p){_mpp(p);if(p.kind!='viewer'||p.sameTab)return;const o=MP.others.get(p.peer),pr=p.presence||{};if(!o)return;
 if(pr.wb&&pr.wb.k===WB.k)WB.others.set(p.peer,clamp(+pr.wb.d||0,0,WB_HP*2));
 o.gm=pr.gm&&typeof pr.gm.id=='string'?{id:pr.gm.id.slice(0,40),n:clamp(pr.gm.n|0,1,30),exp:+pr.gm.exp||0,k:clamp(pr.gm.k|0,0,99),host:!!pr.gm.host}:null;

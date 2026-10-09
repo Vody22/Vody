@@ -1,7 +1,7 @@
 // ===== MODE COCKPIT : vue à la première personne, tableau de bord 3D avec écrans en direct =====
 let COCKPIT=false;try{COCKPIT=localStorage.getItem('sf-cockpit')=='1'}catch(e){}
 const CK={g:null,key:'',scr:null,t:0,lights:[]};
-const ckActive=()=>COCKPIT&&!S.dead&&!atelierOn()&&!(typeof FOOT!='undefined'&&FOOT.on);
+const ckActive=()=>COCKPIT&&!S.dead&&mode!='int'&&!atelierOn()&&!(typeof FOOT!='undefined'&&FOOT.on);
 function ckToggle(){COCKPIT=!COCKPIT;try{localStorage.setItem('sf-cockpit',COCKPIT?'1':'0')}catch(e){}ckBtn();toast(COCKPIT?'👁 Vue cockpit':'🎥 Vue extérieure');camInit=true;SFX.tick()}
 function ckBtn(){const b=$('cockb');b.classList.toggle('on',COCKPIT);b.textContent=COCKPIT?'🎥':'👁';b.title=COCKPIT?'Vue extérieure':'Vue cockpit'}
 $('cockb').addEventListener('pointerdown',e=>{e.preventDefault();ckToggle()});ckBtn();

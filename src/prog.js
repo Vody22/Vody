@@ -31,7 +31,7 @@ function giveBlueprint(){const all=Object.keys(CRAFT).filter(k=>!G.bp.includes(k
 const k=all[Math.random()*all.length|0];G.bp.push(k);toast('📐 Plan trouvé : '+bpName(k)+' — à fabriquer dans l\'onglet Fabrication');SFX.win();gainXP(40);save()}
 giveRarePart=giveBlueprint;
 // ----- matériaux : soute + entrepôt -----
-const matG=id=>GOODS.find(g=>g.id==id)||{n:id,ic:'▫'};
+const matG=id=>GOODS.find(g=>g.id==id)||(window.ILLG||[]).find(g=>g.id==id)||(window.RAREG||[]).find(g=>g.id==id)||{n:id,ic:'▫'};
 const haveMat=id=>(G.cargo[id]||0)+(G.stash[id]||0);
 const stashUsed=()=>Object.values(G.stash).reduce((a,b)=>a+b,0);
 function useMats(m){for(const[id,q]of Object.entries(m)){let n=q;const c=Math.min(n,G.cargo[id]||0);if(c){G.cargo[id]-=c;n-=c;if(!G.cargo[id])delete G.cargo[id]}if(n>0){G.stash[id]-=n;if(G.stash[id]<=0)delete G.stash[id]}}}

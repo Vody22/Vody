@@ -53,7 +53,23 @@ terminal:'<rect x="3" y="4.5" width="18" height="13" rx="1"/><path d="M7 9l3 2.5
 leaf:'<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19l8-8"/>',
 weather:'<path d="M7 17.5h10a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 17.5z"/>',
 pad:'<path d="M3 15l9 4 9-4-9-4z"/><path d="M12 11V4M9 6.5l3-2.5 3 2.5"/>',
-user:'<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>'};
+user:'<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>',
+book:'<path d="M5 4.5h11.5a2 2 0 0 1 2 2V20H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11.5M9 8.5h6M9 11.5h4"/>',
+trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H4.5a3 3 0 0 0 3.5 4M16 6h3.5a3 3 0 0 1-3.5 4M12 13v4M8.5 20h7M10 17h4"/>',
+skull:'<path d="M12 3a7 7 0 0 0-7 7c0 2.6 1.3 4.2 3 5.2V19h8v-3.8c1.7-1 3-2.6 3-5.2a7 7 0 0 0-7-7z"/><circle cx="9.3" cy="10.5" r="1.4"/><circle cx="14.7" cy="10.5" r="1.4"/><path d="M10.5 19v-2M13.5 19v-2"/>',
+squad:'<path d="M12 4.5l3 4.5H9zM6 12.5l3 4.5H3zM18 12.5l3 4.5h-6z"/><path d="M12 9v4M9 15l3-2 3 2"/>',
+drill:'<path d="M3.5 12h7l2-3.5h4l3.5 3.5-3.5 3.5h-4l-2-3.5"/><path d="M20 12h1.5M14 10.5l1.5 3"/>',
+magnet:'<path d="M6 4v8a6 6 0 0 0 12 0V4h-4v8a2 2 0 0 1-4 0V4z"/><path d="M6 8h4M14 8h4"/>',
+pulse:'<circle cx="12" cy="12" r="2"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/>',
+probe:'<circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6M4.5 7.5l5 3M14.5 13.5l5 3M4.5 16.5l5-3M14.5 10.5l5-3"/>',
+vortex:'<path d="M12 12a1.5 1.5 0 1 1 1.5-1.5A4 4 0 1 1 8 14.5a6.5 6.5 0 1 1 10.5-5"/>',
+swords:'<path d="M4 4l9.5 9.5M20 4l-9.5 9.5M4 4h3.5M4 4v3.5M20 4h-3.5M20 4v3.5M6.5 15.5l2 2M17.5 15.5l-2 2M5 19l2.5-2.5M19 19l-2.5-2.5"/>',
+race:'<path d="M5.5 21V4"/><path d="M5.5 4.5h13v8h-13M9.5 4.5v8M13.5 4.5v8M5.5 8.5h13"/>',
+door:'<path d="M5 21V4h14v17M3 21h18M12 4v17M9.5 12.5v.01M14.5 12.5v.01"/>',
+star:'<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/>',
+lock:'<rect x="5" y="10.5" width="14" height="10" rx="1"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2.5"/>',
+gavel:'<path d="M14 3.5l6 6M11 6.5l6 6M12.5 5l5 5M13.5 11.5L4.5 20.5"/><path d="M3.5 21h8"/>',
+bolt:'<path d="M13 2.5L5 13.5h6l-1 8 8-11.5h-6z"/>'};
 document.body.insertAdjacentHTML('afterbegin','<svg width="0" height="0" style="position:absolute" aria-hidden="true">'+Object.entries(ICONS).map(([k,v])=>`<symbol id="i-${k}" viewBox="0 0 24 24">${v}</symbol>`).join('')+'</svg>');
 const ICO=(n,c)=>`<svg class="i${c?' '+c:''}"><use href="#i-${n}"/></svg>`;
 // remplace l'emoji d'en-tête d'un libellé par une icône, et met le texte en minuscules (« 📦 OUVRIR LA CAISSE » → [caisse] Ouvrir la caisse)

@@ -129,10 +129,10 @@ else{const tg=_g1.set(P.x,P.y+1.6,P.z),fw=_g2.set(-Math.sin(FOOT.cy),0,-Math.cos
 const gh=GR?GR.h(want.x,want.z)+1:0;want.y=Math.max(want.y,gh);if(camInit){camera.position.copy(want);camInit=false}else camera.position.lerp(want,damp(12,dt));camera.up.set(0,1,0);camera.lookAt(tg.addScaledVector(fw,3))}
 if(shake>0){camera.position.x+=rv(shake*.3);camera.position.y+=rv(shake*.3);shake=Math.max(0,shake-dt*2.5)}const fv=innerWidth<innerHeight?76:62;if(Math.abs(camera.fov-fv)>.05){camera.fov=fv;camera.updateProjectionMatrix()}sky.position.copy(camera.position)}
 // ----- commandes : clic pour verrouiller la souris (PC), glisser à droite pour regarder (mobile) -----
-OV.addEventListener('pointerdown',e=>{if(!FOOT.on)return;if(e.pointerType=='mouse'&&DESK&&!document.pointerLockElement){try{OV.requestPointerLock()}catch(_){}}if(e.pointerType!='mouse'&&e.clientX>=innerWidth*.62)FOOT.drag={id:e.pointerId,x:e.clientX,y:e.clientY}});
+OV.addEventListener('pointerdown',e=>{if(!FOOT.on&&mode!='int')return;if(e.pointerType=='mouse'&&DESK&&!document.pointerLockElement){try{OV.requestPointerLock()}catch(_){}}if(e.pointerType!='mouse'&&e.clientX>=innerWidth*.62)FOOT.drag={id:e.pointerId,x:e.clientX,y:e.clientY}});
 OV.addEventListener('pointermove',e=>{if(FOOT.drag&&FOOT.drag.id==e.pointerId){FOOT.cy-=(e.clientX-FOOT.drag.x)*.008;FOOT.cp=clamp(FOOT.cp+(e.clientY-FOOT.drag.y)*.006,-.6,1);FOOT.drag.x=e.clientX;FOOT.drag.y=e.clientY;FOOT.lastLook=t}});
 const endDrag=e=>{if(FOOT.drag&&FOOT.drag.id==e.pointerId)FOOT.drag=null};OV.addEventListener('pointerup',endDrag);OV.addEventListener('pointercancel',endDrag);
-document.addEventListener('mousemove',e=>{if(FOOT.on&&document.pointerLockElement===OV){FOOT.cy-=e.movementX*.0026;FOOT.cp=clamp(FOOT.cp+e.movementY*.002,-.6,1);FOOT.lastLook=t}});
+document.addEventListener('mousemove',e=>{if((FOOT.on||mode=='int')&&document.pointerLockElement===OV){FOOT.cy-=e.movementX*.0026;FOOT.cp=clamp(FOOT.cp+e.movementY*.002,-.6,1);FOOT.lastLook=t}});
 $('footb').addEventListener('click',()=>footEnter());
 addEventListener('keydown',e=>{if(e.repeat||e.target.tagName=='INPUT')return;if(e.code=='KeyF'&&mode=='surf'&&!FOOT.on&&canExit())footEnter()});
 // ----- surimpression : noms des PNJ, bulles, jetpack, repère de l'avant-poste -----

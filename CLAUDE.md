@@ -6,7 +6,8 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - Netlify (projet `starvody`) est relié à ce dépôt : **chaque push sur `main` met le site en ligne** (~30 s).
 - `index.html` et `public/index.html` sont GÉNÉRÉS (identiques) : ne pas les éditer à la main. Modifier `src/`, puis `python3 build.py`, puis commit + push.
 - `netlify.toml` : Netlify publie le dossier `public/` (pas la racine, pour ne pas publier `node_modules`) et construit les fonctions de `netlify/functions/`.
-- Sauvegarde cloud : `netlify/functions/save.mjs` (route `/api/save?code=SF-XXXXXXXX`, GET/POST), stockage Netlify Blobs (`@netlify/blobs` dans `package.json`, installé par Netlify).
+- Fonctions Netlify (`netlify/functions/`, stockage Netlify Blobs, `@netlify/blobs` dans `package.json`) : `save.mjs` (`/api/save?code=SF-XXXXXXXX`, sauvegarde cloud), `war.mjs` (`/api/war`, influence des territoires partagée, décroît de moitié en 48 h), `board.mjs` (`/api/board`, classements par semaine ISO), `market.mjs` (`/api/market`, hôtel des ventes). Écritures conditionnelles (`onlyIfMatch`/`onlyIfNew`) avec nouvelles tentatives.
+- Côté jeu, ces fonctions ne sont appelées que sur le site publié (`API_OK` dans svc.js) ; en local, ajouter `?api` à l'URL et servir les fonctions (banc d'essai : serveur Node + faux `@netlify/blobs` en mémoire).
 
 ## Structure
 - `src/shell.html` : HTML/CSS/HUD, avec les marqueurs `%%FONTS%%`, `%%THREE%%` et `%%GAME%%`. Style « instruments de bord » : panneaux à coins coupés (clip-path), jauges segmentées (mask), jetons CSS dans `:root` (`--ice`, `--amber`, `--hf`…).
@@ -37,9 +38,25 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - `options.js` (dernier module) : panneau Options (touche O) : qualité (PC : `cycleQuality` ; mobile : `GQL` 0-2), volumes musique/effets (bus `MVOL`), sensibilité (`OPT.sens`), manette (Gamepad API, `updGamepad`), sauvegarde cloud (`CLOUD`, code `SF-XXXXXXXX` dans `sf-cloud`).
 - Station au sol : objet `GR.st` avec `ground:true` (et `foot:true` quand on parle au marchand à pied → seuls Marché/Armes).
 
+## Mise à jour « 10 nouveautés » (modules après options.js)
+- Ordre : `svc, codex, law, wing, tools, anomaly, war, fmiss, race, derelict, board` (voir `build.py`).
+- `svc.js` : onglet **Services** des stations (`svcAdd({o,ic,t,show,html})`, actions `SVC.act[k]` appelées par `data-sv="k:arg"`), bandeau d'annonce `banner()`, crochets par image `TICK` (toujours) et `STICK` (simulation spatiale), données des nouveaux modules dans `G.x` (sauvegardé tel quel, `GX(clé,défaut)`), `api()`/`API_OK`, objets uniques (`uniq`) cachés de la boutique tant qu'on ne les possède pas. `stFac(st)` = faction de la station (remplacée par war.js).
+- `codex.js` : Journal de bord (touche J, bouton `#cxb`, panneau `#cxpanel`) : succès `ACH` (récompenses, titres `G.x.title`), codex `G.x.cx` (`cxAdd(cat,id)`, `cxLog(texte)`), statistiques `G.x.st` (`STS`).
+- `law.js` : contrebande `ILLG` (window.ILLG, hors `GOODS`), marché noir (`bmAt`), douane des stations de l'Alliance (scan à 1 100 m, saisie + amende), prime `G.x.law.b` (étoiles, police `kind:'police'`, chasseurs de primes `kind:'hunter'`), bureau des primes, pièce « Double fond ».
+- `wing.js` : alliés `FR` (`frSpawn({kind:'wing'|'ally'|'freighter'|'platform'})`, tirs `FB`, les pirates leur tirent dessus, `e.tgF` = cible alliée imposée), ailiers recrutés au bar (`G.x.wing.list`, rôles chasseur/garde/mineur, salaire toutes les 10 min de jeu, capsule de survie dès le niveau 3).
+- `tools.js` : outils dans les armes (`drill`, `tractor`, `scanner`, `probe` + munitions `G.ammo.probe`), astéroïdes riches (`RICH`, seul le laser de minage fait des dégâts pleins : `DRILLING`), conteneurs dérivants (`CONT`, révélés par le scanner), vaisseaux `prospecteur`, `explorateur`, uniques `sentinelle`, `mastodonte` (visuel : `shipDeco` sur une coque de base).
+- `anomaly.js` : trous noirs (lentille gravitationnelle en shader qui dévie la nébuleuse, matière exotique `exo` dans `window.RAREG`), trous de ver (`wormJump`), tempêtes ioniques (radar brouillé, boucliers coupés, cristaux). Anomalies fixes `ANFIX` + anomalies des secteurs (`anCell`), connues dans `G.x.anom`.
+- `war.js` : secteurs de 12 km (`secOf`), influence `influ(sid)` = base + `G.x.warD` (serveur) + `WAR.pend` (à envoyer), `warAdd(n,pos)`, contrôle `ctlOf` (alliance / pirates / front), batailles de frontière, territoires sur la carte.
+- `fmiss.js` : chaînes de missions `FMC` (alliance, guilde, carto ; 5 missions, étapes `goto/kill/escort/scan/collect/deliver/disc/beacons/item/rich/defend/bridge/worm/choice`), état `G.x.fm`, choix dans `#chc`, `fmEvent()` pour les événements externes.
+- `race.js` : un circuit par station (`circuit(st)`), fantôme dans `localStorage` (`sf-gh-…`), médailles, défis multijoueur via la présence (`rc`).
+- `derelict.js` : épaves géantes (`DERFIX` + `derCell`), entrée par le sas → **mode `'int'`** (scène `DER.scene`, `derUpdate/derCam/derOverlay/derInfo/derRadar/derPrompt/derAction` appelés par hud.js et game.js), plan généré (salles + couloirs, portes `doorsM`, piratage `DER.hack`), drones/tourelles, salle en apesanteur, coffre du capitaine. Butin pris : `G.x.der[id]`.
+- `board.js` : classements (`SEA` = saison ISO de la semaine, récompenses du top 10 la semaine suivante, titre + peinture `paint:laurier`), hôtel des ventes (`#mkpanel`).
+
 ## Pièges connus
 - `netroom.js` : ne jamais passer l'objet `mine` directement à `up()` (il est gelé par `Object.freeze`, la présence ne se mettrait plus à jour).
 - En test headless (SwiftShader) les images sont lentes : appeler `placeShip()/updCam()` à la main avant une capture.
+- Noms globaux : tout est dans le même script, un `const` en double casse tout (`node --check` le signale) et une `function` en double remplace l'autre sans prévenir. Préfixer les noms des nouveaux modules (ex. `DRMAT`, `DTS` dans derelict.js).
+- Mode `'int'` (intérieur d'épave) : tout code qui suppose « pas espace = planète » doit tester `mode=='surf'`.
 
 ## Vérifier avant de pousser
 `python3 build.py --check /tmp/g.js && node --check /tmp/g.js`

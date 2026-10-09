@@ -1,0 +1,87 @@
+// ===== ANOMALIES SPATIALES : trous noirs (lentille gravitationnelle, matière exotique), trous de ver (raccourcis), tempêtes ioniques =====
+const RAREG=[{id:'exo',n:'Matière exotique',ic:'🌀',p:520}];window.RAREG=RAREG;
+const ANK=GX('anom',{});const AN={act:new Map(),ck:'',cd:0,inIon:null,flash:0};
+const ANNAME={bh:['Gouffre','Abîme','Œil','Puits'],worm:['Porte','Passage','Arche','Faille'],ion:['Tempête','Orage','Tourmente','Ouragan']},ANSUF=['d\'Érèbe','de Janus','d\'Hélios','de Nyx','de Kor','d\'Orion','de Vel','du Silence','des Anciens','de Thyra'];
+const anNm=(k,a,b)=>ANNAME[k][(a*7+b*3>>>0)%4]+' '+ANSUF[(a*13+b*5>>>0)%ANSUF.length];
+// ----- génération : anomalies fixes près du départ + anomalies des secteurs -----
+const ANFIX=[{k:'bh',id:'bh-fix',n:'Gouffre d\'Érèbe',x:-12500,y:400,z:-10500},{k:'worm',id:'wm-fix',n:'Porte de Janus',x:6500,y:-300,z:7800,ex:-26000,ey:200,ez:21000},{k:'ion',id:'ion-fix',n:'Tempête d\'Hélios',x:8200,y:300,z:-5200}];
+function anCell(cx,cz){if((!cx&&!cz)||(((cx%3)+3)%3==1&&((cz%3)+3)%3==1))return[];const d=Math.hypot(cx,cz)*CS,L=[],ox=cx*CS,oz=cz*CS,P=(s)=>({x:ox+800+h3(cx,0,cz,s)*(CS-1600),y:(h3(cx,0,cz,s+1)-.5)*1200,z:oz+800+h3(cx,0,cz,s+2)*(CS-1600)});
+if(d>9000&&h3(cx,0,cz,401)<.03)L.push({k:'bh',id:'bh'+cx+'_'+cz,n:anNm('bh',cx,cz),...P(410)});
+if(d>6000&&h3(cx,0,cz,402)<.025){const a=P(420),ang=h3(cx,0,cz,404)*TAU,dd=18000+h3(cx,0,cz,405)*14000;L.push({k:'worm',id:'wm'+cx+'_'+cz,n:anNm('worm',cx,cz),...a,ex:a.x+Math.cos(ang)*dd,ey:(h3(cx,0,cz,406)-.5)*1000,ez:a.z+Math.sin(ang)*dd})}
+if(d>5000&&h3(cx,0,cz,403)<.05)L.push({k:'ion',id:'ion'+cx+'_'+cz,n:anNm('ion',cx,cz),...P(430)});return L}
+// liste des anomalies proches (les sorties de trous de ver comptent aussi)
+function anNear(p,R){const L=[],cx=cof(p.x),cz=cof(p.z),add=o=>{if(Math.hypot(o.x-p.x,o.z-p.z)<R)L.push(o)};
+for(const f of ANFIX){add(f);if(f.k=='worm')add({k:'worm',id:f.id+'-b',n:f.n+' (sortie)',x:f.ex,y:f.ey,z:f.ez,ex:f.x,ey:f.y,ez:f.z})}
+const W=Math.ceil((R+32000)/CS),N=Math.ceil(R/CS)+1;for(let i=-W;i<=W;i++)for(let l=-W;l<=W;l++){const near=Math.abs(i)<=N&&Math.abs(l)<=N;const A=anCell(cx+i,cz+l);for(const o of A){if(near&&o.k!='worm')add(o);if(o.k=='worm'){if(near)add(o);add({k:'worm',id:o.id+'-b',n:o.n+' (sortie)',x:o.ex,y:o.ey,z:o.ez,ex:o.x,ey:o.y,ez:o.z})}}}return L}
+function anKnow(o,silent){if(ANK[o.id])return;ANK[o.id]={k:o.k,n:o.n,x:o.x|0,y:o.y|0,z:o.z|0};cxAdd('an',o.k);if(!silent){toast('🌀 Anomalie repérée : '+o.n);SFX.disc()}save()}
+function anScan(p,R){for(const o of anNear(p,R))if(!ANK[o.id]&&Math.hypot(o.x-p.x,o.y-p.y,o.z-p.z)<R)anKnow(o)}
+// ----- trou noir : lentille gravitationnelle (le ciel est dévié autour de l'horizon) -----
+const LENS_VS='varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}';
+const LENS_FS=`uniform sampler2D neb;uniform vec3 C;uniform float Rl,Rh,tm;varying vec3 vW;
+float hsh(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+vec3 starf(vec3 d){vec3 s=d*170.;vec3 c=floor(s);float h=hsh(c);if(h<.985)return vec3(0.);vec3 f=fract(s)-.5;float k=smoothstep(.22,0.,length(f))*(h-.985)*66.;return vec3(k)*mix(vec3(1.,.85,.7),vec3(.7,.85,1.),hsh(c+3.));}
+void main(){vec3 d=normalize(vW-cameraPosition);vec3 oc=C-cameraPosition;float t0=dot(oc,d);vec3 cp=cameraPosition+d*t0;float b=length(cp-C);
+if(t0>0.&&b<Rh){gl_FragColor=vec4(vec3(0.),1.);return;}
+float ring=t0>0.?exp(-pow((b-Rh*1.05)/(Rh*.07),2.)):0.;float fall=smoothstep(Rl,Rl*.55,b);float al=t0>0.?min(2.4,1.6*Rh/max(b,1.)*fall*2.2):0.;
+vec3 ax=normalize(cross(d,normalize(oc))+1e-5);vec3 dn=d*cos(al)+cross(ax,d)*sin(al)+ax*dot(ax,d)*(1.-cos(al));
+float th=acos(clamp(dn.y,-1.,1.)),ph=atan(dn.z,-dn.x);vec2 uv=vec2(ph/6.2831853+.5,1.-th/3.14159265);uv.x=fract(uv.x+.5);
+vec3 col=texture2D(neb,uv).rgb*1.15+starf(dn)*1.4;col*=1.+fall*.35;col+=vec3(1.,.72,.38)*ring*1.6;
+gl_FragColor=vec4(col,1.);}`;
+const DISK2_FS=`uniform float tm;varying vec2 vUv;void main(){vec2 p=vUv-.5;float r=length(p)*2.,a=atan(p.y,p.x);float sw=sin(a*6.+tm*1.8-r*18.)*.5+.5;float sw2=sin(a*13.-tm*3.1+r*30.)*.5+.5;float I=smoothstep(1.,.55,r)*smoothstep(.28,.36,r);
+vec3 c=mix(vec3(1.,.42,.12),vec3(1.,.93,.75),pow(sw*smoothstep(.95,.35,r),1.5));gl_FragColor=vec4(c*I*(.55+sw*.35+sw2*.15)*1.05,1.);}`;
+function bhMesh(o){const g=new THREE.Group(),Rh=110,Rl=1150;const U={neb:{value:NEB.material.map},C:{value:new V3(o.x,o.y,o.z)},Rl:{value:Rl},Rh:{value:Rh},tm:TM};
+const lens=new THREE.Mesh(new THREE.SphereGeometry(Rl,48,32),new THREE.ShaderMaterial({uniforms:U,vertexShader:LENS_VS,fragmentShader:LENS_FS,side:THREE.BackSide,depthWrite:false,fog:false}));lens.renderOrder=-5;g.add(lens);
+g.add(new THREE.Mesh(new THREE.SphereGeometry(Rh*.95,32,20),new THREE.MeshBasicMaterial({color:0,fog:false})));
+const dm=new THREE.ShaderMaterial({uniforms:{tm:TM},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:DISK2_FS,transparent:true,blending:ADDB,depthWrite:false,side:THREE.DoubleSide,fog:false});
+const disk=new THREE.Mesh(new THREE.PlaneGeometry(1100,1100),dm);disk.rotation.x=-1.32;g.add(disk);const d2=new THREE.Mesh(new THREE.PlaneGeometry(700,700),dm);d2.rotation.set(-.2,0,0);d2.scale.set(1,.35,1);d2.position.y=8;g.add(d2);
+const halo=sprite(0xff9a50,900,.13);g.add(halo);g.position.set(o.x,o.y,o.z);g.userData={lens,disk,U};
+// poches de matière exotique en orbite (renouvelées toutes les heures)
+const per=Math.floor(Date.now()/3600e3),got=ANK[o.id]&&ANK[o.id].exo===per?ANK[o.id].n2||0:0;o.orbs=[];for(let i=0;i<6;i++){if(i<got)continue;const s=sprite(0xc07aff,26,.95);const s2=sprite(0xffffff,8);s.add(s2);g.add(s);o.orbs.push({s,r:240+i*55,a:i*1.7,sp:.5-i*.04,y:rv(40)})}return g}
+// ----- trou de ver -----
+const WORM_FS=`uniform float tm;varying vec2 vUv;void main(){vec2 p=vUv-.5;float r=length(p)*2.,a=atan(p.y,p.x);if(r>1.)discard;float sp=sin(a*3.+log(r+.02)*7.-tm*3.5)*.5+.5;float sp2=sin(a*5.-log(r+.02)*11.+tm*2.2)*.5+.5;
+vec3 c=mix(vec3(.25,.15,.9),vec3(.3,.95,1.),sp)*(.4+sp2*.6);c+=vec3(1.)*smoothstep(.25,0.,r)*1.2;float e=smoothstep(1.,.82,r);gl_FragColor=vec4(c*e*(.6+.6*smoothstep(.0,.6,r)),1.);}`;
+function wormMesh(o){const g=new THREE.Group(),M=new THREE.ShaderMaterial({uniforms:{tm:TM},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:WORM_FS,transparent:true,blending:ADDB,depthWrite:false,side:THREE.DoubleSide,fog:false});
+const d=new THREE.Mesh(new THREE.CircleGeometry(170,48),M);g.add(d);const d2=new THREE.Mesh(new THREE.CircleGeometry(120,40),M);d2.position.z=-25;g.add(d2);
+const RM=new THREE.MeshStandardMaterial({color:0x3a3550,metalness:.6,roughness:.4,emissive:0x2a1a60,emissiveIntensity:.6});for(let i=0;i<16;i++){const a=i/16*TAU,r=new THREE.Mesh(AGEO[i%8],RM);r.scale.setScalar(10+Math.random()*12);r.position.set(Math.cos(a)*190,Math.sin(a)*190,rv(10));g.add(r)}
+const ring=new THREE.Mesh(new THREE.TorusGeometry(178,3,8,64),new THREE.MeshBasicMaterial({color:0x7fe8ff,transparent:true,opacity:.7,blending:ADDB,depthWrite:false}));g.add(ring);g.add(sprite(0x7a8cff,520,.3));
+g.position.set(o.x,o.y,o.z);g.lookAt(o.ex,o.y,o.ez);g.userData={d,d2,ring};return g}
+// ----- tempête ionique -----
+function ionMesh(o){const g=new THREE.Group(),r=rng(seedOf(o.x|0,o.z|0,3,9)),R=1400;for(let i=0;i<(DESK?46:26);i++){const s=sprite(r()<.5?0x7a4cff:0x3a8cff,500+r()*700,.09+r()*.06);const u=r()*2-1,th=r()*TAU,k=Math.cbrt(r())*R*.85,q=Math.sqrt(1-u*u);s.position.set(q*Math.cos(th)*k,u*k*.45,q*Math.sin(th)*k);g.add(s)}
+o.nodes=[];const per=Math.floor(Date.now()/1800e3),got=ANK[o.id]&&ANK[o.id].per===per?ANK[o.id].nodes||[]:[];for(let i=0;i<6;i++){if(got.includes(i))continue;const p=new V3(rv(R*.6),rv(R*.25),rv(R*.6));const c=new THREE.Mesh(new THREE.OctahedronGeometry(6,0),new THREE.MeshStandardMaterial({color:0x8fd8ff,emissive:0x5ac8ff,emissiveIntensity:1.4}));c.scale.y=1.8;c.position.copy(p);c.add(sprite(0x8fd8ff,40,.8));g.add(c);o.nodes.push({i,m:c,p})}
+const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(32*3),3));const bolt=new THREE.Line(lg,new THREE.LineBasicMaterial({color:0xd8e8ff,transparent:true,opacity:0,blending:ADDB,depthWrite:false,fog:false}));bolt.frustumCulled=false;g.add(bolt);
+g.position.set(o.x,o.y,o.z);g.userData={bolt,R,lt:2};return g}
+function ionStrike(o,a,b){const u=o.mesh.userData,P=u.bolt.geometry.attributes.position,n=16;for(let i=0;i<n;i++){const k=i/(n-1),p=a.clone().lerp(b,k);if(i>0&&i<n-1)p.add(new V3(rv(30),rv(30),rv(30)));P.setXYZ(i,p.x-o.x,p.y-o.y,p.z-o.z)}for(let i=n;i<32;i++){const p=b;P.setXYZ(i,p.x-o.x,p.y-o.y,p.z-o.z)}P.needsUpdate=true;u.bolt.material.opacity=1;u.flash=.18;fxGlow(b,0xbfd8ff,60,.25,2);AN.flash=Math.max(AN.flash,.35);noise(.5,.4,600);tone(90,40,.5,'sine',.15)}
+// ----- boucle -----
+function anSync(){const L=anNear(S.pos,9000),ids=new Set(L.map(o=>o.id));for(const o of L){if(AN.act.has(o.id))continue;
+// évite les planètes et les stations
+for(let i=-1;i<=1;i++)for(let l=-1;l<=1;l++)for(let j=-1;j<=1;j++){const c=cdata(cof(o.x)+i,j,cof(o.z)+l);for(const q of[c.pl,c.st,c.sun]){if(!q)continue;const rr=(q.r||200)+(o.k=='bh'?2500:o.k=='ion'?1800:900),dd=Math.hypot(o.x-q.x,o.y-q.y,o.z-q.z);if(dd<rr){const dx=(o.x-q.x)/(dd||1),dz=(o.z-q.z)/(dd||1);o.x=q.x+dx*rr;o.z=q.z+dz*rr}}}
+o.mesh=o.k=='bh'?bhMesh(o):o.k=='worm'?wormMesh(o):ionMesh(o);scene.add(o.mesh);AN.act.set(o.id,o)}
+for(const[id,o]of AN.act)if(!ids.has(id)){scene.remove(o.mesh);o.mesh.traverse(m=>{if(m.geometry&&!AGEO.includes(m.geometry))m.geometry.dispose()});AN.act.delete(id)}}
+function anTick(dt){AN.cd-=dt;const ck=cof(S.pos.x)+','+cof(S.pos.z);if(ck!==AN.ck){AN.ck=ck;anSync()}AN.inIon=null;
+for(const o of AN.act.values()){const c=o.mesh.position,d=S.pos.distanceTo(c);if(d<3200&&!ANK[o.id])anKnow(o);
+if(o.k=='bh'){o.mesh.userData.disk.rotation.z+=dt*.05;o.mesh.userData.U.neb.value=NEB.material.map;const R0=380;if(d<2600&&!S.docked&&!S.dead){const k=Math.min(900,260*Math.pow(R0/Math.max(d,60),1.6));_c2.copy(c).sub(S.pos).normalize();S.vel.addScaledVector(_c2,k*dt);S.pos.addScaledVector(_c2,k*dt*.35);shake=Math.max(shake,Math.pow(1-d/2600,2)*.7);
+if(d<700&&!o.near){o.near=1;STS.holes++;toast('🌀 Horizon des événements tout proche : la gravité te happe !');SFX.alarm()}if(d<150){damage(70*dt);if(t-(o.wT||0)>2){o.wT=t;toast('⚠ Tu es aspiré par le trou noir — boost à fond !');SFX.alarm()}}}else if(d>1400)o.near=0;
+for(const q of o.orbs){if(q.got)continue;q.a+=q.sp*dt*(380/q.r);q.s.position.set(Math.cos(q.a)*q.r,q.y+Math.sin(q.a*2)*20,Math.sin(q.a)*q.r);q.s.scale.setScalar(22+Math.sin(t*6+q.r)*5);const wp=q.s.getWorldPosition(_c3);if(wp.distanceTo(S.pos)<34&&!S.dead){if(cargoUsed()>=cap()){if(t-(q.ft||0)>3){q.ft=t;toast('Soute pleine : impossible de prendre la matière exotique')}continue}q.got=1;o.mesh.remove(q.s);G.cargo.exo=(G.cargo.exo||0)+1;const per=Math.floor(Date.now()/3600e3),K=ANK[o.id]||(ANK[o.id]={k:'bh',n:o.n,x:o.x|0,y:o.y|0,z:o.z|0});if(K.exo!==per){K.exo=per;K.n2=0}K.n2++;boom3(wp,20,0xc07aff,60);SFX.win();toast('🌀 Matière exotique récupérée ! (revends-la au laboratoire d\'une station)');gainXP(60);addRep('carto',25)}}}
+else if(o.k=='worm'){const u=o.mesh.userData;u.d.rotation.z+=dt*.6;u.d2.rotation.z-=dt*.9;u.ring.scale.setScalar(1+Math.sin(t*3)*.02);if(d<1200&&!S.docked){_c2.copy(c).sub(S.pos).normalize();S.vel.addScaledVector(_c2,60*dt*(1-d/1200))}
+if(d<120&&AN.cd<=0&&!S.dead&&!S.entry)wormJump(o)}
+else if(o.k=='ion'){const u=o.mesh.userData;if(u.flash>0){u.flash-=dt;if(u.flash<=0)u.bolt.material.opacity=0}else{u.lt-=dt;if(u.lt<=0&&d<u.R+1500){u.lt=.6+Math.random()*2.5;const a=c.clone().add(new V3(rv(u.R*.7),rv(u.R*.3),rv(u.R*.7))),b=c.clone().add(new V3(rv(u.R*.7),rv(u.R*.3),rv(u.R*.7)));ionStrike(o,a,b)}}
+if(d<u.R){AN.inIon=o;if(!o.inside){o.inside=1;STS.ions++;toast('⚡ Tempête ionique : radar brouillé, boucliers coupés !');SFX.alarm()}o.st=(o.st||3)-dt;if(o.st<=0){o.st=3+Math.random()*4;const b=S.pos.clone().add(new V3(rv(90),rv(40),rv(90))),a=b.clone().add(new V3(rv(300),200+Math.random()*200,rv(300)));ionStrike(o,a,b);if(b.distanceTo(S.pos)<55&&!S.docked){damage(9);toast('⚡ Frappé par la foudre !')}}}else if(d>u.R+300)o.inside=0;
+for(const q of o.nodes){if(q.got)continue;q.m.rotation.y+=dt*2;const wp=q.m.getWorldPosition(_c3);if(wp.distanceTo(S.pos)<30&&!S.dead){const n=Math.min(4,cap()-cargoUsed());if(n<=0){if(t-(q.ft||0)>3){q.ft=t;toast('Soute pleine')}continue}q.got=1;o.mesh.remove(q.m);G.cargo.cristal=(G.cargo.cristal||0)+n;const per=Math.floor(Date.now()/1800e3),K=ANK[o.id]||(ANK[o.id]={k:'ion',n:o.n,x:o.x|0,y:o.y|0,z:o.z|0});if(K.per!==per){K.per=per;K.nodes=[]}K.nodes.push(q.i);boom3(wp,18,0x8fd8ff,60);SFX.pick();toast('⚡ Cristaux ioniques : +'+n+' Cristaux d\'énergie');gainXP(20)}}}}
+if(AN.flash>0)AN.flash=Math.max(0,AN.flash-dt*2)}
+function wormJump(o){AN.cd=6;FADE.col='200,230,255';FADE.tg=1;FADE.sp=8;tone(200,2400,1.2,'sine',.12);tone(80,600,1.2,'sawtooth',.05);shake=1.2;
+setTimeout(()=>{const dir=_c2.set(o.ex-o.x,0,o.ez-o.z).normalize();S.pos.set(o.ex,o.ey,o.ez).addScaledVector(dir,320);S.q.setFromUnitVectors(new V3(0,0,-1),dir);S.vel.copy(dir).multiplyScalar(150);S.spd=150;S.mustLeave=null;if(S.docked)S.docked=null;
+for(const e of en)e.mesh.parent&&e.mesh.parent.remove(e.mesh);en.length=0;for(const b of EB)b.m.parent&&b.m.parent.remove(b.m);EB.length=0;clearWeapons();if(EV)endEvent(0);lastCK='';streamWorld();camInit=true;AN.ck='';
+for(const F of FR)if(F.kind=='wing'&&!F.gone)F.pos.copy(S.pos).add(new V3(rv(60),20,80).applyQuaternion(S.q));STS.worms++;const km=(Math.hypot(S.pos.x,S.pos.z)/1000).toFixed(1);FADE.tg=0;FADE.sp=1.4;toast('🌀 Trou de ver traversé ! Tu es à '+km+' km de la Base Alpha');SFX.disc();anKnow({k:'worm',id:o.id.endsWith('-b')?o.id.slice(0,-2):o.id+'-b',n:o.n.replace(' (sortie)','')+(o.id.endsWith('-b')?'':' (sortie)'),x:o.ex,y:o.ey,z:o.ez},true);save()},380)}
+STICK.push(anTick);
+// tempête : boucliers coupés et radar brouillé
+TICK.push(()=>{if(AN.inIon&&mode=='space')S.sh=0});
+{const _rd=radar;radar=function(){_rd();if(!AN.inIon||mode!='space')return;const W=innerWidth,H=innerHeight,land=W>H&&H<520,mr=DESK?80:land?46:54,mx=W-mr-(DESK?24:14),my=DESK?H-mr-24:land?mr+100:H-mr-210;OX.save();OX.beginPath();OX.arc(mx,my,mr,0,TAU);OX.clip();OX.fillStyle='rgba(20,10,50,.75)';OX.fillRect(mx-mr,my-mr,mr*2,mr*2);for(let i=0;i<60;i++){OX.fillStyle=`rgba(${150+Math.random()*100},${150+Math.random()*100},255,${Math.random()*.6})`;OX.fillRect(mx-mr+Math.random()*mr*2,my-mr+Math.random()*mr*2,2+Math.random()*6,1)}OX.restore();OX.fillStyle='#b8a0ff';OX.font="700 10px 'Chakra Petch',system-ui";OX.textAlign='center';OX.fillText('BROUILLÉ',mx,my+4)}}
+{const _ov=overlay;overlay=function(){_ov();if(mode!='space')return;if(AN.flash>0){OX.fillStyle=`rgba(220,230,255,${AN.flash*.5})`;OX.fillRect(0,0,innerWidth,innerHeight)}if(S.dead)return;for(const o of AN.act.values()){if(!ANK[o.id])continue;const d=S.pos.distanceTo(o.mesh.position);if(d>600&&d<9000)edgeMarker(o.mesh.position,o.k=='bh'?'#ff9a50':o.k=='worm'?'#7fe8ff':'#a88cff',o.n,o.k=='ion'?'⚡':'🌀')}}}
+{const _ci=contentInfo;contentInfo=function(){let s=_ci();if(mode!='space')return s;for(const o of AN.act.values()){const d=S.pos.distanceTo(o.mesh.position);if(o.k=='bh'&&d<2600)s+=(s?'<br>':'')+`<span style="color:#ff9a50">🌀 ${esc(o.n)} — matière exotique : ${o.orbs.filter(q=>!q.got).length} poche(s) · gravité ${Math.round((1-d/2600)*100)} %</span>`;if(o.k=='ion'&&d<o.mesh.userData.R)s+=(s?'<br>':'')+`<span style="color:#b8a0ff">⚡ ${esc(o.n)} — cristaux ioniques : ${o.nodes.filter(q=>!q.got).length}</span>`;if(o.k=='worm'&&d<1500)s+=(s?'<br>':'')+`<span style="color:#7fe8ff">🌀 ${esc(o.n)} — fonce au centre pour le traverser</span>`}return s}}
+// carte : anomalies connues
+{const _dm=drawMap;drawMap=function(){_dm();if(mode=='surf'&&GR)return;for(const id in ANK){const o=ANK[id];const[x,y]=w2s(o.x,o.z);if(x<-30||y<-30||x>innerWidth+30||y>innerHeight+30)continue;const c=o.k=='bh'?'#ff9a50':o.k=='worm'?'#7fe8ff':'#a88cff';MX.strokeStyle=c;MX.fillStyle=c;MX.lineWidth=1.5;MX.beginPath();MX.arc(x,y,7,0,TAU);MX.stroke();MX.font="700 11px 'Chakra Petch',system-ui";MX.textAlign='center';MX.fillText(o.k=='ion'?'⚡':'🌀',x,y+4);if(MAP.zoom>.008){MX.fillStyle='rgba(220,235,255,.8)';MX.font="600 10px 'Chakra Petch',system-ui";MX.fillText(o.n,x,y-11)}}}}
+{const _mr=mpRadar;mpRadar=function(blip){_mr(blip);if(mode!='space')return;for(const o of AN.act.values())blip(o.mesh.position,o.k=='bh'?'#ff9a50':o.k=='worm'?'#7fe8ff':'#a88cff',3.2,!!ANK[o.id],true)}}
+// ----- laboratoire : rachat de la matière exotique -----
+const exoPrice=st=>{const e=stEcon(st);return Math.round(RAREG[0].p*(e=='High-tech'?1.35:e=='Luxe'?1.2:.9))};
+SVC.act.exos=()=>{const st=S.docked,n=G.cargo.exo||0;if(!st||!n)return;const p=exoPrice(st);G.cr+=p*n;delete G.cargo.exo;toast('🌀 Matière exotique vendue : +'+fmt(p*n)+' ¢');SFX.coin();gainXP(n*15);addRep('carto',n*10);save()};
+svcAdd({o:50,ic:'vortex',t:'Laboratoire',show:st=>!st.ground,html:st=>{const n=G.cargo.exo||0,p=exoPrice(st);return SROW(`<div><b>🌀 Matière exotique</b><small>Rachetée ${fmt(p)} ¢ l'unité${stEcon(st)=='High-tech'?' (meilleur prix : station High-tech)':''}. On la trouve en orbite des trous noirs.${n?'<br>En soute : '+n:''}</small></div>`,n?`<button class="sell" data-sv="exos">Vendre ${fmt(p*n)} ¢</button>`:'')}});

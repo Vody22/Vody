@@ -1,6 +1,6 @@
 // ===== JEU (espace) =====
 const _f=new V3(),_u=new V3(),_r=new V3(),_v=new V3(),_w=new V3(),_q=new QT(),AX=new V3(1,0,0),AY=new V3(0,1,0),AZ=new V3(0,0,1);
-const curScene=()=>mode=='surf'?SURF.scene:scene;
+const curScene=()=>mode=='surf'?SURF.scene:mode=='int'?DER.scene:scene;
 let ship=buildShip();scene.add(ship);
 function rebuildShip(){const p=ship.parent;p.remove(ship);ship=buildShip();p.add(ship)}
 const fwd=(q=S.q,o=_f)=>o.set(0,0,-1).applyQuaternion(q);
@@ -14,7 +14,7 @@ fwd();S.vel.lerp(_v.copy(_f).multiplyScalar(S.spd),damp(3.2,dt));S.pos.addScaled
 S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.75,damp(5,dt))}
 // ----- caméra -----
 const camUp=new V3(0,1,0),camLook=new V3();let camInit=true,fovK=0;const CAMQ=new QT(),CAMS={y:0,p:0,a:0,ls:0};
-function updCam(dt){if(FOOT.on&&mode=='surf'){footCam(dt);return}if(atelierOn()){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
+function updCam(dt){if(mode=='int'){derCam(dt);return}if(FOOT.on&&mode=='surf'){footCam(dt);return}if(atelierOn()){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
 if(ckActive()){ckCam(dt);return}
 // 3e personne : caméra plus éloignée, rotation amortie (elle balance dans les virages), recul à l'accélération, vibrations au boost
 const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(2.4,dt));const sk=Math.max(1,ship.userData.body.scale.z),spK=clamp(S.spd/Math.max(1,cruise()),0,2.8),srf=mode=='surf'?.84:1;
@@ -113,7 +113,7 @@ for(let i=0;i<3;i++)$('u'+(i+1)).onclick=()=>{const c=upCost(i);if(G.u[i]<6&&G.c
 function dock(st){S.docked=st;if(!G.vst.some(v=>v.n==st.n))G.vst.push({n:st.n,x:st.x|0,y:st.y|0,z:st.z|0});S.undockT=0;armed=0;offer=G.m?null:makeOffer();if(G.m&&G.m.type=='liv'&&G.m.tg===st){complete();offer=makeOffer()}if(S.ore>0){G.cr+=S.ore*12;gainXP(S.ore);addRep('guilde',S.ore);toast('Amarré à '+st.n+' · minerai vendu +'+S.ore*12+' ¢');S.ore=0;SFX.coin()}else toast('Amarré à '+st.n);save()}
 function undock(){const st=S.docked;S.docked=null;S.mustLeave=st;S.undockT=0;if(st){const out=_v.copy(S.pos).sub(_w.set(st.x,st.y,st.z));out.y*=.2;if(out.lengthSq()<1)out.set(0,0,1);S.q.setFromUnitVectors(new V3(0,0,-1),out.normalize())}S.spd=cruise()*.8;S.vel.copy(fwd()).multiplyScalar(S.spd);SFX.buy()}
 // ----- mort -----
-function die(){if(S.dead)return;S.dead=1;mpDied();clearWeapons();S.entry=null;S.ascent=null;S.heat=0;FADE.tg=0;boom3(S.pos,60,0xffaa44,160,true);SFX.boom();ship.visible=false;toast('Vaisseau détruit — retour à la base');setTimeout(()=>{if(mode=='surf')SURF.exit(true);G.cr>>=1;S.ore=0;S.pos.set(0,30,900);S.q.set(0,0,0,1);S.vel.set(0,0,0);S.spd=0;S.hp=maxhp();for(const e of en)e.mesh.parent&&e.mesh.parent.remove(e.mesh);en=[];for(const b of EB)b.m.parent&&b.m.parent.remove(b.m);EB=[];if(G.m&&G.m.type=='boss')G.m.spawned=0;ship.visible=true;S.dead=0;camInit=true},1600)}
+function die(){if(S.dead)return;S.dead=1;mpDied();clearWeapons();S.entry=null;S.ascent=null;S.heat=0;FADE.tg=0;boom3(S.pos,60,0xffaa44,160,true);SFX.boom();ship.visible=false;toast('Vaisseau détruit — retour à la base');setTimeout(()=>{if(mode=='int')derExit(true);if(mode=='surf')SURF.exit(true);G.cr>>=1;S.ore=0;S.pos.set(0,30,900);S.q.set(0,0,0,1);S.vel.set(0,0,0);S.spd=0;S.hp=maxhp();for(const e of en)e.mesh.parent&&e.mesh.parent.remove(e.mesh);en=[];for(const b of EB)b.m.parent&&b.m.parent.remove(b.m);EB=[];if(G.m&&G.m.type=='boss')G.m.spawned=0;ship.visible=true;S.dead=0;camInit=true},1600)}
 // ----- boucle espace -----
 let landP=null;
 function updSpace(dt){streamWorld();runJobs(LOWQ?5:8);

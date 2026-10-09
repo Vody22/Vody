@@ -30,7 +30,7 @@ addEventListener('gamepadconnected',e=>{GPD.id=e.gamepad.id;toast('🎮 Manette 
 addEventListener('gamepaddisconnected',()=>{GPD.id=null;if(stick&&stick.gp)stick=null;for(const k of['fire','boost','brake'])B[k]=0;if(OPTP.open)optRender()});
 function updGamepad(dt){if(!GPD.id||!navigator.getGamepads)return;const gp=[...navigator.getGamepads()].find(g=>g&&g.connected);if(!gp)return;const ax=i=>{const v=gp.axes[i]||0;return Math.abs(v)<.14?0:v},btn=i=>{const b=gp.buttons[i];return!!b&&(b.pressed||b.value>.35)};
 const lx=ax(0),ly=ax(1);if(!stick||stick.gp){if(lx||ly)stick={id:'gp',gp:1,ox:-999,oy:-999,x:clamp(lx,-1,1),y:clamp(ly,-1,1),R:70};else if(stick&&stick.gp)stick=null}
-if(FOOT.on){const rx=ax(2),ry=ax(3);if(rx||ry){FOOT.cy-=rx*dt*2.6;FOOT.cp=clamp(FOOT.cp+ry*dt*1.8,-.6,1);FOOT.lastLook=t}}
+if(FOOT.on||mode=='int'){const rx=ax(2),ry=ax(3);if(rx||ry){FOOT.cy-=rx*dt*2.6;FOOT.cp=clamp(FOOT.cp+ry*dt*1.8,-.6,1);FOOT.lastLook=t}}
 const now=gp.buttons.map((b,i)=>btn(i)),was=GPD.prev,edge=i=>now[i]&&!was[i],rel=i=>!now[i]&&was[i];
 for(const[i,k]of[[7,'fire'],[0,'boost'],[6,'brake']]){if(edge(i)){B[k]=1;$(k).classList.add('on')}if(rel(i)){B[k]=0;$(k).classList.remove('on')}}
 if(edge(1)){const l=$('land');if(l&&l.style.display!='none')l.click()}if(edge(2)||edge(5))cycleW(1);if(edge(4))cycleW(-1);if(edge(3))ckToggle();
