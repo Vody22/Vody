@@ -36,8 +36,10 @@ if(TAB=='ships'){const hid=[];for(const id in HULLS)if(HULLS[id].uniq&&!G.owned.
 TICK.push(()=>{if(!ARGENT_ILLIMITE&&G.cr>=1e8){G.cr=2500;toast('💰 Argent illimité désactivé : tu repars avec 2 500 ¢');save()}});
 // ----- mise à jour automatique : si une nouvelle version est publiée, elle s'installe au retour dans l'appli ou au prochain amarrage -----
 const UPD={cur:(document.querySelector('meta[name="sf-build"]')||{}).content||'',ready:false,busy:false};
-async function updCheck(){if(!API_OK||!UPD.cur||UPD.busy||UPD.ready)return;UPD.busy=true;try{const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});const tx=await r.text(),m=tx.match(/name="sf-build" content="([^"]+)"/);if(m&&m[1]!==UPD.cur){UPD.ready=true;toast('✨ Nouvelle version disponible : elle s\'installe à ton prochain amarrage')}}catch(e){}UPD.busy=false}
-function updApply(){if(!UPD.ready)return;save();try{if(typeof cloudSave=='function')cloudSave(false)}catch(e){}setTimeout(()=>location.reload(),600)}
+async function updCheck(){if(!API_OK||!UPD.cur||UPD.busy||UPD.ready)return;UPD.busy=true;try{const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});const tx=await r.text(),m=tx.match(/name="sf-build" content="([^"]+)"/);if(m&&m[1]!==UPD.cur){UPD.ready=true;UPD.nb=m[1];toast('✨ Nouvelle version disponible : elle s\'installe à ton prochain amarrage')}}catch(e){}UPD.busy=false}
+function updApply(){if(!UPD.ready)return;save();try{if(typeof cloudSave=='function')cloudSave(false)}catch(e){}setTimeout(()=>{const q=new URLSearchParams(location.search);q.set('v',UPD.nb||Date.now());location.replace(location.pathname+'?'+q.toString()+location.hash)},600)}
+// après une mise à jour, on retire le paramètre v= de l'adresse (l'icône de l'écran d'accueil garde l'adresse propre)
+try{const q=new URLSearchParams(location.search);if(q.has('v')){q.delete('v');const r=q.toString();history.replaceState(null,'',location.pathname+(r?'?'+r:'')+location.hash)}}catch(e){}
 addEventListener('visibilitychange',()=>{if(document.hidden)return;updCheck().then(()=>{if(UPD.ready&&(S.docked||mode=='space'&&!en.length))updApply()})});
 setInterval(updCheck,10*60e3);setTimeout(updCheck,30000);
 {const _dk=dock;dock=function(st){_dk(st);if(UPD.ready){toast('✨ Installation de la nouvelle version…');updApply()}}}
