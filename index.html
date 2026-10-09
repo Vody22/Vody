@@ -142,7 +142,10 @@ body.atelier #tabX{max-height:min(32vh,300px)}body.desk.atelier #shop{left:auto;
 <button id="mppvp"></button><div id="mplist"></div>
 <form id="mpform"><input id="mpmsg" maxlength="120" placeholder="Écris un message…" autocomplete="off"><button>Envoyer</button></form></div>
 <div id="loading">STARFARER 3D<small>Chargement…</small></div>
-<meta name="sf-build" content="20261009-121738"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
+addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
+setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
+<meta name="sf-build" content="20261009-124506"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -3706,9 +3709,12 @@ function stepFX(dt){shieldT=Math.max(0,shieldT-dt*1.8);hurt=Math.max(0,hurt-dt);
 let last=performance.now();
 function frame(now){requestAnimationFrame(frame);const dt=clamp((now-last)/1000,0,.05);last=Math.max(last,now);DT=dt;t+=dt;hint-=dt;
 try{if(!isPaused()){if(mode=='space')updSpace(dt);else if(mode=='int')derUpdate(dt);else SURF.update(dt);updContent(dt)}updContentAlways(dt);updMP(dt)}catch(e){console.error(e)}
-SPK.update(dt);FIRE.update(dt);updFlashes(dt);updFXS(dt);updFX(dt);updFade(dt);placeShip(dt);updCam(dt);updSpeedLines(dt,mode=='space'&&!S.docked?fovK:0,S.spd);updDetail();stepFX(dt);updParts(dt);updCockpit(dt);updStreaks(dt);boostSound(dt);
-if(engG&&AC)engG.gain.setTargetAtTime(S.dead?0:S.thr*.05+(isBoost()&&!S.docked&&!FOOT.on&&mode!='int'?.07:0),AC.currentTime,.08);if(engLP&&AC)engLP.frequency.setTargetAtTime(160+S.spd*2.2,AC.currentTime,.1);
-TM.value=t;camera.updateMatrixWorld();if(typeof updGodRays=='function')updGodRays();renderFrame();overlay();if(FADE.v>.003){OX.fillStyle=`rgba(${FADE.col},${FADE.v})`;OX.fillRect(0,0,innerWidth,innerHeight)}hud()}
+try{SPK.update(dt);FIRE.update(dt);updFlashes(dt);updFXS(dt);updFX(dt);updFade(dt);placeShip(dt);updCam(dt);updSpeedLines(dt,mode=='space'&&!S.docked?fovK:0,S.spd);updDetail();stepFX(dt);updParts(dt);updCockpit(dt);updStreaks(dt);boostSound(dt)}catch(e){frameErr(e)}
+try{if(engG&&AC)engG.gain.setTargetAtTime(S.dead?0:S.thr*.05+(isBoost()&&!S.docked&&!FOOT.on&&mode!='int'?.07:0),AC.currentTime,.08);if(engLP&&AC)engLP.frequency.setTargetAtTime(160+S.spd*2.2,AC.currentTime,.1)}catch(e){}
+try{TM.value=t;camera.updateMatrixWorld();if(typeof updGodRays=='function')updGodRays();renderFrame()}catch(e){frameErr(e)}try{overlay();if(FADE.v>.003){OX.fillStyle=`rgba(${FADE.col},${FADE.v})`;OX.fillRect(0,0,innerWidth,innerHeight)}hud()}catch(e){frameErr(e)}FE.tick(dt)}
+// erreurs dans la boucle : le jeu continue, et un message s'affiche si elles se répètent
+const FE={n:0,last:'',t:0,el:null,tick(dt){this.t=Math.max(0,this.t-dt);if(this.el&&this.t<=0){this.el.remove();this.el=null;this.n=0}}};
+function frameErr(e){console.error(e);FE.n++;FE.last=String(e&&e.message||e).slice(0,160);if(FE.n>40&&!FE.el){FE.el=document.createElement('div');FE.el.style.cssText='position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:60;max-width:90vw;padding:8px 12px;background:rgba(120,10,20,.92);color:#fff;font:600 12px system-ui;border-radius:8px;pointer-events:none;text-align:center';document.body.appendChild(FE.el)}if(FE.el){FE.el.textContent='⚠ Erreur du jeu : '+FE.last+' — fais une capture d\'écran';FE.t=5}}
 if(DESK){try{NEB.material.map=gpuNebula();NEB.material.needsUpdate=true}catch(e){console.warn(e)}setupEnv(NEB);setupPost();setupGrade()}
 resize();{const l=load();if(l=='old')setTimeout(()=>toast('Progression de la version 2D importée'),400);else if(l){hint=0;setTimeout(()=>toast('Partie chargée — bon retour, pilote'),400)}}
 if(S.pos.distanceTo(new V3())<300)S.pos.set(0,30,900);
@@ -3909,6 +3915,8 @@ function updApply(){if(!UPD.ready)return;save();try{if(typeof cloudSave=='functi
 addEventListener('visibilitychange',()=>{if(document.hidden)return;updCheck().then(()=>{if(UPD.ready&&(S.docked||mode=='space'&&!en.length))updApply()})});
 setInterval(updCheck,10*60e3);setTimeout(updCheck,30000);
 {const _dk=dock;dock=function(st){_dk(st);if(UPD.ready){toast('✨ Installation de la nouvelle version…');updApply()}}}
+// ----- le moteur 3D peut s'arrêter (mémoire saturée sur mobile) : on le dit au lieu de rester figé -----
+R3.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();try{save()}catch(x){}const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(3,5,12,.94);color:#cdf2ff;font:600 15px system-ui;text-align:center;padding:24px';d.innerHTML='Le moteur 3D s\'est arrêté (mémoire de l\'appareil saturée).<br><small style="opacity:.7">Ta partie est sauvegardée.</small><button style="padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px">Relancer le jeu</button>';d.querySelector('button').onclick=()=>location.reload();document.body.appendChild(d)},false);
 
 // ===== CODEX ET SUCCÈS : encyclopédie qui se remplit en jouant, statistiques, 46 succès avec récompenses et titres =====
 const CX=GX('cx',{});for(const k of['pl','sp','en','an','ch','fac','log','der'])if(typeof CX[k]!='object'||!CX[k])CX[k]={};

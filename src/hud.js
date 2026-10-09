@@ -59,9 +59,12 @@ function stepFX(dt){shieldT=Math.max(0,shieldT-dt*1.8);hurt=Math.max(0,hurt-dt);
 let last=performance.now();
 function frame(now){requestAnimationFrame(frame);const dt=clamp((now-last)/1000,0,.05);last=Math.max(last,now);DT=dt;t+=dt;hint-=dt;
 try{if(!isPaused()){if(mode=='space')updSpace(dt);else if(mode=='int')derUpdate(dt);else SURF.update(dt);updContent(dt)}updContentAlways(dt);updMP(dt)}catch(e){console.error(e)}
-SPK.update(dt);FIRE.update(dt);updFlashes(dt);updFXS(dt);updFX(dt);updFade(dt);placeShip(dt);updCam(dt);updSpeedLines(dt,mode=='space'&&!S.docked?fovK:0,S.spd);updDetail();stepFX(dt);updParts(dt);updCockpit(dt);updStreaks(dt);boostSound(dt);
-if(engG&&AC)engG.gain.setTargetAtTime(S.dead?0:S.thr*.05+(isBoost()&&!S.docked&&!FOOT.on&&mode!='int'?.07:0),AC.currentTime,.08);if(engLP&&AC)engLP.frequency.setTargetAtTime(160+S.spd*2.2,AC.currentTime,.1);
-TM.value=t;camera.updateMatrixWorld();if(typeof updGodRays=='function')updGodRays();renderFrame();overlay();if(FADE.v>.003){OX.fillStyle=`rgba(${FADE.col},${FADE.v})`;OX.fillRect(0,0,innerWidth,innerHeight)}hud()}
+try{SPK.update(dt);FIRE.update(dt);updFlashes(dt);updFXS(dt);updFX(dt);updFade(dt);placeShip(dt);updCam(dt);updSpeedLines(dt,mode=='space'&&!S.docked?fovK:0,S.spd);updDetail();stepFX(dt);updParts(dt);updCockpit(dt);updStreaks(dt);boostSound(dt)}catch(e){frameErr(e)}
+try{if(engG&&AC)engG.gain.setTargetAtTime(S.dead?0:S.thr*.05+(isBoost()&&!S.docked&&!FOOT.on&&mode!='int'?.07:0),AC.currentTime,.08);if(engLP&&AC)engLP.frequency.setTargetAtTime(160+S.spd*2.2,AC.currentTime,.1)}catch(e){}
+try{TM.value=t;camera.updateMatrixWorld();if(typeof updGodRays=='function')updGodRays();renderFrame()}catch(e){frameErr(e)}try{overlay();if(FADE.v>.003){OX.fillStyle=`rgba(${FADE.col},${FADE.v})`;OX.fillRect(0,0,innerWidth,innerHeight)}hud()}catch(e){frameErr(e)}FE.tick(dt)}
+// erreurs dans la boucle : le jeu continue, et un message s'affiche si elles se répètent
+const FE={n:0,last:'',t:0,el:null,tick(dt){this.t=Math.max(0,this.t-dt);if(this.el&&this.t<=0){this.el.remove();this.el=null;this.n=0}}};
+function frameErr(e){console.error(e);FE.n++;FE.last=String(e&&e.message||e).slice(0,160);if(FE.n>40&&!FE.el){FE.el=document.createElement('div');FE.el.style.cssText='position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:60;max-width:90vw;padding:8px 12px;background:rgba(120,10,20,.92);color:#fff;font:600 12px system-ui;border-radius:8px;pointer-events:none;text-align:center';document.body.appendChild(FE.el)}if(FE.el){FE.el.textContent='⚠ Erreur du jeu : '+FE.last+' — fais une capture d\'écran';FE.t=5}}
 if(DESK){try{NEB.material.map=gpuNebula();NEB.material.needsUpdate=true}catch(e){console.warn(e)}setupEnv(NEB);setupPost();setupGrade()}
 resize();{const l=load();if(l=='old')setTimeout(()=>toast('Progression de la version 2D importée'),400);else if(l){hint=0;setTimeout(()=>toast('Partie chargée — bon retour, pilote'),400)}}
 if(S.pos.distanceTo(new V3())<300)S.pos.set(0,30,900);
