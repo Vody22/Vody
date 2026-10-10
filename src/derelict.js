@@ -154,7 +154,7 @@ const hs=Math.hypot(DER.vel.x,DER.vel.z);if(hs>.4){const ty=Math.atan2(-DER.vel.
 const jump=B.boost||K.Space,ceil=dCeil(P.x,P.z);if(zg){DER.vy-=1.1*dt;if(jump&&DER.fuel>0){DER.vy=Math.min(4.5,DER.vy+12*dt);DER.fuel-=dt*.25/(1+.25*talR('jet'));if(Math.random()<.5)FIRE.emit(P.x,P.y+1,P.z,rv(1),-4,rv(1),.25,.6,.75,1,.12)}if(DER.grounded)DER.fuel=Math.min(1,DER.fuel+dt*.4)}
 else{if(DER.grounded){DER.fuel=Math.min(1,DER.fuel+dt*.5);if(jump&&!DER.jl){DER.vy=6.4;DER.grounded=false;tone(200,320,.1,'sine',.04)}}DER.vy-=18*dt}DER.jl=jump;
 const nx=P.x+DER.vel.x*dt;if(dFree(nx,P.z,.42))P.x=nx;else DER.vel.x=0;const nz=P.z+DER.vel.z*dt;if(dFree(P.x,nz,.42))P.z=nz;else DER.vel.z=0;P.y+=DER.vy*dt;if(P.y>ceil-1.9){P.y=ceil-1.9;DER.vy=Math.min(0,DER.vy)}if(P.y<=0){P.y=0;if(DER.vy<-14)damage((-DER.vy-14)*.6,'col');DER.vy=0;DER.grounded=true}else if(P.y>.05)DER.grounded=false;
-DER.ph+=dt*hs*1.3;const m=DER.model;m.position.copy(P);m.rotation.y=DER.yaw;animHuman(m,DER.ph,hs,!DER.grounded,isFire(),0,null);
+DER.ph+=dt*hm3Rate(hs);const m=DER.model;m.position.copy(P);m.rotation.y=DER.yaw;animHuman(m,DER.ph,hs,!DER.grounded,isFire(),0,null);
 // portes automatiques
 for(const D2 of lv.doorsM){const near=!D2.lock&&Math.hypot(D2.pos.x-P.x,D2.pos.z-P.z)<3.2;const o0=D2.open;D2.open=clamp(D2.open+(near?dt*2.6:-dt*1.8),0,1);D2.panel.position.y=DCEIL/2+D2.open*(DCEIL-.4);if(o0<.02&&D2.open>=.02)tone(160,260,.35,'sawtooth',.02)}
 // objets flottants, étincelles

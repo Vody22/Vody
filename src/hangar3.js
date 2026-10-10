@@ -101,7 +101,7 @@ if(H3.hook)H3.hook.position.z=4+Math.sin(t3*.13)*14;
 // mécaniciens : marchent d'un point à l'autre, s'arrêtent et gesticulent
 for(const n of H3.npc){if(n.fixed){animHuman(n.m,0,0,false,false,Math.sin(t3*.4)>0?1:0,Math.sin(t3*.3)*.6);continue}
 if(n.wait>0){n.wait-=dt;animHuman(n.m,n.ph,0,false,false,n.wait>1.2?1:0,null);continue}const T=n.P[n.i],dx=T[0]-n.pos.x,dz=T[1]-n.pos.z,d=Math.hypot(dx,dz);
-if(d<.3){n.i=(n.i+1)%n.P.length;n.wait=1.5+Math.random()*3;continue}const sp=1.5,st=Math.min(d,sp*dt);n.pos.x+=dx/d*st;n.pos.z+=dz/d*st;n.ph+=st*2.6;const yaw=Math.atan2(-dx,-dz);let dy=yaw-n.m.rotation.y;dy=Math.atan2(Math.sin(dy),Math.cos(dy));n.m.rotation.y+=dy*Math.min(1,dt*6);animHuman(n.m,n.ph,sp,false,false,0,null)}
+if(d<.3){n.i=(n.i+1)%n.P.length;n.wait=1.5+Math.random()*3;continue}const sp=1.5,st=Math.min(d,sp*dt);n.pos.x+=dx/d*st;n.pos.z+=dz/d*st;n.ph+=dt*hm3Rate(sp);const yaw=Math.atan2(-dx,-dz);let dy=yaw-n.m.rotation.y;dy=Math.atan2(Math.sin(dy),Math.cos(dy));n.m.rotation.y+=dy*Math.min(1,dt*6);animHuman(n.m,n.ph,sp,false,false,0,null)}
 // drone
 if(H3.dr){const d=H3.dr;d.position.set(Math.sin(t3*.31)*16,6+Math.sin(t3*.7)*2,Math.sin(t3*.23)*18);d.rotation.y=t3*.6;d.rotation.z=Math.sin(t3*1.3)*.15}
 // bras de soudure : vise l'aile, étincelles et éclairs bleus

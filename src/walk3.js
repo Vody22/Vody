@@ -40,7 +40,7 @@ function w3Tick(dt){if(!H3.on&&WK3.on)w3Stop();w3UI();if(!WK3.on||!WK3.m)return;
 if(!WK3.menu){if(stick&&Math.hypot(stick.x,stick.y)>.1){ix=stick.x;iz=-stick.y}ix+=(K.KeyD|K.ArrowRight|0)-(K.KeyA|K.KeyQ|K.ArrowLeft|0);iz+=(K.KeyW|K.KeyZ|K.ArrowUp|0)-(K.KeyS|K.ArrowDown|0);const il=Math.hypot(ix,iz);if(il>1){ix/=il;iz/=il}}
 const fw=new V3(-Math.sin(WK3.cy),0,-Math.cos(WK3.cy)),rt=new V3(Math.cos(WK3.cy),0,-Math.sin(WK3.cy)),run=K.ShiftLeft||K.ShiftRight||(B&&B.boost),sp=run?7:4.2;
 const want=fw.multiplyScalar(iz).addScaledVector(rt,ix).multiplyScalar(sp);WK3.vel.x=lerp(WK3.vel.x,want.x,damp(10,dt));WK3.vel.z=lerp(WK3.vel.z,want.z,damp(10,dt));P.x+=WK3.vel.x*dt;P.z+=WK3.vel.z*dt;w3Coll(P);
-const hs=Math.hypot(WK3.vel.x,WK3.vel.z);if(hs>.4){const ty=Math.atan2(-WK3.vel.x,-WK3.vel.z);let d=ty-WK3.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));WK3.yaw+=d*damp(10,dt)}WK3.ph+=hs*dt*2.2;
+const hs=Math.hypot(WK3.vel.x,WK3.vel.z);if(hs>.4){const ty=Math.atan2(-WK3.vel.x,-WK3.vel.z);let d=ty-WK3.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));WK3.yaw+=d*damp(10,dt)}WK3.ph+=dt*hm3Rate(hs);
 WK3.m.position.set(P.x,0,P.z);WK3.m.rotation.y=WK3.yaw;try{animHuman(WK3.m,WK3.ph,hs,false,false,0,null)}catch(e){}
 // proximité des stands
 let best=null,bd=3.6;for(const s of WK3.spots){if(s.idle){try{animHuman(s.n,s.ph,0,false,false,Math.sin(t*.7+s.ph)>.6?1:0,null)}catch(e){}continue}const d=Math.hypot(P.x-s.x,P.z-s.z);if(d<bd){bd=d;best=s}if(s.n)try{animHuman(s.n,s.ph,0,false,false,d<5?1:0,d<8?Math.atan2(P.x-s.n.position.x,P.z-s.n.position.z)-s.n.rotation.y:null)}catch(e){}}WK3.near=best;w3UI()}

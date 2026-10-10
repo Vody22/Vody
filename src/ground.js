@@ -67,7 +67,7 @@ SURF.radar=blip=>{if(!GR)return;if(GR.op)blip(GR.op,'#ffc845',3.4,true);for(cons
 // ----- à chaque image (surface) : PNJ, lumières, piste d'atterrissage -----
 SURF.tick=function(dt,F){if(!GR)return;for(const L of GR.lights)L.s.visible=L.blink?Math.sin(t*3)>0:Math.sin(t*4+L.ph)>-.2;
 for(const D of GR.deps)D.g.children[D.g.children.length-1].scale.setScalar(8+Math.sin(t*3+D.pos.x)*1.5);
-const me=FOOT.on?FOOT.pos:S.pos;for(const n of GR.npcs){const near=n.pos.distanceTo(me)<7;if(!n.fixed&&!near){n.wait-=dt;if(n.wait<=0){if(!n.tg)n.tg=n.path[Math.random()*n.path.length|0].clone();const dx=n.tg.x-n.pos.x,dz=n.tg.z-n.pos.z,d=Math.hypot(dx,dz);if(d<1.5){n.tg=null;n.wait=2+Math.random()*4}else{const sp=2.2;n.pos.x+=dx/d*sp*dt;n.pos.z+=dz/d*sp*dt;n.yaw=Math.atan2(-dx,-dz);n.ph+=dt*sp*1.6}}}
+const me=FOOT.on?FOOT.pos:S.pos;for(const n of GR.npcs){const near=n.pos.distanceTo(me)<7;if(!n.fixed&&!near){n.wait-=dt;if(n.wait<=0){if(!n.tg)n.tg=n.path[Math.random()*n.path.length|0].clone();const dx=n.tg.x-n.pos.x,dz=n.tg.z-n.pos.z,d=Math.hypot(dx,dz);if(d<1.5){n.tg=null;n.wait=2+Math.random()*4}else{const sp=2.2;n.pos.x+=dx/d*sp*dt;n.pos.z+=dz/d*sp*dt;n.yaw=Math.atan2(-dx,-dz);n.ph+=dt*hm3Rate(sp)}}}
 if(near){n.yaw=Math.atan2(-(me.x-n.pos.x),-(me.z-n.pos.z))}n.pos.y=gAt(n.pos.x,n.pos.z);n.m.rotation.y=lerp(n.m.rotation.y,n.yaw,damp(6,dt));{let lk=null;if(near){lk=Math.atan2(-(me.x-n.pos.x),-(me.z-n.pos.z))-n.m.rotation.y;lk=Math.atan2(Math.sin(lk),Math.cos(lk))}animHuman(n.m,n.ph,!n.fixed&&!near&&n.wait<=0?2.2:0,false,false,n.sayT,lk)}if(n.sayT>0)n.sayT-=dt}
 // le vaisseau se pose sur la piste → services de station
 if(GR.pad&&!FOOT.on&&!S.ascent&&!S.dead){const P=GR.pad,dxz=Math.hypot(S.pos.x-P.x,S.pos.z-P.z);if(S.padLeave&&dxz>45)S.padLeave=0;
@@ -104,7 +104,7 @@ const lim=F.HALF*.9;P.x=clamp(P.x,-lim,lim);P.z=clamp(P.z,-lim,lim);
 let gnd=F.h(P.x,P.z);if(GR.pad&&Math.hypot(P.x-GR.pad.x,P.z-GR.pad.z)<24)gnd=Math.max(gnd,GR.pad.y);const liq=gnd<0;if(liq)gnd=Math.max(gnd,-1.4);
 if(P.y<=gnd){P.y=gnd;if(FOOT.vy<-16)damage((-FOOT.vy-16)*.8,'col');FOOT.vy=0;FOOT.grounded=true}else if(P.y>gnd+.05)FOOT.grounded=false;
 F.onLiq=liq&&P.y<1;if(F.onLiq&&F.ty=='Volcanique'){damage(14*dt);if(Math.random()<dt*8)FIRE.emit(P.x,P.y+.5,P.z,rv(3),8,rv(3),.5,1,.5,.1,.4)}
-FOOT.ph+=dt*hs*1.25;const m=FOOT.model;m.position.copy(P);m.rotation.y=FOOT.yaw;animAstro(m,FOOT.ph,hs,!FOOT.grounded,isFire());m.visible=!COCKPIT;
+FOOT.ph+=dt*hm3Rate(hs);const m=FOOT.model;m.position.copy(P);m.rotation.y=FOOT.yaw;animAstro(m,FOOT.ph,hs,!FOOT.grounded,isFire());m.visible=!COCKPIT;
 // l'état du vaisseau suit le pilote (radar, multijoueur, ramassage des cristaux, tirs des tourelles)
 S.pos.set(P.x,P.y+1,P.z);S.q.setFromEuler(new THREE.Euler(0,FOOT.yaw,0));S.vel.set(FOOT.vel.x,FOOT.vy,FOOT.vel.z);S.spd=hs;S.thr=0;
 if(K.KeyF&&!FOOT.kf&&nearShip())footLeave();FOOT.kf=K.KeyF}
