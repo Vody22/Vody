@@ -1,8 +1,18 @@
 // Stockage des données en ligne sur Vercel : base Redis (Upstash) appelée par son API REST, sans dépendance.
 // Imite l'API de Netlify Blobs utilisée par les fonctions (get, set, getWithMetadata, setJSON avec onlyIfMatch / onlyIfNew).
-const URL0 = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
-const TOK = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+// variables posées par l'intégration Upstash (avec ou sans préfixe), sinon déduites de l'URL redis(s)://default:jeton@hôte:port
+function pickEnv() {
+  const E = process.env, K = Object.keys(E);
+  const find = re => K.find(k => re.test(k) && E[k]);
+  let u = E.KV_REST_API_URL || E.UPSTASH_REDIS_REST_URL, t = E.KV_REST_API_TOKEN || E.UPSTASH_REDIS_REST_TOKEN, src = "direct";
+  if (!(u && t)) { const ku = find(/(^|_)(KV_REST_API_URL|UPSTASH_REDIS_REST_URL|REST_API_URL|REDIS_REST_URL)$/), kt = find(/(^|_)(KV_REST_API_TOKEN|UPSTASH_REDIS_REST_TOKEN|REST_API_TOKEN|REDIS_REST_TOKEN)$/); if (ku && kt) { u = E[ku]; t = E[kt]; src = ku + "/" + kt; } }
+  if (!(u && t)) { const kr = find(/(^|_)(REDIS_URL|KV_URL)$/); if (kr) { try { const x = new URL(E[kr]); if (x.password) { u = "https://" + x.hostname; t = decodeURIComponent(x.password); src = kr; } } catch (e) {} } }
+  return { u: u || "", t: t || "", src: u && t ? src : "" };
+}
+const ENV = pickEnv(), URL0 = ENV.u, TOK = ENV.t;
 export const kvOk = () => !!(URL0 && TOK);
+export const kvSrc = () => ENV.src;
+export const kvCmd = (...a) => cmd(...a);
 async function cmd(...args) {
   const r = await fetch(URL0, { method: "POST", headers: { authorization: "Bearer " + TOK, "content-type": "application/json" }, body: JSON.stringify(args) });
   const j = await r.json().catch(() => ({ error: "réponse illisible" }));
