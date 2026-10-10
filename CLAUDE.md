@@ -3,7 +3,8 @@
 Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne : https://starvody.netlify.app
 
 ## Déploiement
-- Netlify (projet `starvody`) est relié à ce dépôt : **chaque push sur `main` met le site en ligne** (~30 s).
+- **Vercel** (projet `starvody`, https://starvody.vercel.app) est relié à ce dépôt : chaque push sur `main` met le site en ligne. `vercel.json` : pas de construction (index.html est déjà généré), publie `public/`. Fonctions dans `api/` (`save`, `war`, `board`, `market`, format `export default { fetch }`), stockage = Redis Upstash (intégration Vercel Marketplace, variables `KV_REST_API_URL`/`KV_REST_API_TOKEN` ou `UPSTASH_REDIS_REST_URL`/`_TOKEN`) via `api/_kv.mjs` (imite Netlify Blobs : `getWithMetadata` + `setJSON` conditionnel par script Lua). `api/save` va chercher une partie absente sur l'ancien site Netlify (transfert avec le même code SF-…).
+- Netlify (ancien hébergement, offre gratuite à crédits : 15 crédits par mise en ligne, 300/mois, mises en ligne bloquées une fois épuisés) : `netlify.toml` + `netlify/functions/` gardés tels quels.
 - `index.html` et `public/index.html` sont GÉNÉRÉS (identiques) : ne pas les éditer à la main. Modifier `src/`, puis `python3 build.py`, puis commit + push.
 - `netlify.toml` : Netlify publie le dossier `public/` (pas la racine, pour ne pas publier `node_modules`) et construit les fonctions de `netlify/functions/`.
 - Fonctions Netlify (`netlify/functions/`, stockage Netlify Blobs, `@netlify/blobs` dans `package.json`) : `save.mjs` (`/api/save?code=SF-XXXXXXXX`, sauvegarde cloud), `war.mjs` (`/api/war`, influence des territoires partagée, décroît de moitié en 48 h), `board.mjs` (`/api/board`, classements par semaine ISO), `market.mjs` (`/api/market`, hôtel des ventes). Écritures conditionnelles (`onlyIfMatch`/`onlyIfNew`) avec nouvelles tentatives.

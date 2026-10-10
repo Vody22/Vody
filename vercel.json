@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "echo 'index.html est déjà construit (python3 build.py)'",
+  "outputDirectory": "public"
+}
