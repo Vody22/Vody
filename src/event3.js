@@ -1,0 +1,51 @@
+// ===== ÉVÉNEMENTS DE SAISON : HALLOWEEN (10 oct. → 3 nov.) et NOËL (1er déc. → 6 janv.) — test : ?event=halloween / ?event=noel =====
+const EV3={k:null,gT:40,gifts:[],gfT:25,space:null,said:0};
+{const q=location.search.match(/[?&]event=(halloween|noel|off)/);if(q)EV3.k=q[1]=='off'?null:q[1];else{const d=new Date(),m=d.getMonth()+1,j=d.getDate();if((m==10&&j>=10)||(m==11&&j<=3))EV3.k='halloween';else if(m==12||(m==1&&j<=6))EV3.k='noel'}}
+function ev3Id(){const d=new Date();return EV3.k+(EV3.k=='noel'&&d.getMonth()==0?d.getFullYear()-1:d.getFullYear())}
+function ev3St(){const s=GX('ev3',{});if(s.id!==ev3Id()){s.id=ev3Id();s.n=0;s.done=0;s.ann=0}return s}
+// récompenses : peintures uniques (Atelier)
+PARTS.paint.o.citrouille={n:'Citrouille hantée',p:0,uniq:1,d:'Récompense d\'Halloween : orange citrouille, noir et vert spectral.',c:[0xff7a1a,0x1c1418,0x9aff5a]};
+PARTS.paint.o.givre={n:'Givre de Noël',p:0,uniq:1,d:'Récompense de Noël : blanc givré, rouge et vert sapin.',c:[0xf2f6fa,0xc8202a,0x2fbf5f]};
+function ev3Grant(id,n){if(G.pown.includes('paint:'+id))return;G.pown.push('paint:'+id);banner('trophy','Peinture débloquée : '+n+' !','Installe-la à l\'Atelier (onglet Peinture) dans n\'importe quelle station','#ffc34d');try{SFX.win()}catch(e){}save()}
+// ----- textures et modèles -----
+function ev3Face(){if(EV3.face)return EV3.face;const c=mkC(256,128),g=c.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,256,128);g.fillStyle='#ffd040';g.save();g.translate(128,64);
+for(const s of[-1,1]){g.beginPath();g.moveTo(s*30,-30);g.lineTo(s*50,-4);g.lineTo(s*10,-4);g.closePath();g.fill()}g.beginPath();g.moveTo(-10,0);g.lineTo(10,0);g.lineTo(0,14);g.closePath();g.fill();
+g.beginPath();g.moveTo(-56,18);for(let i=0;i<=8;i++){g.lineTo(-56+i*14,i%2?32:22)}g.lineTo(56,18);g.quadraticCurveTo(0,62,-56,18);g.fill();g.restore();return EV3.face=new THREE.CanvasTexture(c)}
+function ev3PumpGeo(){if(EV3.pg)return EV3.pg;const g=new THREE.SphereGeometry(1,20,14),P=g.attributes.position;for(let i=0;i<P.count;i++){const x=P.getX(i),y=P.getY(i),z=P.getZ(i),a=Math.atan2(z,x),k=1-.07*Math.pow(Math.abs(Math.cos(a*4)),.5);P.setXYZ(i,x*k,y*.78,z*k)}g.computeVertexNormals();return EV3.pg=g}
+function ev3PumpMat(){return EV3.pm||(EV3.pm=new THREE.MeshStandardMaterial({color:0xe8701a,roughness:.6,emissive:0xffb030,emissiveMap:ev3Face(),emissiveIntensity:1.4}))}
+function ev3Pumpkin(sc,x,y,z,s,ry){const m=new THREE.Mesh(ev3PumpGeo(),ev3PumpMat());m.position.set(x,y+s*.75,z);m.scale.setScalar(s);m.rotation.y=ry;sc.add(m);const st=new THREE.Mesh(new THREE.CylinderGeometry(.08,.12,.4,6),new THREE.MeshStandardMaterial({color:0x3a6a2a}));st.position.y=.85;m.add(st);return m}
+function ev3Tree(sc,x,y,z,s){const g=new THREE.Group(),gm=new THREE.MeshStandardMaterial({color:0x1d5a32,roughness:.85,flatShading:true});for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.ConeGeometry(4.2-i*.9,3.6,10),gm);c.position.y=2+i*2.2;g.add(c)}
+const tr=new THREE.Mesh(new THREE.CylinderGeometry(.4,.5,1.6,8),new THREE.MeshStandardMaterial({color:0x5a3a22}));tr.position.y=.8;g.add(tr);const L=[];const cols=[0xff4040,0xffd040,0x40c0ff,0x60ff80,0xff60d0];
+for(let i=0;i<26;i++){const h=i/26,a=i*2.4,r=(4.2-h*3.6)*.92;const sp=sprite(cols[i%5],.9,1);sp.material=sp.material.clone();sp.position.set(Math.cos(a)*r,1.6+h*8.4,Math.sin(a)*r);g.add(sp);L.push(sp)}
+const star=sprite(0xffe070,2.6,1);star.position.y=11.2;g.add(star);g.position.set(x,y,z);g.scale.setScalar(s);sc.add(g);g.userData.L=L;return g}
+// ----- espace : nébuleuse teintée, citrouille géante ou sapin géant près de la Base Alpha -----
+function ev3Space(){if(EV3.space||!EV3.k)return;try{if(NEB&&NEB.material&&NEB.material.color)NEB.material.color.copy(EV3.k=='halloween'?new THREE.Color(1.15,.8,.6):new THREE.Color(.88,.96,1.12))}catch(e){}
+const g=new THREE.Group();if(EV3.k=='halloween'){const p=new THREE.Mesh(ev3PumpGeo(),ev3PumpMat());p.scale.setScalar(55);g.add(p);const st=new THREE.Mesh(new THREE.CylinderGeometry(4,7,22,8),new THREE.MeshStandardMaterial({color:0x3a6a2a}));st.position.y=48;g.add(st);const gl=sprite(0xff9a30,260,.45);g.add(gl);g.position.set(420,180,-900);g.userData.spin=.05}
+else{const t=ev3Tree(g,0,0,0,14);g.position.set(-520,-160,-950);g.userData.tree=t}
+scene.add(g);EV3.space=g}
+// ----- Halloween : vaisseaux fantômes (ils patrouillent, à toi de les chasser) -----
+const EV3GM=new THREE.MeshStandardMaterial({color:0x5affa8,emissive:0x2aff8a,emissiveIntensity:.7,transparent:true,opacity:.5,depthWrite:false,roughness:.3});
+function ev3Ghosts(){const z=Math.max(1,danger()),a=Math.random()*TAU,base=S.pos.clone().add(new V3(Math.cos(a)*1250,rv(200),Math.sin(a)*1250)),g=(typeof AI3!='undefined')?++AI3.gid:0;
+for(let i=0;i<2;i++){const e=mkEnemy(i?'pirate':'chasseur',base.clone().add(new V3(i*40,i*10,i*35)),z);e.ghost=1;e.label='Vaisseau fantôme';e.lc='#7fffb0';e.mesh.traverse(o=>{if(o.isMesh&&o!==e.mesh.userData.bar&&!(o.material&&o.material.blending===THREE.AdditiveBlending))o.material=EV3GM});en.push(e);if(typeof ai3Init=='function')ai3Init(e,'patrol',g)}
+toast('👻 Des vaisseaux fantômes rôdent dans le secteur…');try{tone(220,110,1.6,'sine',.05);tone(330,160,1.6,'triangle',.03)}catch(e){}}
+// ----- Noël : cadeaux qui flottent dans l'espace -----
+function ev3Gift(){const g=new THREE.Group(),cols=[0xd8282a,0x2f9fd8,0x3fbf5f,0xe8b830],c=cols[Math.random()*4|0],box=new THREE.Mesh(new THREE.BoxGeometry(5,5,5),new THREE.MeshStandardMaterial({color:c,roughness:.5,emissive:c,emissiveIntensity:.15})),rb=new THREE.MeshStandardMaterial({color:0xffe080,metalness:.6,roughness:.3});
+g.add(box);for(const r of[[5.2,1,5.2],[1,5.2,5.2]]){const m=new THREE.Mesh(new THREE.BoxGeometry(...r),rb);g.add(m)}const bw=new THREE.Mesh(new THREE.TorusGeometry(1.2,.35,6,14),rb);bw.position.y=3;g.add(bw);const gl=sprite(0xfff0c0,16,.5);g.add(gl);
+const p=S.pos.clone().addScaledVector(fwd(),700+Math.random()*400).add(new V3(rv(300),rv(120),rv(300)));g.position.copy(p);scene.add(g);EV3.gifts.push({g,l:150})}
+function ev3Open(){const s=ev3St();s.n++;const r=Math.random();if(r<.12){try{giveBlueprint()}catch(e){G.cr+=500}}else if(r<.45){try{gainXP(120)}catch(e){}toast('🎁 Cadeau : +120 XP ('+s.n+'/10)')}else{const c=150+Math.floor(Math.random()*250);G.cr+=c;toast('🎁 Cadeau : +'+c+' ¢ ('+s.n+'/10)')}
+try{SFX.coin()}catch(e){}if(s.n>=10&&!s.done){s.done=1;ev3Grant('givre','Givre de Noël')}save()}
+{const _he=hitEnemy;hitEnemy=function(e,d,p){const was=e&&e.dead;_he(e,d,p);try{if(e&&e.ghost&&!was&&e.dead){const s=ev3St();s.n++;boom3(e.pos,DESK?40:24,0x7fffb0,120);try{tone(880,220,.8,'sine',.04)}catch(x){}toast('👻 Âme capturée ('+s.n+'/13)');if(s.n>=13&&!s.done){s.done=1;ev3Grant('citrouille','Citrouille hantée')}save()}}catch(x){}}}
+// ----- surface : citrouilles autour de la piste, chauves-souris la nuit ; sapin décoré à Noël -----
+{const _se=SURF.enter;SURF.enter=function(p,entry){_se(p,entry);if(!EV3.k)return;try{const sc=SURF.scene,P=GR&&GR.pad,F=GR&&GR.F;if(!P||!F)return;const r=rng(seedOf(p.x,p.y,p.z,1031));
+if(EV3.k=='halloween'){for(let i=0;i<9;i++){const a=i/9*TAU+r()*.3,d=30+r()*14,x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;const pk=ev3Pumpkin(sc,x,F.h(x,z),z,1.6+r()*1.1,r()*TAU);const gl=sprite(0xff8a20,pk.scale.x*3.2,.35);gl.position.copy(pk.position);sc.add(gl)}if(typeof nt3Flock=='function'){const f=nt3Flock(F,sc,P.x+60,P.z+40,r,0x0c0a0e,DESK?24:16);f.bats=1}}
+else{const x=P.x+36,z=P.z-22;ev3Tree(sc,x,F.h(x,z),z,1.4);for(let i=0;i<4;i++){const a=r()*TAU,x2=x+Math.cos(a)*5,z2=z+Math.sin(a)*5;const gb=new THREE.Mesh(new THREE.BoxGeometry(1.2,1,1.2),new THREE.MeshStandardMaterial({color:[0xd8282a,0x2f9fd8,0xe8b830,0x3fbf5f][i]}));gb.position.set(x2,F.h(x2,z2)+.5,z2);gb.rotation.y=r()*3;sc.add(gb)}}}catch(e){console.warn(e)}}}
+// ----- par image -----
+TICK.push(dt=>{if(!EV3.k)return;if(mode=='space'){ev3Space();if(EV3.space){if(EV3.space.userData.spin)EV3.space.rotation.y+=dt*EV3.space.userData.spin;const T=EV3.space.userData.tree;if(T)for(const s of T.userData.L)s.material.opacity=.4+.6*Math.abs(Math.sin(t*2+s.position.y))}}
+if(!EV3.said&&t>12&&!(typeof MENU3!='undefined'&&MENU3.on)){const s=ev3St();if(!s.ann){s.ann=1;EV3.said=1;if(EV3.k=='halloween')banner('skull','Événement Halloween !','Chasse les vaisseaux fantômes (13 âmes = peinture « Citrouille hantée »). Citrouilles sur les avant-postes, chauves-souris la nuit. Jusqu\'au 3 novembre.','#ff9a30');else banner('star','Événement de Noël !','Ramasse 10 cadeaux qui flottent dans l\'espace pour gagner la peinture « Givre de Noël ». Sapin géant près de la Base Alpha. Jusqu\'au 6 janvier.','#7fd0ff')}else EV3.said=1}
+if(mode!='space'||S.docked||S.dead)return;const st=ev3St();
+if(EV3.k=='halloween'){EV3.gT-=dt;if(EV3.gT<=0){EV3.gT=150+Math.random()*120;if(en.filter(e=>e.ghost).length<2)ev3Ghosts()}for(const e of en)if(e.ghost&&!e.dead){const k=.35+.25*Math.sin(t*3+e.sz)+(Math.random()<.02?.3:0);EV3GM.opacity=k}}
+else{EV3.gfT-=dt;if(EV3.gfT<=0){EV3.gfT=70+Math.random()*60;if(EV3.gifts.length<3)ev3Gift()}for(let i=EV3.gifts.length-1;i>=0;i--){const q=EV3.gifts[i];q.l-=dt;q.g.rotation.y+=dt*.8;q.g.rotation.x+=dt*.3;const d=q.g.position.distanceTo(S.pos);
+if(d<26){scene.remove(q.g);EV3.gifts.splice(i,1);boom3(q.g.position,24,0xfff0a0,80);ev3Open()}else if(q.l<=0||d>6000){scene.remove(q.g);EV3.gifts.splice(i,1)}}}});
+{const _ov=overlay;overlay=function(){_ov();if(!EV3.k||mode!='space'||S.dead||(typeof H3!='undefined'&&H3.on))return;for(const q of EV3.gifts){const s=proj(q.g.position);if(s.front&&s.x>0&&s.x<innerWidth&&s.y>0&&s.y<innerHeight)label({x:q.g.position.x,y:q.g.position.y+12,z:q.g.position.z},'🎁 Cadeau','#ffe080',3000);else edgeMarker(q.g.position,'#ffe080','Cadeau','🎁')}}}
+// progression dans les Services des stations
+svcAdd({o:3,ic:'star',t:'Événement',show:st=>!!EV3.k,html:st=>{const s=ev3St();return SROW(`<div><b>${EV3.k=='halloween'?'Halloween : vaisseaux fantômes':'Noël : cadeaux dans l\'espace'}</b><small>${EV3.k=='halloween'?'Âmes capturées : '+Math.min(13,s.n)+'/13 · récompense : peinture « Citrouille hantée ». Les fantômes patrouillent : tire-leur dessus pour les chasser.':'Cadeaux ouverts : '+Math.min(10,s.n)+'/10 · récompense : peinture « Givre de Noël ».'}${s.done?'<br><em>Récompense obtenue !</em>':''}</small></div>`,'')}});

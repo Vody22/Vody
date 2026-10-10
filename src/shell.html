@@ -197,6 +197,25 @@ body.gm3 #gm3{display:block}
 #toast{display:flex;align-items:center;justify-content:center;gap:8px;width:max-content;box-sizing:border-box}#toast .ti{color:var(--amber);filter:drop-shadow(0 0 5px rgba(255,195,77,.55));width:1.25em;height:1.25em}#toast .ti.tw{color:#ff6b78;filter:drop-shadow(0 0 5px rgba(255,90,110,.6))}
 body:not(.desk) #achb{max-width:min(92vw,420px);padding:9px 14px 9px 12px}body:not(.desk) #achb b{font-size:13.5px}body:not(.desk) #achb small{font-size:11px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 body.minui #lvrow,body.minui #sub,body.minui #zone,body.minui #help,body.minui #mpfeed{display:none!important}body.minui #info{font-size:10.5px;margin-top:4px;padding-top:4px}body.minui .pan{opacity:.88}
+body.cus3>*:not(#c):not(#cus3):not(#toast):not(#achb){visibility:hidden!important}
+#cus3{position:fixed;display:none;flex-direction:column;gap:9px;padding:13px 14px;box-sizing:border-box;z-index:85;font-size:12px;pointer-events:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;background:rgba(5,13,26,.94);box-shadow:inset 0 0 0 1px var(--edge);clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut))}
+body.desk #cus3{right:24px;top:70px;width:370px;max-height:calc(100vh - 100px)}
+body:not(.desk) #cus3{left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);max-height:54vh}
+.c3tab{display:flex;gap:6px}.c3tab button{flex:1}
+.c3sw{display:flex;flex-wrap:wrap;gap:7px}.c3sw button{width:30px;height:30px;flex:none;min-height:0;padding:0;background:var(--c);box-shadow:inset 0 0 0 2px rgba(255,255,255,.22);clip-path:circle(50%);border-radius:50%;opacity:1}
+.c3sw button.on{box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 5px var(--amber)}
+.c3sw button.c3a{width:auto;clip-path:none;border-radius:15px;padding:0 11px;background:rgba(255,255,255,.08);font-size:11px;color:var(--ice)}
+.c3sw button.c3a.on{background:var(--amber);color:#1a1206}
+.c3ch{display:flex;flex-wrap:wrap;gap:6px}.c3ch button{padding:6px 10px;flex:none}
+.c3ch button.on,.c3tab button.on,#cus3 .orow button.on{background:var(--amber);color:#1a1206}
+#cus3 .dimt{opacity:.7}
+#w3ui button{position:fixed;z-index:30;display:none;pointer-events:auto;font-size:14px;padding:11px 16px;box-shadow:inset 0 0 0 1px var(--amber);color:var(--amber);background:rgba(6,12,22,.88)}
+#w3go{left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 22vh)}
+body.desk #w3go{top:110px}
+#w3act{right:calc(env(safe-area-inset-right,0px) + 16px);bottom:calc(env(safe-area-inset-bottom,0px) + 130px);font-size:15px!important;padding:14px 18px!important;max-width:60vw}
+#w3ship{right:calc(env(safe-area-inset-right,0px) + 16px);bottom:calc(env(safe-area-inset-bottom,0px) + 70px);font-size:12px!important;opacity:.9}
+#w3back{left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 12px)}
+body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.walk3.w3menu #shop{display:flex!important}
 </style></head><body>
 <canvas id="c"></canvas><canvas id="ov"></canvas>
 <div id="hud"><div class="pan" id="pl"><div class="row"><span class="lab h" title="Coque"><svg class="i"><use href="#i-hull"/></svg></span><div class="bar" id="hpbar"><i id="hpb"></i></div><span class="num" id="hpt"></span></div><div class="row" id="shrow" style="display:none"><span class="lab s" title="Bouclier"><svg class="i"><use href="#i-shield"/></svg></span><div class="bar" id="shbar"><i id="shb"></i></div><span class="num" id="sht"></span></div><div class="row"><span class="lab c" title="Soute"><svg class="i"><use href="#i-cargo"/></svg></span><div class="bar" id="orebar"><i id="orb"></i></div><span class="num" id="ort"></span></div><div class="row" id="lvrow"><span class="lvt" id="lvt"></span><div class="xbar"><i id="xpb"></i></div><span id="xpg"></span></div><div class="row" id="pwr" title="Énergie : touche pour changer (1/2/3 sur PC)"></div><div id="wpn"></div><div id="info"></div></div><div class="pan" id="pr"><div id="cr"></div><div id="sub"></div><div class="chip" id="zone"></div><div class="chip" id="want" style="display:none"></div></div></div>
