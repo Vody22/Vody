@@ -6,4 +6,4 @@ function minuiApply(){document.body.classList.toggle('minui',MINUI.on);const b=$
 minuiApply();
 
 // les petits messages passent sous les conseils de départ au lieu de les recouvrir
-TICK.push(()=>{const e=$('toast');if(!e)return;const y=window.HINTY;const v=y!=null?Math.round(y+62)+'px':'';if(e.style.top!==v)e.style.top=v});
+{let te=null,tv=null;TICK.push(()=>{const y=window.HINTY,v=y!=null?Math.round(y+62)+'px':'';if(v===tv)return;tv=v;te=te||$('toast');if(te)te.style.top=v})}
