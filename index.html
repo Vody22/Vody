@@ -232,6 +232,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <div id="prof"></div><div id="bpanel"></div><div id="trpanel"></div><div id="cxpanel"></div><div id="mkpanel"></div><div id="bugpanel"></div><div id="talpanel"></div><div id="chc"></div>
 <div id="opts"><div class="phead"><b><svg class="i"><use href="#i-gear"/></svg> Options</b><button id="optx" title="Fermer"><svg class="i"><use href="#i-close"/></svg></button></div>
 <div class="psec"><b class="pt">Affichage</b><div class="orow"><span>Qualité graphique</span><button id="qbtn"></button></div><div class="orow"><span>Effets visuels</span><button id="fxbtn"></button></div><div class="orow"><span>Interface</span><button id="minuib"></button></div><div class="orow"><span>Vue cockpit</span><button id="ockb"></button></div><div class="orow desk-only"><span>Aide des touches</span><button id="ohelp"></button></div></div>
+<div class="psec"><b class="pt">Jeu</b><div class="orow"><span>Difficulté des combats</span><button id="df3b"></button></div></div>
 <div class="psec"><b class="pt">Son</b><div class="orow"><span>Son</span><button id="snd"></button></div><label class="orow"><span>Musique</span><input type="range" id="vmus" min="0" max="100"></label><label class="orow"><span>Effets</span><input type="range" id="vsfx" min="0" max="100"></label></div>
 <div class="psec"><b class="pt">Commandes</b><label class="orow"><span>Sensibilité</span><input type="range" id="sens" min="40" max="180"></label><div class="orow"><span>Tangage inversé</span><button id="inv"></button></div><div class="orow"><span>Manette</span><b id="gpst">Non détectée</b></div></div>
 <div class="psec"><b class="pt">Sauvegarde dans le cloud</b><small>Ta partie est enregistrée en ligne avec ton code. Sur un autre appareil, choisis « Charger un code » et tape-le pour retrouver ta progression.</small><div class="orow"><span>Ton code</span><b id="ccode"></b></div><div class="obtns"><button id="csave">Sauvegarder</button><button id="cload">Charger un code</button><button id="ccopy">Copier le code</button></div><small id="cstat"></small></div><div class="psec"><b class="pt">Un problème ?</b><small>Un bug, un prix bizarre, quelque chose de trop dur ? Prépare un rapport et colle-le dans ta conversation avec Claude.</small><div class="obtns"><button id="bugb">Signaler un problème</button></div></div></div>
@@ -243,7 +244,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261010-203311"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261010-211229"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -7841,6 +7842,22 @@ MUS.step++;MUS.next+=spb}}}
 const sn3Q=p=>{if(p&&p.catch)p.catch(()=>{})};
 document.addEventListener('visibilitychange',()=>{if(!AC)return;try{sn3Q(document.hidden?AC.suspend():AC.resume())}catch(e){}});
 for(const ev of['pointerdown','touchend','keydown'])addEventListener(ev,()=>{if(AC&&AC.state!='running'&&AC.state!='closed'&&!document.hidden)try{sn3Q(AC.resume())}catch(e){}},true);
+
+// ===== DIFFICULTÉ DES COMBATS (diff3) : Facile / Normal / Difficile (= ancien équilibrage), Options → Jeu =====
+// dégâts reçus des tirs ennemis, précision des tirs ennemis (dispersion ajoutée), points de vie et cadence des ennemis
+const DF3L=[{n:'Facile',dmg:.4,spr:.05,hp:.7,rate:1.35},{n:'Normal',dmg:.6,spr:.03,hp:.85,rate:1.15},{n:'Difficile',dmg:1,spr:0,hp:1,rate:1}];
+const DF3={lv:1};try{const v=localStorage.getItem('sf-diff');if(v!=null&&DF3L[+v])DF3.lv=+v}catch(e){}
+const df3=()=>DF3L[DF3.lv]||DF3L[1];
+// ennemis moins résistants et qui tirent un peu moins souvent (les foes.js, primes, police, boss… passent tous par mkEnemy)
+{const _mk=mkEnemy;mkEnemy=function(ty,pos,z){const e=_mk(ty,pos,z),D=df3();e.hp*=D.hp;e.mhp=e.hp;e.rate*=D.rate;return e}}
+// tirs ennemis : chaque nouveau projectile est marqué une fois (dégâts réduits, direction un peu moins précise ; les missiles gardent leur guidage)
+const _df3v=new V3();
+function df3Bolt(v,dmgKey,b){const D=df3();b[dmgKey]*=D.dmg;if(D.spr&&!b.home){const s=v.length();_df3v.set(rv(1),rv(1),rv(1)).multiplyScalar(D.spr*s);v.add(_df3v).setLength(s)}b.df3=1}
+TICK.push(()=>{for(const b of EB)if(!b.df3&&b.v)df3Bolt(b.v,'dmg',b);if(typeof DER!='undefined'&&DER.eb)for(const b of DER.eb)if(!b.df3&&b.v)df3Bolt(b.v,'d',b)});
+// bouton des Options
+function df3Apply(){const b=$('df3b');if(b)b.textContent=df3().n}
+{const b=$('df3b');if(b)b.onclick=()=>{DF3.lv=(DF3.lv+1)%DF3L.length;try{localStorage.setItem('sf-diff',DF3.lv)}catch(e){}df3Apply();toast(['🛡 Facile : les ennemis visent mal et font peu de dégâts','🛡 Normal : combats équilibrés','⚔ Difficile : les ennemis sont redoutables (ancien réglage)'][DF3.lv])}}
+df3Apply();
 
 // ===== MODE PHOTO : pause, caméra libre autour du vaisseau, filtres, flou, cadres, enregistrement de l'image =====
 const PH={on:false,yaw:0,pitch:.2,dist:30,fov:60,roll:0,anc:new V3(),f:'none',b:'none',fr:'none',hide:false,drag:null,pinch:null,shots:0};
