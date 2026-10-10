@@ -13,10 +13,13 @@ $('shop').addEventListener('click',e=>{const b=e.target.closest('button');if(!b|
 // faction qui contrôle une station (remplacée par la guerre des territoires dans war.js)
 let stFac=st=>'alliance';
 // petit bandeau d'annonce en haut de l'écran (succès, événements importants)
-const BANQ=[];let BANT=0;
-function banner(ic,title,sub,col){BANQ.push({ic,title,sub,col:col||'#ffc34d'});if(BANQ.length==1&&BANT<=0)banNext()}
-function banNext(){const b=BANQ[0],el=$('achb');if(!b){el.classList.remove('on');return}el.style.setProperty('--bc',b.col);el.innerHTML=`${ICO(b.ic)}<div><b>${b.title}</b><small>${b.sub||''}</small></div>`;el.classList.add('on');BANT=4.2}
-function updBanner(dt){if(BANT>0){BANT-=dt;if(BANT<=0){$('achb').classList.remove('on');BANQ.shift();if(BANQ.length)setTimeout(banNext,450)}}}
+// un seul bandeau à la fois ; il attend que les panneaux (options, profil, carte, dialogue…) soient fermés et que les conseils de départ aient disparu
+const BANQ=[];let BANT=0,BANP=0;
+const BANBLK=['opts','prof','cxpanel','talpanel','mkpanel','bugpanel','bpanel','trpanel','chc','mppanel','map'];
+function banBlocked(){try{if(!DESK&&hint>0)return true;if(DLG.open||window.XPAUSE>0)return true;for(const id of BANBLK){const e=$(id);if(e&&e.style.display&&e.style.display!='none')return true}}catch(e){}return false}
+function banner(ic,title,sub,col){if(BANQ.some(b=>b.title===title))return;BANQ.push({ic,title,sub,col:col||'#ffc34d'});if(BANQ.length==1&&BANT<=0)banNext()}
+function banNext(){const b=BANQ[0],el=$('achb');if(!b){el.classList.remove('on');BANT=0;return}el.style.setProperty('--bc',b.col);el.innerHTML=`${ICO(b.ic)}<div><b>${b.title}</b><small>${b.sub||''}</small></div>`;BANT=4.2+Math.min(5,String(b.sub||'').length/70);if(banBlocked()){BANP=1;el.classList.remove('on')}else{BANP=0;el.classList.add('on')}}
+function updBanner(dt){if(BANT<=0)return;const el=$('achb');if(banBlocked()){if(!BANP){BANP=1;el.classList.remove('on')}return}if(BANP){BANP=0;el.classList.add('on');BANT=Math.max(BANT,3)}BANT-=dt;if(BANT<=0){el.classList.remove('on');BANQ.shift();if(BANQ.length)setTimeout(banNext,450)}}
 // ----- crochets par image : TICK (toujours), STICK (simulation spatiale, hors pause) -----
 const TICK=[],STICK=[];
 {const _u=updParts;updParts=function(dt){_u(dt);for(const f of TICK)try{f(dt)}catch(e){console.warn(e)}}}

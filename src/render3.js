@@ -8,7 +8,7 @@ const FX3V='varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*mod
 function fx3HDR(){try{if(!R3.capabilities.isWebGL2)return false;const gl=R3.getContext();if(!gl.getExtension('EXT_color_buffer_float')&&!gl.getExtension('EXT_color_buffer_half_float'))return false;
 const rt=new THREE.WebGLRenderTarget(4,4,{type:THREE.HalfFloatType});R3.setRenderTarget(rt);const ok=gl.checkFramebufferStatus(gl.FRAMEBUFFER)===gl.FRAMEBUFFER_COMPLETE;R3.setRenderTarget(null);rt.dispose();return ok}catch(e){try{R3.setRenderTarget(null)}catch(x){}return false}}
 // objets à ignorer dans les passes de profondeur (particules, halos, vitres…)
-function fx3Skip(o){if(o.isPoints||o.isLine||o.isSprite)return true;const m=Array.isArray(o.material)?o.material[0]:o.material;if(!m)return false;
+function fx3Skip(o){if(o.isPoints||o.isLine||o.isSprite||o.userData.noAO)return true;const m=Array.isArray(o.material)?o.material[0]:o.material;if(!m)return false;
 return m.blending===THREE.AdditiveBlending||m.depthWrite===false||(m.transparent&&m.opacity<.9)||(o.isInstancedMesh&&o.count>1500)}
 function fx3Hide(sc){const L=[];sc.traverseVisible(o=>{if(o!==sc&&fx3Skip(o))L.push(o)});for(const o of L)o.visible=false;return L}
 // ----- passe de rendu de la scène : MSAA ×4 dans une cible privée (PC), sinon directement -----
@@ -118,11 +118,12 @@ if(mbOn&&FX3.pqOk){_fx3q.copy(camera.quaternion).invert();_fx3f.set(0,0,-1).appl
 if(_fx3f.z<-.94){const ty=Math.tan(camera.fov*Math.PI/360),nx=_fx3f.x/-_fx3f.z/(ty*camera.aspect),ny=_fx3f.y/-_fx3f.z/ty,k=.2;let mx=nx*k,my=ny*k;const L=Math.hypot(mx,my),L2=Math.min(.02,Math.max(0,L-.003));if(L>1e-6){mx*=L2/L;my*=L2/L}FX3.mb.x+=(mx-FX3.mb.x)*.6;FX3.mb.y+=(my-FX3.mb.y)*.6}else FX3.mb.set(0,0)}else FX3.mb.set(0,0);
 if(FX3.mb.lengthSq()<4e-6)FX3.mb.set(0,0);FX3.pq.copy(camera.quaternion);FX3.pqOk=true;
 // occlusion ambiante : PC, qualité Ultra, effets Complets, au sol et dans les épaves
-if(FX3.ao)FX3.ao.enabled=FX3.lv=='full'&&QI==0&&(mode=='surf'||mode=='int')&&!menu&&!MAP.open;
+const hg=typeof H3!='undefined'&&H3.on;if(FX3.ao)FX3.ao.enabled=FX3.lv=='full'&&QI==0&&(mode=='surf'||mode=='int'||hg)&&!menu&&!MAP.open;
 // profondeur de champ : menu, ralenti sur les boss, amarrage, mode photo « Profondeur »
 const D=FX3.dof;if(D){let f=0,ap=0,mb=.02;if(FX3.lv=='full'){
 if(menu&&MENU3.cam&&MENU3.ship){f=MENU3.cam.position.distanceTo(MENU3.ship.position);ap=.00012;mb=.0085}
 else if(ph&&PH.b=='dof'){f=PH.dist;ap=.00028*clamp(60/PH.fov,.6,3);mb=.013}
+else if(hg&&DESK&&H3.cam&&H3.ship){f=H3.cam.position.distanceTo(H3.ship.position);ap=.00009;mb=.006}
 else if(typeof KC3!='undefined'&&KC3.on){f=camera.position.distanceTo(KC3.p);ap=.00006;mb=.009}
 else if(typeof DKA!='undefined'&&DKA.on&&mode=='space'){f=camera.position.distanceTo(ship.position);ap=.00003;mb=.006}}
 D.enabled=f>0&&!MAP.open;if(D.enabled){const u=D.uniforms;u.focus.value+=(f-u.focus.value)*(Math.abs(f-u.focus.value)>f*.5?1:.25);u.aperture.value=ap;u.maxblur.value=mb}}}
