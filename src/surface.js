@@ -115,7 +115,7 @@ for(const[ax,lim2]of[['x',260],['y',150],['z',260]]){if(q[ax]<-lim2)q[ax]+=lim2*
 const x=cp.x+q.x,y=cp.y+q.y,z=cp.z+q.z;if(rain){wp.set([x,y,z,x+3+st*4,y+9,z],i*6)}else wp.set([x,y,z],i*3)}F.wg.attributes.position.needsUpdate=true;
 if(F.wx!='pluie'&&F.wx!='neige'&&F.wx!='sable'&&F.wm.material)F.wm.material.opacity=F.wx=='paillettes'?.5+.5*Math.sin(t*5):.9;
 if(F.wx=='sable'){F.fog.near=60+(1-st)*160;F.fog.far=500+(1-st)*900}
-if(F.ty=='Jungle'&&Math.random()<dt*.1){F.flash=1;setTimeout(()=>SFX.boom(),200+Math.random()*600)}F.flash=Math.max(0,F.flash-dt*3);hemi.intensity=F.hemiI+F.flash*2.2;
+if(F.ty=='Jungle'&&Math.random()<dt*.1){F.flash=1;setTimeout(()=>(SFX.thunder||SFX.boom)(250+Math.random()*700),200+Math.random()*600)}F.flash=Math.max(0,F.flash-dt*3);hemi.intensity=F.hemiI+F.flash*2.2;
 dl.position.copy(S.pos).addScaledVector(F.sunDir,1300);F.sunS.position.copy(camera.position).addScaledVector(F.sunDir,4000);SURF.sunPos=F.sunS.position;updClouds(dt);dl.target.position.copy(S.pos);if(SURF.tick)SURF.tick(dt,F);if(F.lmat.uniforms){const u=F.lmat.uniforms;u.fogColor.value.copy(F.fog.color);u.fogNear.value=F.fog.near;u.fogFar.value=F.fog.far;u.sunDir.value.copy(F.sunDir)}F.dome.position.copy(camera.position);
 if(S.hp<=0)die()};
 function updClouds(dt){if(!F)return;let w=0;const cp=camera.position;for(const c of F.clouds){c.s.position.x+=6*dt;if(c.s.position.x>HALF)c.s.position.x-=HALF*2;const d=c.s.position.distanceTo(cp),r0=c.sz*.42;if(d<r0)w=Math.max(w,1-d/r0)}CLOUDW=Math.min(1,w*1.6)}

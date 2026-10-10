@@ -23,7 +23,7 @@ if(rain){const k=1-st*.3;F.fog.color.multiplyScalar(k);if(F.skyU){F.skyU.hor.val
 if(F.wm&&F.wm.material){const m=F.wm.material;if(rain)m.opacity=.12+.45*st;else if(F.wx=='neige')m.opacity=.35+.65*st;else if(F.wx=='sable')m.opacity=.15+.85*st}
 // éclairs (pluie) avec tonnerre décalé selon la distance
 if(rain&&st>.55&&Math.random()<dt*.12*st){F.flash=1}
-if(F.flash>W.lf+.3){const x=cp.x+rv(700),z=cp.z+rv(700),gy=Math.max(0,F.h(x,z));W.bolts.push(mkBolt(SURF.scene,x,z,gy));const d=Math.hypot(x-cp.x,z-cp.z);setTimeout(()=>{if(mode=='surf'){SFX.boom();shake=Math.min(1,shake+.25*(1-d/1000))}},d/340*1000)}W.lf=F.flash;
+if(F.flash>W.lf+.3){const x=cp.x+rv(700),z=cp.z+rv(700),gy=Math.max(0,F.h(x,z));W.bolts.push(mkBolt(SURF.scene,x,z,gy));const d=Math.hypot(x-cp.x,z-cp.z);setTimeout(()=>{if(mode=='surf'){(SFX.thunder||SFX.boom)(d,{x,y:gy+150,z});shake=Math.min(1,shake+.25*(1-d/1000))}},d/340*1000)}W.lf=F.flash;
 for(let i=W.bolts.length-1;i>=0;i--){const b=W.bolts[i];b.l-=dt;const o=b.l>0?(Math.sin(b.l*90)>-.3?1:.25)*Math.min(1,b.l*6):0;b.m.material.opacity=o;b.gl.material.opacity=o*.8;if(b.l<=0){SURF.scene.remove(b.m,b.gl);b.m.geometry.dispose();b.m.material.dispose();b.gl.material.dispose();W.bolts.splice(i,1)}}
 if(F.skyU&&F.flash>.05){F.skyU.hor.value.lerp(_dc2.set(.75,.8,.95),F.flash*.5);F.fog.color.lerp(_dc2,F.flash*.35)}
 // éclaboussures de pluie au sol autour du joueur

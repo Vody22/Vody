@@ -31,8 +31,8 @@ $('m3play').onclick=()=>menu3Close();$('m3opt').onclick=e=>{e.stopPropagation();
 function menu3Close(quick){if(!MENU3.on)return;MENU3.on=false;window.XPAUSE=Math.max(0,(window.XPAUSE||1)-1);try{sessionStorage.setItem('sf-m3','1')}catch(e){}try{optToggle(false)}catch(e){}
 const d=$('menu3');if(d){d.classList.add('out');setTimeout(()=>d.remove(),700)}document.body.classList.remove('m3');
 if(!quick){FADE.col='4,6,14';FADE.v=1;FADE.tg=0;FADE.sp=1.3;MENU3.fc=1}try{SFX.whoosh()}catch(e){}
-if(!G.x.news17)setTimeout(news13,2600);const pl=MENU3.pl;MENU3.sc=null;MENU3.ship=null;MENU3.pl=null;MENU3.ast=[];MENU3.gen=null;if(pl){try{disposeObj(pl)}catch(e){}}}
+if(!G.x.news18)setTimeout(news13,2600);const pl=MENU3.pl;MENU3.sc=null;MENU3.ship=null;MENU3.pl=null;MENU3.ast=[];MENU3.gen=null;if(pl){try{disposeObj(pl)}catch(e){}}}
 TICK.push(()=>{if(MENU3.fc&&FADE.v<.01){MENU3.fc=0;if(FADE.tg==0)FADE.col='255,245,230'}});
 addEventListener('keydown',e=>{if(MENU3.on&&(e.code=='Enter'||e.code=='Space')&&!(OPTP&&OPTP.open)){e.preventDefault();menu3Close()}},true);
-function news13(){if(G.x.news17)return;G.x.news17=1;G.x.news16=1;G.x.news15=1;G.x.news14=1;G.x.news13=1;G.x.news12=1;banner('star','Mise à jour : 10 nouveautés + IA corrigée !','Les pirates ne t\'attaquent plus sans raison (ils patrouillent et t\'avertissent). Personnalisation du pilote et du vaisseau (Profil), marche dans la station (Descendre du vaisseau), dégâts visibles, boucliers ennemis, volcans, geysers, rivières, troupeaux, oiseaux, méga-structures, batailles au loin, événement Halloween','#7ab6ff');try{save()}catch(e){}}
+function news13(){if(G.x.news18)return;G.x.news18=1;G.x.news17=1;G.x.news16=1;G.x.news15=1;G.x.news14=1;G.x.news13=1;G.x.news12=1;banner('star','Mise à jour : sons réalistes !','Tous les sons refaits : moteur en couches, une voix pour chaque canon, explosions qui grondent au loin, tonnerre, échos dans le hangar et les grottes, sons qui viennent de gauche ou de droite, vent, pluie, vagues, oiseaux, grillons la nuit, bruits de pas selon le sol, radio des stations. Mets un casque !','#7ab6ff');try{save()}catch(e){}}
 if(!menu3Skip())menu3Open();else setTimeout(news13,7000);
