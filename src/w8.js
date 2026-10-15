@@ -29,7 +29,7 @@ const add=(geo,m,x,y,z,ry)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z)
 const fr=new THREE.MeshStandardMaterial({color:0x2a313a,metalness:.7,roughness:.4}),pn=new THREE.MeshBasicMaterial({color:0x3fa8ff,transparent:true,opacity:.55});
 for(const[x,z]of W8DOORS){const s=Math.sign(x);add(RB3(.6,3.6,3.2),fr,x+s*.9,1.8,z);add(new THREE.PlaneGeometry(2.4,3),pn,x+s*.55,1.6,z,-s*Math.PI/2);const L=sprite(0x3fa8ff,3,.6);L.position.set(x+s*.4,3.7,z);sc.add(L)}
 let n=0;for(const P of R){if(n>=max)break;if(night&&!P.night&&P.J.k!='cuisto'&&P.J.k!='garde')continue;if(!night&&Math.random()<.15)continue;
- const m=buildHuman({role:P.J.role,suit:P.suit,robe:P.J.k=='marchand'?P.suit:undefined,helmet:false,closed:false,fem:P.fem,seed:P.seed,hs:P.hs,tool:P.J.k=='meca'});m.userData.noAO=1;
+ const jk=P.J.k,rr=rng(P.seed%2147483646+1),m=buildHuman({role:P.J.role,suit:P.suit,robe:jk=='marchand'?P.suit:undefined,helmet:false,closed:false,fem:P.fem,seed:P.seed,hs:rr()<.6?undefined:P.hs,tool:jk=='meca',outfit:jk=='cuisto'?'tablier':jk=='pilote'?'veste':jk=='journa'?(rr()<.5?'manteau':'veste'):undefined,acc2:jk=='touriste'?(rr()<.5?['solaires','sac']:['audio','sac','lunettes'].slice(0,1+(rr()*2|0))):jk=='journa'?['audio']:undefined});m.userData.noAO=1;
  const out=Math.random()<.25,dr=W8DOORS[Math.random()*2|0],p0=out?new V3(dr[0],0,dr[1]):w8Pt(P.J.go[Math.random()*P.J.go.length|0]);m.position.copy(p0);m.visible=!out;sc.add(m);
  W8.A.push({P,m,p:m.position,yaw:Math.random()*TAU,ph:Math.random()*6,st:out?'away':'idle',wait:out?3+Math.random()*25:Math.random()*6,tg:null,spd:0,mate:null,talkT:0,bub:null});n++}
 w8Spots()}
