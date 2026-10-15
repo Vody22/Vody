@@ -16,3 +16,7 @@ document.addEventListener('pointerover',e=>{if(e.pointerType!='mouse')return;UI4
 // en curseur libre, un clic dans le décor ne tire pas
 OV.addEventListener('pointerdown',e=>{if(UI4.free&&e.pointerType=='mouse'&&!FOOT.on&&mode!='int'){e.stopImmediatePropagation();MS.fire=0;MS.boost=0}},true);
 TICK.push(()=>{if(!DESK)return;if(UI4.free&&(FOOT.on||mode=='int'||S.dead))ui4Free(false);const flying=(mode=='space'||mode=='surf')&&!FOOT.on;if(flying&&(UI4.free||UI4.over)){MS.in=false;if(UI4.free){MS.fire=0;MS.boost=0}}});
+
+// la souris ne doit jamais diriger en curseur libre : on bloque l'événement avant mouseAim et on neutralise steerInput
+OV.addEventListener('pointermove',e=>{if(UI4.free&&e.pointerType=='mouse'&&!FOOT.on&&mode!='int'){e.stopImmediatePropagation();MS.in=false}},true);
+{const _si=steerInput;steerInput=function(){if(DESK&&(UI4.free||UI4.over)&&!FOOT.on&&mode!='int')MS.in=false;return _si.apply(this,arguments)}}
