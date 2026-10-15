@@ -13,6 +13,14 @@ const ENV = pickEnv(), URL0 = ENV.u, TOK = ENV.t;
 export const kvOk = () => !!(URL0 && TOK);
 export const kvSrc = () => ENV.src;
 export const kvCmd = (...a) => cmd(...a);
+// plusieurs commandes en une seule requête HTTP (API « pipeline » d'Upstash) : renvoie les résultats dans l'ordre
+export async function kvPipe(cmds) {
+  if (!cmds.length) return [];
+  const r = await fetch(URL0.replace(/\/$/, "") + "/pipeline", { method: "POST", headers: { authorization: "Bearer " + TOK, "content-type": "application/json" }, body: JSON.stringify(cmds) });
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !Array.isArray(j)) throw new Error((j && j.error) || "HTTP " + r.status);
+  return j.map(x => (x && x.error ? null : x && x.result));
+}
 async function cmd(...args) {
   const r = await fetch(URL0, { method: "POST", headers: { authorization: "Bearer " + TOK, "content-type": "application/json" }, body: JSON.stringify(args) });
   const j = await r.json().catch(() => ({ error: "réponse illisible" }));
