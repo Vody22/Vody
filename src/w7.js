@@ -67,14 +67,14 @@ if(p.distanceTo(S.pos)<6000)toast('📡 '+N.name+' a été détruit…');if(W7.r
 // ----- déplacement -----
 function w7Steer(N,goal,spd,dt,turn){const F=N.F;_w7a.copy(goal).sub(F.pos);const d=_w7a.length();_w7a.divideScalar(d||1);_w7b.copy(F.dir);F.dir.lerp(_w7a,damp(turn||1.4,dt)).normalize();const v=Math.min(spd,Math.max(10,d*.7));F.vel.copy(F.dir).multiplyScalar(v);F.pos.addScaledVector(F.vel,dt);
 const ds=F.pos.distanceTo(S.pos),R=F.r+16;if(ds<R&&ds>.01)F.pos.addScaledVector(_w7c.copy(F.pos).sub(S.pos).normalize(),(R-ds));
-F.mesh.lookAt(_w7c.copy(F.pos).sub(F.dir));const u=F.mesh.userData,turnY=_w7c.crossVectors(_w7b,F.dir).y;N.bank=lerp(N.bank||0,clamp(turnY*50,-.8,.8),damp(3,dt));if(N.job!='cargo')u.body.rotation.z=N.bank;
-for(const sp of u.fl)sp.scale.setScalar((N.job=='cargo'?14:3.5)+Math.min(5,v/60)+Math.random()*.8);return d}
+F.mesh.lookAt(_w7c.copy(F.pos).sub(F.dir));const u=F.mesh.userData,turnY=_w7c.crossVectors(_w7b,F.dir).y;N.bank=lerp(N.bank||0,clamp(turnY*50,-.8,.8),damp(3,dt));u.body.rotation.z=N.bank*(N.job=='cargo'?.3:1);
+for(const sp of u.fl)sp.scale.setScalar((u.fb||4)*(1+Math.min(1.2,v/150))+Math.random()*.8);return d}
 function w7Upd(N,dt){const F=N.F,raid=W7.raid&&W7.raid.N===N,sp=N.sp*(raid?.45:1);
 if(N.ph=='undock'){if(w7Steer(N,N.out,Math.min(sp,40+(t-N.t0)*12),dt,2.2)<90){if(N.job=='miner')w7MinerGo(N);else{N.ph='cruise';const to=N.to;if(to&&w7D(to)<7000&&Math.hypot(to.x-F.pos.x,to.z-F.pos.z)<9000){N.goal=w7Berth(to,Math.random()<.5?1:-1,1100);N.sg=N.goal.clone().sub(new V3(to.x,to.y,to.z)).dot(w7Ax(to))>0?1:-1}else{N.jump=1;N.goal=F.pos.clone().addScaledVector(F.dir,1500).add(new V3(rv(300),rv(80),rv(300)))}}}}
 else if(N.ph=='cruise'){const d=w7Steer(N,N.goal,sp,dt);if(d<90){if(N.jump){N.ph='jumpc';N.jt=0}else if(N.to){N.ph='approach';N.goal=w7Berth(N.to,N.sg,125)}else{N.jump=1;N.goal=F.pos.clone().addScaledVector(F.dir,600)}}}
 else if(N.ph=='approach'){if(w7Steer(N,N.goal,Math.min(sp,55),dt,2.4)<25)w7Docked(N)}
-else if(N.ph=='dockin'){N.dk+=dt;F.pos.addScaledVector(F.dir,12*dt);F.mesh.scale.setScalar(Math.max(.05,1-N.dk/1.2)*(N.job=='cargo'?1:1.7));if(N.dk>1.2)w7Remove(N)}
-else if(N.ph=='jumpc'){N.jt+=dt;F.pos.addScaledVector(F.dir,(sp*.4+N.jt*N.jt*400)*dt);for(const s of F.mesh.userData.fl)s.scale.setScalar(6+N.jt*16);if(N.jt>1.6){w7Warp(N);w7Remove(N)}}
+else if(N.ph=='dockin'){N.dk+=dt;F.pos.addScaledVector(F.dir,12*dt);F.mesh.scale.setScalar(Math.max(.05,1-N.dk/1.2)*(F.mesh.userData.s0||1));if(N.dk>1.2)w7Remove(N)}
+else if(N.ph=='jumpc'){N.jt+=dt;F.pos.addScaledVector(F.dir,(sp*.4+N.jt*N.jt*400)*dt);for(const s of F.mesh.userData.fl)s.scale.setScalar((F.mesh.userData.fb||4)*(1.5+N.jt*3));if(N.jt>1.6){w7Warp(N);w7Remove(N)}}
 else if(N.ph=='tomine'){const A=N.ast;if(!A||A.gone||!asts.includes(A)){w7MinerHome(N);return}const d=w7Steer(N,_w7b.copy(A.pos).addScaledVector(_w7c.copy(F.pos).sub(A.pos).normalize(),A.r+55),sp,dt,2);if(d<30){N.ph='mine';N.mt=25+Math.random()*30}}
 else if(N.ph=='mine'){const A=N.ast;if(!A||A.gone||!asts.includes(A)){w7MinerHome(N);return}N.mt-=dt;F.dir.lerp(_w7a.copy(A.pos).sub(F.pos).normalize(),damp(2,dt)).normalize();F.mesh.lookAt(_w7c.copy(F.pos).sub(F.dir));
  if(F.pos.distanceTo(S.pos)<3000){if(!F.beam)F.beam=mkBeam(0xffd060);placeBeam(F.beam,F.pos,_w7b.copy(A.pos).addScaledVector(_w7c.copy(F.pos).sub(A.pos).normalize(),A.r*.9),.3,true);if(Math.random()<dt*6){const q=_w7b;SPK.emit(q.x,q.y,q.z,rv(30),rv(30),rv(30),.3,1,.75,.3,.5)}}else if(F.beam)hideBeam(F.beam);
