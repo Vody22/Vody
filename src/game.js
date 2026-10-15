@@ -9,7 +9,7 @@ function fly(dt,{rate=1,minSpd=0,surf=false}={}){const[yaw,pitch]=steerInput(),R
 S.yawV=lerp(S.yawV||0,yaw,damp(7,dt));S.pitchV=lerp(S.pitchV||0,pitch,damp(7,dt));
 _q.setFromAxisAngle(AY,S.yawV*R*dt);S.q.multiply(_q);_q.setFromAxisAngle(AX,S.pitchV*R*.85*dt);S.q.multiply(_q);
 _r.set(1,0,0).applyQuaternion(S.q);fwd();if(Math.abs(_f.y)<.97){const roll=Math.asin(clamp(_r.y,-1,1));_q.setFromAxisAngle(AZ,-roll*damp(2.2,dt));S.q.multiply(_q)}S.q.normalize();
-const tg=S.docked?0:isBrake()?Math.max(minSpd,10):isBoost()?boostSpd()*(surf?.6:1):cruise()*(surf?.75:1);S.spd=lerp(S.spd,tg,damp(isBoost()?1.6:2.4,dt));
+const tg=S.docked?0:THR6.man?(isBoost()?boostSpd()*(surf?.6:1):Math.max(minSpd,cruise()*THR6.v*(surf?.75:1))):isBrake()?Math.max(minSpd,10):isBoost()?boostSpd()*(surf?.6:1):cruise()*(surf?.75:1);S.spd=lerp(S.spd,tg,damp(isBoost()?1.6:THR6.man&&isBrake()?3.2:2.4,dt));
 fwd();S.vel.lerp(_v.copy(_f).multiplyScalar(S.spd),damp(3.2,dt));S.pos.addScaledVector(S.vel,dt);
 S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.75,damp(5,dt))}
 // ----- caméra -----

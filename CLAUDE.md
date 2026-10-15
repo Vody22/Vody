@@ -205,3 +205,8 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - Deux plans : cabine (coques `hp < 1,4`) ou grand vaisseau (`siBig()` : cockpit, cuisine, couchettes, réacteur, soute avec caisses selon `cargoUsed()`). Fenêtres sur l'espace réel (soleil/planète/ciel orientés par l'inverse de `S.q`).
 - Postes `SI.spots` (à 1,6 m, E ou bouton `#sia`) : siège (reprendre les commandes, aussi `#siback`), lit (`siSleep` 3,2 s → `siWake` : coque + bouclier pleins, `G.x.siRest` +10 % d'XP 20 min, voyage pendant le sommeil vers `MAP.sel` en payant le carburant), casier (`cus3Toggle`), terminal (`openMap`), café (`G.x.siCafe` cadence +10 % 10 min), panneau de réparation (`SI.fix` 2,5 s → `v1s()` à 1), soute, passager du taxi (`siPassenger`). Alarme rouge si on est attaqué → retour aux commandes.
 - Minuteries en temps réel (`performance.now()`), déplacement plafonné à 0,1 s par image.
+
+## Manette des gaz (w6.js, après w5.js)
+- `THR6` (core.js) {man, v} : en pilotage manuel (par défaut, `localStorage sf-thr` = `auto` pour l'ancien comportement, Options → « Pilotage du vaisseau » `#thr6b`), la vitesse visée dans `fly` = max(minSpd, croisière × `THR6.v`) ; le boost reste à part ; `isBoost`/`isBrake` n'utilisent plus W/S sur PC en manuel.
+- Commandes : PC W (Z en AZERTY) / S = gaz + / − (0,7/s), B/Ctrl = frein (coupe les gaz, 1,6/s) ; mobile = jauge `#thr6` à glisser (à gauche de Tonneau/Leurres) + bouton Frein ; manette = stick droit vertical.
+- Amarré → 0 ; départ d'une station → 40 % ; décollage d'une planète → au moins 50 %. Bandeau d'explication une fois (`G.x.thr6h`).

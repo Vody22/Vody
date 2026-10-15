@@ -83,4 +83,5 @@ document.addEventListener('gesturestart',e=>e.preventDefault());document.addEven
 // lecture du joystick → [lacet, tangage]
 function steerInput(){let yaw=0,pitch=0;if(DESK&&MS.in&&!stick){const m=Math.hypot(MS.x,MS.y),dz=.05;if(m>dz){const k=Math.min(1,(m-dz)/(1-dz));yaw=-MS.x/m*k*k*1.15;pitch=-MS.y/m*k*k*1.15*(inv?-1:1)}}else if(stick&&Math.hypot(stick.x,stick.y)>.08){yaw=-stick.x;pitch=-stick.y*(inv?-1:1);const m=Math.hypot(yaw,pitch);const c=Math.min(1,m);yaw=yaw/m*c*c;pitch=pitch/m*c*c}
 yaw+=((K.ArrowLeft|K.KeyA|0)-(K.ArrowRight|K.KeyD|0));pitch+=((K.ArrowUp|(DESK?0:K.KeyW)|0)-(K.ArrowDown|(DESK?0:K.KeyS)|0))*(inv?-1:1);return[clamp(yaw,-1,1),clamp(pitch,-1,1)]}
-const isBoost=()=>B.boost||MS.boost||K.ShiftLeft||K.ShiftRight||(DESK&&K.KeyW),isBrake=()=>B.brake||K.KeyB||K.ControlLeft||(DESK&&K.KeyS),isFire=()=>B.fire||MS.fire||K.Space;
+const THR6={man:(()=>{try{return localStorage.getItem('sf-thr')!=='auto'}catch(e){return true}})(),v:0};
+const isBoost=()=>B.boost||MS.boost||K.ShiftLeft||K.ShiftRight||(DESK&&K.KeyW&&!THR6.man),isBrake=()=>B.brake||K.KeyB||K.ControlLeft||(DESK&&K.KeyS&&!THR6.man),isFire=()=>B.fire||MS.fire||K.Space;
