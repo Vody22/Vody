@@ -157,3 +157,13 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - Netlify : pas de fonction `mmo` (hébergement abandonné).
 - Banc d'essai : faux serveur REST Upstash en mémoire + serveur Node qui sert `public/index.html` avec Three.js local et `dev/mockpeer.js` à la place de PeerJS ; deux onglets du même contexte pour le temps réel, deux contextes pour le serveur (identités différentes).
 
+## Réseau galactique — visuels (mmo3.js, après mmo.js)
+- Chantier commun dans l'espace (`CH3`, position fixe (-2600, 260, 2400), échelle 1,6, chargé à moins de 16 km si `API_OK` et `MMO.pr`) : `ch3Gen(kind)` produit poutres / panneaux / lumières (relais = tour + anneau, croiseur = coque sur couples, observatoire = parabole, bouclier = dôme) triés du bas vers le haut (ou de l'arrière vers l'avant) ; 3 `InstancedMesh`, `count` réglé par `ch3Apply(pct)` (poutres 0→45 %, panneaux 15→98 %, lumières 55→100 %). Drones + étincelles (`SPK`) sur le front de construction, halo quand c'est fini, étiquette `ch3Label`, point sur la carte via l'enveloppe de `mapItems` (k `site`).
+- Livrée de guilde : `mm3Emblem(root, tag, col)` (écusson dessiné sur canvas `mm3EmTex`, posé sur un endroit plat des ailes par lancer de rayon vers le bas, `userData.mm3e` ; clé `userData.mm3k` pour ne pas refaire) ; appliquée toutes les 0,5 s (temps réel) à `ship`, `H3.ship` et aux vaisseaux des autres pilotes.
+- Arrivées : `mm3Arrivals` → `mm3Warp` (éclair, anneau, traînée, étincelles, son) quand un pilote apparaît ou saute de plus de 2,5 km ; rien pendant 4,5 s après un changement de zone.
+- Bulles : discussion de zone (`o.bub`, 6 s) et émotes (`o.ebub`, 2,6 s), dessinées dans `mpOverlay`, qui est REMPLACÉ (plus d'enveloppe : niveau en pastille, tag dans la couleur de la guilde, losange vert + marqueur de bord pour les membres de ta guilde). Les compteurs `m3ch`/`m3em` sont initialisés à la 1re présence (pas de rejeu).
+- Émotes (`mm3Emote` : `wave`, `flare`, `roll`, boutons `#mm3em` dans l'onglet Zone, 1 toutes les 1,5 s) : présence `em:{n,k}` ; le tonneau fait tourner `S.q` sur 1,1 s (vu par les autres via la position).
+- Stations : enveloppe de `loadSmall` → `st3Deco` (40 balises qui défilent vers le berceau, navettes `ST3` avec feux qui s'amarrent en boucle de 26 s sur les couloirs z = ±170…1100), masquées au-delà de 5,2 km.
+- Bandeau de région `#zb3` (`zb3Show`, enveloppe de `mmZoneSwitched`, animation CSS 3,6 s). Annonce `G.x.newsMMO3`.
+- Test headless : les captures de page ratent souvent le canvas 2D de surimpression (images très lentes) ; lire `OV.toDataURL()` dans un `requestAnimationFrame` pour vérifier l'overlay.
+
