@@ -75,7 +75,7 @@ return null}
 function updShop(){if(!S.docked||(mode!='space'&&!S.docked.ground))return;const ft=!!S.docked.foot;if(ft&&TAB!='market'&&TAB!='weap')TAB='market';for(const b of $('tabs').children){b.classList.toggle('on',b.dataset.tab==TAB);b.style.display=ft&&b.dataset.tab!='market'&&b.dataset.tab!='weap'?'none':''}const st=TAB=='station';$('tabStation').style.display=st?'flex':'none';$('tabX').style.display=st?'none':'block';
 if(!st){const v=shopView()+'|'+G.cr;if(HC.shopV!==v){HC.shopV=v;$('tabX').innerHTML=shopView()}}}
 // ----- commandes armes -----
-addEventListener('keydown',e=>{if(e.repeat||e.target.tagName=='INPUT')return;if(e.code=='KeyQ'||e.code=='Tab'){cycleW(1);e.preventDefault()}});
+addEventListener('keydown',e=>{if(e.repeat||e.target.tagName=='INPUT')return;if(e.code=='KeyQ'||(e.code=='Tab'&&!DESK)){cycleW(1);e.preventDefault()}});
 OV.addEventListener('wheel',e=>{if(DESK&&!MAP.open){cycleW(e.deltaY>0?1:-1)}},{passive:true});
 $('wbtn').addEventListener('pointerdown',e=>{e.preventDefault();cycleW(1)});
 function wpnHUD(){const w=curW(),W=WPN[w];let s=`${W.ic} ${W.n}`;if(W.am)s+=` · <b>${G.ammo[W.am]}</b>`;if(w=='laser')s+=` <span class="heat"><i style="width:${(LZ.heat*100).toFixed(0)}%;background:${LZ.over>0?'#f44':LZ.heat>.7?'#fa4':'#6ef'}"></i></span>`;return s}
