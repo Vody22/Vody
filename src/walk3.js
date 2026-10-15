@@ -27,8 +27,8 @@ TAB=a=='bar'?'svc':a=='market'?'market':'station';HC.shopV=null;WK3.menu=true;do
 // ----- boutons tactiles -----
 {const d=document.createElement('div');d.id='w3ui';d.innerHTML=`<button id="w3go">${ICO('user')} Descendre du vaisseau</button><button id="w3act"></button><button id="w3back">${ICO('close')} Continuer à marcher</button><button id="w3ship">${ICO('ship')} Retour au vaisseau</button>`;document.body.appendChild(d);
 $('w3go').onclick=()=>w3Start();$('w3act').onclick=()=>{if(WK3.near)w3Act(WK3.near.act)};$('w3back').onclick=()=>{WK3.menu=false;document.body.classList.remove('w3menu');w3UI()};$('w3ship').onclick=()=>w3Stop()}
-function w3UI(){const go=H3.on&&!WK3.on&&!(typeof CUS3!='undefined'&&CUS3.open);$('w3go').style.display=go?'':'none';$('w3act').style.display=WK3.on&&!WK3.menu&&WK3.near?'':'none';if(WK3.near)$('w3act').innerHTML=ICO(WK3.near.act=='ship'?'ship':WK3.near.act=='market'?'cargo':WK3.near.act=='bar'?'squad':WK3.near.act=='atelier'?'wrench':'target')+' '+WK3.near.lab+(DESK?' (E)':'');
-$('w3back').style.display=WK3.on&&WK3.menu?'':'none';$('w3ship').style.display=WK3.on&&!WK3.menu?'':'none'}
+function w3UI(){const go=H3.on&&!WK3.on&&!(typeof CUS3!='undefined'&&CUS3.open);$('w3go').style.display=go?'block':'none';$('w3act').style.display=WK3.on&&!WK3.menu&&WK3.near?'block':'none';if(WK3.near)$('w3act').innerHTML=ICO(WK3.near.act=='ship'?'ship':WK3.near.act=='market'?'cargo':WK3.near.act=='bar'?'squad':WK3.near.act=='atelier'?'wrench':'target')+' '+WK3.near.lab+(DESK?' (E)':'');
+$('w3back').style.display=WK3.on&&WK3.menu?'block':'none';$('w3ship').style.display=WK3.on&&!WK3.menu?'block':'none'}
 // regard : glisser à droite (tactile) ou n'importe où (souris)
 OV.addEventListener('pointerdown',e=>{if(!WK3.on||WK3.menu)return;if(e.pointerType!='mouse'&&e.clientX<innerWidth*.62)return;WK3.drag={id:e.pointerId,x:e.clientX,y:e.clientY}});
 OV.addEventListener('pointermove',e=>{const D=WK3.drag;if(!D||D.id!==e.pointerId)return;WK3.cy-=(e.clientX-D.x)*.008;WK3.cp=clamp(WK3.cp+(e.clientY-D.y)*.005,-.3,.9);D.x=e.clientX;D.y=e.clientY});
