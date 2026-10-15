@@ -38,7 +38,7 @@ V1.dis=V1.dis.filter(D=>!D.gone)}
 function v1Q(D){if(D.q)return D.q;const u=D.mesh.userData||(D.mesh.userData={});if(!u.air){const a=new THREE.Object3D();a.position.set(D.sz*1.1/(D.mesh.scale.x||1),0,0);D.mesh.add(a);u.air=a}
 D.q={id:D.id,seed:D.seed,n:D.n,x:D.pos.x,y:D.pos.y,z:D.pos.z,mesh:D.mesh,v1:1};return D.q}
 STICK.push(()=>{try{if(V1.near&&!V1.tow&&S.spd<120&&!S.docked&&!S.dead)DRH.near=v1Q(V1.near)}catch(e){}});
-TICK.push(()=>{if(mode=='space'&&typeof DRH!='undefined'&&DRH.near&&DRH.near.v1){const l=$('land');const h=ICO('door')+'Aborder le '+DRH.near.n+(DESK?' <kbd>E</kbd>':'');if(l&&l.innerHTML!==h)l.innerHTML=h}});
+TICK.push(()=>{if(mode=='space'&&typeof DRH!='undefined'&&DRH.near&&DRH.near.v1){const l=$('land');const h=ICO('door')+(DRH.near.v2h?'Entrer dans le ':'Aborder le ')+DRH.near.n+(DESK?' <kbd>E</kbd>':'');if(l&&l.innerHTML!==h)l.innerHTML=h}});
 
 // =============== 3. REMORQUAGE ===============
 function v1TowStart(){const D=V1.near;if(!D||V1.tow)return;const g=new THREE.BufferGeometry().setFromPoints([new V3(),new V3()]),line=new THREE.Line(g,new THREE.LineBasicMaterial({color:0x8fe8ff,transparent:true,opacity:.8}));line.frustumCulled=false;scene.add(line);
@@ -145,9 +145,10 @@ function v1BossEnd(abandon){const B=V1.B;if(!B)return;for(const bm of B.beams){s
 
 // =============== BOUTONS CONTEXTUELS + INDICATEUR DE SYSTÈMES ===============
 document.body.insertAdjacentHTML('beforeend','<div id="v1bar"></div><div id="v1sys"></div><div id="v1ret"></div><div id="v1veil"></div>');
-const V1ACT={tur:v1TurToggle,st:()=>v1Stealth(),guide:()=>{if(V1.gm){V1.gm.l=0;return}V1.guide=!V1.guide;toast(V1.guide?'🚀 Missiles guidés à la main':'🎯 Missiles à tête chercheuse')},tow:()=>V1.tow?v1TowEnd():v1TowStart()};
+// les autres vagues ajoutent leurs boutons : V1XB.push(()=>[clé,libellé,icône,touche] ou null) et V1ACT[clé]=fonction
+const V1XB=[];const V1ACT={tur:v1TurToggle,st:()=>v1Stealth(),guide:()=>{if(V1.gm){V1.gm.l=0;return}V1.guide=!V1.guide;toast(V1.guide?'🚀 Missiles guidés à la main':'🎯 Missiles à tête chercheuse')},tow:()=>V1.tow?v1TowEnd():v1TowStart()};
 function v1Bar(){const L=[];if(v1Sp()&&!V1.gm){if(v1Big())L.push(['tur',V1.tur?'Pilotage':'Tourelle',V1.tur?'ship':'turret','Y']);L.push(['st',V1.st.on?'Furtif '+Math.ceil(V1.st.t)+' s':V1.st.cd>0?'Furtif '+Math.ceil(V1.st.cd)+' s':'Furtif','moon','N']);if(curW()=='missile')L.push(['guide',V1.guide?'Guidé : oui':'Guidé : non','missile','U']);if(V1.tow)L.push(['tow','Larguer','magnet','L']);else if(V1.near)L.push(['tow','Remorquer','magnet','L'])}
-if(V1.gm)L.push(['guide','Exploser','missile','U']);const h=L.map(([k,n,ic,kb])=>`<button class="v1b${(k=='st'&&V1.st.on)||(k=='tur'&&V1.tur)||(k=='guide'&&V1.guide)?' on':''}" data-v1="${k}">${ICO(ic)}${n}${DESK?' <kbd>'+kb+'</kbd>':''}</button>`).join('');if(h!==V1.bk){V1.bk=h;$('v1bar').innerHTML=h}}
+if(V1.gm)L.push(['guide','Exploser','missile','U']);for(const f of V1XB){try{const r=f();if(r)L.push(r)}catch(e){}}const h=L.map(([k,n,ic,kb])=>`<button class="v1b${(k=='st'&&V1.st.on)||(k=='tur'&&V1.tur)||(k=='guide'&&V1.guide)?' on':''}" data-v1="${k}">${ICO(ic)}${n}${DESK?' <kbd>'+kb+'</kbd>':''}</button>`).join('');if(h!==V1.bk){V1.bk=h;$('v1bar').innerHTML=h}}
 $('v1bar').addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();e.stopPropagation();const f=V1ACT[b.dataset.v1];if(f)f()});
 addEventListener('keydown',e=>{if(e.target.tagName=='INPUT'||e.target.tagName=='TEXTAREA'||e.repeat||mode!='space')return;const m={KeyY:'tur',KeyN:'st',KeyU:'guide',KeyL:'tow'}[e.code];if(m&&(m!='tow'||V1.near||V1.tow)){e.preventDefault();V1ACT[m]()}});
 

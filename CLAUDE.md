@@ -181,3 +181,17 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - Boutons contextuels `#v1bar` (Tourelle Y, Furtif N, Guidé U, Remorquer/Larguer L) ; CSS `.v1b`.
 - Test headless : le jeu tourne à ~1 image/s avec beaucoup d'objets ; appeler les fonctions directement (`fireW(.1, spaceTargets())`) plutôt qu'attendre la boucle.
 
+## Vague 2 « exploration » (w2.js, après w1.js) — état `V2`
+- Barre contextuelle extensible : `V1XB.push(()=>[clé,libellé,icône,touche]|null)` + `V1ACT[clé]=fn` (w1.js).
+- Artefacts (18) : 12 dans `ART` (`G.x.v2art` = indices) ; reliques flottantes dans les secteurs où `h3(a,0,b,577) ≤ 0,22` (hors 4 secteurs centraux), ramassées à 35 m (`G.x.v2rel`) ; bonus (enveloppe de `PM`) 4 → dmg +5 %, 8 → hp +10 %, 12 → spd/boost +8 % ; service « Collection d'artefacts ». Les artefacts 2, 5, 8 sont des fragments de coordonnées (`v2Frag()`).
+- Système d'Ombre (12) : portail `PORT` (4200, 200, -3800) visible quand les 3 fragments sont réunis ; mène à `HID` (-188 000, 0, 166 000) (étoile violette, anneau de 12 monolithes = Sanctuaire 8 000 ¢ une fois `G.x.v2sanct`, 70 cristaux flottants qui lâchent du cristal, 4 gardiens Xil) ; portail de retour au centre (`G.x.v2hid`).
+- Géantes gazeuses (13) : bouton « Plonger » (touche R) près d'une planète `ring` ; `GZ` = scène à part (`GZ.sc`, rendue par l'enveloppe de `renderFrame`), le vaisseau et les particules y sont déplacés, position virtuelle `GZ.vp` (900 km, 250 km, 900 km) ; enveloppe d'`updSpace` → `gzUpdate` (vol, couches de nuages, couleur/brouillard selon la profondeur, éclairs, pression > 1 800 m = dégâts, 40 bulles d'hélium-3 payées 40 + 0,18 × profondeur) ; remonter au-dessus de -60 m ou bouton « Remonter ». `netZone` renvoie null pendant la plongée.
+- Lunes (14) : STICK `v2Moons` : près d'une lune (`userData.moons[i].piv.children[0]`) → `landP` = pseudo-planète `{name:'… — Lune I', hue 270/50/10/300, r ≥ 120, v2moon}` (atterrissage normal par `startEntry`).
+- Postes abandonnés hantés (15) : secteurs `h3(a,0,b,613) ≤ 0,12`, maillage `v2HsMesh` ; entrée via `DRH.near` (descripteur `v1:1, v2h:1`) → intérieur d'épave ; `v2Haunt` : fantôme (sprite `GHT`) toutes les 8–20 s, chuchotements, lumière qui vacille (`DRAMB`).
+- Signaux de détresse (16) : toutes les 150–300 s à 2,2 km (marqueur `edgeMarker`), 35 % de pièges (3 pirates) en zone ≥ 1, sinon capsule : 300–900 ¢ + réputation Alliance (+15 % de chances d'artefact).
+- Cartographie (17) : service « Guilde des cartographes » : 150 ¢/planète (`G.disc`), 250/anomalie (`ANK`), 300/épave géante (`DERD`), vendus une fois (`G.x.v2cs`), + 5 % par 100 de réputation carto.
+- Vaisseau-mère (19) : `MOM` (-31 000, 900, 27 500), construit à moins de 14 km ; découverte à 4,5 km = 5 000 ¢ (`G.x.v2mom`) + 3 Xil ; rester 12 s à moins de 1,5 km = artefact (`G.x.v2moms`).
+- Galaxie miroir (20) : entrer à moins de 170 m d'un trou noir bascule `G.x.v2mir` (filtre CSS `hue-rotate(180deg) saturate(1.5)` sur `#c`, ressorti à 3,2 km) ; ennemis × 1,6 PV, primes × 2 (enveloppe de `mkEnemy`).
+- Nébuleuses profondes (11) : secteurs `h3(a,0,b,911) ≤ 0,16`, rayon 2,4–3,3 km ; voile `#w2fog`, éclairs `#w2flash`, radar brouillé (enveloppe de `radar`), 9 méduses à scanner (180 ¢, 1 500 ¢ la colonie, `G.x.v2jel`).
+- Piège : `THREE.CapsuleGeometry` existe dans r128 mais lève une erreur → utiliser un cylindre. En test, fermer les dialogues (`DLG.open=false`) sinon le jeu reste en pause.
+
