@@ -296,7 +296,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261016-182818"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261016-184520"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -14963,10 +14963,24 @@ function a2Txt(){const s=a2S(),ch=s.ch;
 function a2Tg(){const s=a2S();if(s.ch==1)return a2Pos('relay');if(s.ch==2)return a2Pos('cor');if(s.ch==3)return WRECK;if(s.ch==4)return{x:0,y:0,z:0};
  if(s.ch==5)return s.sub=='esc'&&A2.sh&&!A2.sh.gone?A2.sh.pos:s.sub=='esc'?s.st:{x:0,y:0,z:0};if(s.ch==6||s.ch==7)return BOSS&&A2.boss?BOSS.g.position:a2Pos('porte');return null}
 // ----- décors -----
-function a2Relay(){const g=new THREE.Group(),M=new THREE.MeshStandardMaterial({color:0x6a6460,map:HULLT,metalness:.6,roughness:.5}),D=new THREE.MeshStandardMaterial({color:0x22252b,metalness:.6,roughness:.5});
- g.add(new THREE.Mesh(new THREE.CylinderGeometry(4,6,120,10),M));for(let i=0;i<3;i++){const a=i*TAU/3,d=new THREE.Mesh(new THREE.SphereGeometry(22,20,10,0,TAU,0,1.1),D);d.position.set(Math.cos(a)*26,20+i*14,Math.sin(a)*26);d.lookAt(Math.cos(a)*80,60,Math.sin(a)*80);d.rotateX(-Math.PI/2);g.add(d)}
- const r=new THREE.Mesh(new THREE.TorusGeometry(40,2.5,8,40),M);r.rotation.x=Math.PI/2;r.position.y=-30;g.add(r);for(let i=0;i<4;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(8,30,8),D);b.position.set(rv(30),-50+rv(10),rv(30));b.rotation.set(rv(1),rv(1),rv(1));g.add(b)}
- const L=sprite(0xffa040,50,.9);L.position.y=64;g.add(L);g.userData.L=L;const p=a2Pos('relay');g.position.copy(p);g.rotation.z=.25;scene.add(g);return g}
+function a2Relay(){const g=new THREE.Group(),M=new THREE.MeshStandardMaterial({color:0x8a8680,map:HULLT,metalness:.6,roughness:.45}),D=new THREE.MeshStandardMaterial({color:0x2a2d33,metalness:.6,roughness:.5}),
+  W=new THREE.MeshStandardMaterial({color:0xd8d6d0,metalness:.35,roughness:.35,side:THREE.DoubleSide}),PV=new THREE.MeshStandardMaterial({color:0x1a2a4a,metalness:.7,roughness:.25,emissive:0x0a1430,side:THREE.DoubleSide});
+ // paraboles : profil y = x²/(4f), ouvertes vers +z
+ const prof=[];for(let i=0;i<=10;i++){const x=i/10*20;prof.push(new THREE.Vector2(x,x*x/48))}const dishG=new THREE.LatheGeometry(prof,28);dishG.rotateX(Math.PI/2);
+ const dish=(r,x,y,z,ax,ay)=>{const d=new THREE.Group();d.position.set(x,y,z);const sc=r/20;const m=new THREE.Mesh(dishG,W);m.scale.setScalar(sc);d.add(m);
+  for(let k=0;k<3;k++){const a=k*TAU/3,st=new THREE.Mesh(new THREE.CylinderGeometry(.35*sc,.35*sc,13*sc,5),D);st.position.set(Math.cos(a)*8*sc,Math.sin(a)*8*sc,9*sc);st.lookAt(0,0,12*sc*1.5);st.rotateX(Math.PI/2);d.add(st)}
+  const h=new THREE.Mesh(new THREE.CylinderGeometry(1.2*sc,.8*sc,4*sc,8),D);h.rotation.x=Math.PI/2;h.position.z=12*sc;d.add(h);const arm=new THREE.Mesh(new THREE.CylinderGeometry(1.4*sc,1.4*sc,10*sc,8),M);arm.rotation.x=Math.PI/2;arm.position.z=-5*sc;d.add(arm);
+  d.rotation.set(ax,ay,0);g.add(d);return d};
+ // mât en treillis
+ g.add(new THREE.Mesh(new THREE.CylinderGeometry(3,4.5,130,8),M));for(let i=0;i<5;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(6,.8,6,16),D);r.rotation.x=Math.PI/2;r.position.y=-50+i*25;g.add(r)}
+ const hub=new THREE.Mesh(new THREE.BoxGeometry(18,14,18),M);hub.position.y=30;g.add(hub);
+ dish(26,0,52,0,-.5,0);dish(15,14,30,6,-.2,1.2);dish(15,-14,30,6,-.2,-1.2);dish(10,0,8,-12,.3,Math.PI);
+ // panneaux solaires
+ for(const sx of[-1,1]){const bm=new THREE.Mesh(new THREE.BoxGeometry(40,1.5,1.5),D);bm.position.set(sx*28,-20,0);g.add(bm);for(let k=0;k<3;k++){const pnl=new THREE.Mesh(new THREE.BoxGeometry(11,.5,24),PV);pnl.position.set(sx*(16+k*12.5),-20,0);pnl.rotation.x=.4;g.add(pnl)}}
+ // module d'habitation abîmé + débris
+ const hab=new THREE.Mesh(new THREE.CylinderGeometry(9,9,26,12),M);hab.rotation.z=Math.PI/2;hab.position.y=-62;g.add(hab);for(let i=0;i<5;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(2+Math.random()*6,1+Math.random()*3,3+Math.random()*8),i%2?M:D);b.position.set(rv(70),-40+rv(50),rv(70));b.rotation.set(rv(3),rv(3),rv(3));g.add(b)}
+ const L=sprite(0xffa040,40,.9);L.position.y=68;g.add(L);g.userData.L=L;for(const[x,y]of[[-56,-20],[56,-20],[0,-75]]){const s=sprite(0xff4030,10,.8);s.position.set(x,y,0);g.add(s)}
+ const p=a2Pos('relay');g.position.copy(p);g.rotation.z=.18;scene.add(g);return g}
 const A2PFS=`uniform float tm,k;uniform vec3 col;varying vec2 vUv;void main(){vec2 q=vUv*2.-1.;float r=length(q),a=atan(q.y,q.x);float s=sin(a*6.+r*16.-tm*2.2)*.5+.5,s2=sin(a*3.-r*9.+tm*1.3)*.5+.5;
  float f=smoothstep(1.,.15,r)*(.25+.55*s+.3*s2)+pow(max(0.,1.-r*2.2),2.)*.8;gl_FragColor=vec4(col*f*k,1.);}`;
 function a2Porte(){const g=new THREE.Group(),M=new THREE.MeshStandardMaterial({color:0x3a3846,map:HULLT,metalness:.8,roughness:.35});
