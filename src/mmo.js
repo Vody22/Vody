@@ -14,7 +14,7 @@ const mmGL=xp=>Math.min(20,1+Math.floor(Math.sqrt(Math.max(0,xp)/400))),mmGX=L=>
 const mmBonus=()=>MMO.guild?Math.min(10,MMO.guild.lv-1)*2:0;
 
 // ----- zones -----
-function netZone(){if(mode=='int')return null;
+function netZone(){if(mode=='int')return null;if(mode=='vox'){const n=vxPName();if(!n)return null;const s=String(n).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,18);return{c:'v-'+(s||'monde'),n,surf:1}}
 if(mode=='surf'){const I=SURF.info&&SURF.info();if(!I||!I.name)return null;const s=String(I.name).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,18);return{c:'p-'+(s||'monde'),n:I.name,surf:1}}
 const a=Math.floor((S.pos.x+MZ/2)/MZ),b=Math.floor((S.pos.z+MZ/2)/MZ),f=v=>v<0?'m'+(-v):''+v;
 return{c:'z'+f(a)+'x'+f(b),n:'Région '+String(secName((a*3)+','+(b*3))).replace(/^Secteur /,''),a,b}}
