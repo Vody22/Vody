@@ -107,8 +107,8 @@ function a2Tick(dt){const s=a2S(),ch=s.ch;
     ['tess','(à voix basse) Pilote… je n\'ai pas confiance. Je pars avec la clé sur ma navette. Escorte-moi hors de la base, vite.']])}
   else if(!A2.tw){A2.tw=1;setTimeout(()=>A2.tw=0,20000);toast('Il faut 8 cristal et 4 titane en soute — creuse les astéroïdes géants ou les planètes')}}}
  else if(ch==5){const B=P.length();
-  if(s.sub=='wait'){if(!S.docked&&B>350&&B<4500&&!DLG.open){if(!s.st)s.st=storyFindStation()||{n:'Base Alpha',x:0,y:0,z:0};s.sub='esc';s.k1=s.k2=0;
-    fwd();A2.sh=frSpawn({kind:'freighter',name:'Navette de Tess',p:P.clone().addScaledVector(_f,180).add(new V3(60,0,0)),hp:520,mhp:520,sp:85,dest:new V3(s.st.x,s.st.y,s.st.z)});A2.sh.onDie=a2ShDie;A2.sh.onArrive=a2ShArr;A2.sh.d0=A2.sh.pos.distanceTo(A2.sh.dest);
+  if(s.sub=='wait'){if(!S.docked&&B>350&&B<4500&&!DLG.open){if(!s.st)s.st=a2EscSt();s.sub='esc';s.k1=s.k2=0;
+    fwd();A2.sh=frSpawn({kind:'freighter',name:'Navette de Tess',p:P.clone().addScaledVector(_f,180).add(new V3(60,0,0)),hp:a2ShHp(),mhp:a2ShHp(),sp:85,dest:w7Berth(s.st,1,1100)});A2.sh.onDie=a2ShDie;A2.sh.onArrive=a2ShArr;A2.sh.d0=A2.sh.pos.distanceTo(A2.sh.dest);
     if(s.c1=='save'){A2.al.push(a2Ally('Corbeau',0x2a2226,0xff3b3b,P),a2Ally('Pirate de Corbeau',0x3a2a2e,0xff6a3b,P));say([['corbeau','Je t\'avais promis de payer ma dette. Mes gars et moi, on couvre la navette.']])}
     say([['tess','Navette en route vers '+s.st.n+'. Reste près de moi !']])}
    else if(B>=4500&&!A2.tw){A2.tw=1;setTimeout(()=>A2.tw=0,30000);toast('Retourne près de la Base Alpha : la navette de Tess t\'y attend')}}
@@ -129,7 +129,10 @@ function a2CorDie(){const s=a2S();A2.cor=null;for(const e of en)if(e.a2)e.tgF=nu
 function a2Ch3(){if(a2S().ch!=2)return;a2Go(3);say([['tess','Revenons à la Porte. D\'après les journaux, le Kepler transportait une pièce pour l\'ouvrir : son cœur. Il est toujours dans l\'épave.'],['iris','Les Xil la surveillent sûrement. Extrais ce cœur et ne traîne pas.']])}
 function a2Ch4(lines){a2Go(4);say(lines.concat([['tess','Il me faut une clé de phase pour l\'utiliser : 8 cristal et 4 titane. Les astéroïdes géants et les profondeurs des planètes en sont pleins.']]))}
 function a2ShDie(){const s=a2S();A2.sh=null;s.sub='wait';for(const e of en)if(e.a2)e.tgF=null;a2ClearAl();say([['iris','La navette… elle a explosé ! Tess s\'est éjectée, une patrouille l\'a récupérée.'],['tess','Je vais bien. J\'ai encore la clé. On recommence : rejoins-moi près de la Base Alpha.']])}
-function a2ShArr(F){const s=a2S();A2.sh=null;frRemove(F);a2ClearAl();for(const e of en)if(e.a2)e.tgF=null;G.cr+=900;SFX.win();a2Go(6);
+const a2ShHp=()=>Math.round(115*(typeof DF3!='undefined'&&DF3.lv==2?1.3:1));
+function a2EscSt(){let b=null,bd=1e18;for(let i=-4;i<=4;i++)for(let l=-4;l<=4;l++)for(let j=-1;j<=1;j++){const c=cdata(i,j,l).st;if(!c||c.n=='Base Alpha')continue;const d=Math.hypot(c.x,c.y,c.z),k=Math.abs(d-8000);if(d>4500&&k<bd){bd=k;b=c}}
+ b=b||storyFindStation();return b?{n:b.n,x:b.x,y:b.y,z:b.z}:{n:'Base Alpha',x:0,y:0,z:0}}
+function a2ShArr(F){const s=a2S();if(!F.a2d){F.a2d=1;F.arr=0;F.dest=w7Berth(s.st,1,125);F.sp=40;F.d0=1;for(const e of en)if(e.a2)e.tgF=null;toast('🛬 La navette entre dans le couloir d\'amarrage');return}A2.sh=null;frRemove(F);a2ClearAl();for(const e of en)if(e.a2)e.tgF=null;G.cr+=900;SFX.win();a2Go(6);
  say([['tess','Arrivée ! Merci, pilote. (+900 ¢)'],['tess','J\'ai lu les ordres de Kessler. Il veut ouvrir la Porte de force et faire de sa puissance une arme. Les Xil seraient exterminés.'],
   ['iris','Si c\'est vrai, il a trahi l\'Alliance. Va à la Porte avant lui. J\'ai marqué ses coordonnées.'],['echo','… la Porte … ne la laissez pas … à celui qui veut la briser …'],['ia','La Porte est loin : fais le plein de carburant avant le saut.']])}
 function a2Boss(first){const s=a2S(),Pp=a2Pos('porte');A2.boss=1;spawnBoss(Pp.clone().add(new V3(700,120,-500)),{story:true,a2:1,nm:'CROISEUR VENGEUR (KESSLER)'});toast('⚠ Le Vengeur de Kessler garde la Porte !');

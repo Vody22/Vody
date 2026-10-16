@@ -112,11 +112,20 @@ W7.simT-=dt;if(W7.simT<=0){W7.simT=60+Math.random()*50;const sts=w7Sts();if(sts.
 TICK.push(()=>{if(mode!='space'&&W7.L.length){for(const N of W7.L)w7Remove(N);W7.L=[]}});
 // ----- étiquettes, bulles et SOS à l'écran -----
 {const _ov=overlay;overlay=function(){_ov();if(mode!='space'||S.dead||S.docked||(typeof SI!='undefined'&&SI.on))return;try{
-for(const N of W7.L){if(N.gone)continue;const p=N.F.pos,s=proj(p);if(!s.front||s.d>1700||s.x<0||s.x>innerWidth||s.y<40||s.y>innerHeight)continue;const J=W7J[N.job],a=clamp(1.3-s.d/1700,.25,1);OX.globalAlpha=a;OX.textAlign='center';
- const y=s.y-Math.min(46,10+900/Math.max(60,s.d));OX.font="700 11px 'Chakra Petch',system-ui";OX.fillStyle=J.col;OX.fillText(N.name,s.x,y);
- if(s.d<900){OX.font="600 9.5px 'Chakra Petch',system-ui";OX.fillStyle='rgba(205,230,255,.85)';const st=N.toN||(N.to&&N.to.n);let info=N.inf?N.inf:N.job=='patrol'?'Alliance · sécurité':N.ph=='mine'?'Minage · '+w7G(N.g).n:N.ph=='undock'?'Départ de '+(N.from?N.from.n:'la station'):N.ph=='approach'||N.ph=='dockin'?'Amarrage à '+(st||''):N.q&&N.g?(N.q+' t de '+w7G(N.g).n+(st?' → '+st:'')):(st?'→ '+st:N.co);OX.fillText(info,s.x,y+12)}
- if(N.bub&&t<N.bub.t){OX.globalAlpha=1;OX.font="600 11px 'Chakra Petch',system-ui";const w=Math.min(260,OX.measureText(N.bub.txt).width+16),by=y-30;OX.fillStyle='rgba(6,16,28,.88)';OX.fillRect(s.x-w/2,by-14,w,22);OX.fillStyle=J.col;OX.fillRect(s.x-w/2,by-14,2,22);OX.fillStyle='#eaf6ff';OX.fillText(N.bub.txt.length>40&&w>=260?N.bub.txt.slice(0,38)+'…':N.bub.txt,s.x,by+1)}
- if(W7.raid&&W7.raid.N===N){OX.globalAlpha=1;const k=N.F.hp/N.F.mhp;OX.fillStyle='rgba(0,0,0,.6)';OX.fillRect(s.x-24,y+17,48,4);OX.fillStyle=k>.5?'#7dffb0':k>.25?'#ffc34d':'#ff5a4a';OX.fillRect(s.x-24,y+17,48*k,4)}}
+const LB=[],RN=W7.raid&&W7.raid.N;for(const N of W7.L){if(N.gone)continue;const s=proj(N.F.pos);if(!s.front||s.d>1700||s.x<0||s.x>innerWidth||s.y<40||s.y>innerHeight)continue;LB.push([N,s])}
+LB.sort((a,b)=>((b[0]===RN)-(a[0]===RN))||((b[0].bub&&t<b[0].bub.t)-(a[0].bub&&t<a[0].bub.t))||a[1].d-b[1].d);
+// étiquettes sans chevauchement : la plus proche d'abord, les suivantes se décalent ou se taisent
+const occ=[],hit=(x0,y0,x1,y1)=>occ.some(r=>x0<r[2]&&x1>r[0]&&y0<r[3]&&y1>r[1]);let nL=0;
+for(const[N,s]of LB){if(nL>=(DESK?9:6)&&N!==RN)break;const J=W7J[N.job],a=clamp(1.3-s.d/1700,.25,1),y0=s.y-Math.min(46,10+900/Math.max(60,s.d)),full=s.d<900;
+ const st=N.toN||(N.to&&N.to.n);let info='';if(full)info=N.inf?N.inf:N.job=='patrol'?'Alliance · sécurité':N.ph=='mine'?'Minage · '+w7G(N.g).n:N.ph=='undock'?'Départ de '+(N.from?N.from.n:'la station'):N.ph=='approach'||N.ph=='dockin'?'Amarrage à '+(st||''):N.q&&N.g?(N.q+' t de '+w7G(N.g).n+(st?' → '+st:'')):(st?'→ '+st:N.co);
+ OX.font="700 11px 'Chakra Petch',system-ui";let w=OX.measureText(N.name).width;if(info){OX.font="600 9.5px 'Chakra Petch',system-ui";w=Math.max(w,OX.measureText(info).width)}const hh=info?28:15;
+ let y=null;for(const dy of[0,-30,30,-60]){const yy=y0+dy;if(!hit(s.x-w/2-4,yy-12,s.x+w/2+4,yy-12+hh)){y=yy;break}}if(y===null&&N!==RN)continue;if(y===null)y=y0;
+ occ.push([s.x-w/2-4,y-12,s.x+w/2+4,y-12+hh]);nL++;OX.globalAlpha=a;OX.textAlign='center';
+ if(y!==y0){OX.strokeStyle=J.col;OX.globalAlpha=a*.4;OX.lineWidth=1;OX.beginPath();OX.moveTo(s.x,s.y-4);OX.lineTo(s.x,y+(y<y0?hh-10:-12));OX.stroke();OX.globalAlpha=a}
+ OX.font="700 11px 'Chakra Petch',system-ui";OX.fillStyle=J.col;OX.fillText(N.name,s.x,y);
+ if(info){OX.font="600 9.5px 'Chakra Petch',system-ui";OX.fillStyle='rgba(205,230,255,.85)';OX.fillText(info,s.x,y+12)}
+ if(N.bub&&t<N.bub.t){OX.globalAlpha=1;OX.font="600 11px 'Chakra Petch',system-ui";const bw=Math.min(260,OX.measureText(N.bub.txt).width+16),by=y-30;occ.push([s.x-bw/2,by-14,s.x+bw/2,by+8]);OX.fillStyle='rgba(6,16,28,.88)';OX.fillRect(s.x-bw/2,by-14,bw,22);OX.fillStyle=J.col;OX.fillRect(s.x-bw/2,by-14,2,22);OX.fillStyle='#eaf6ff';OX.fillText(N.bub.txt.length>40&&bw>=260?N.bub.txt.slice(0,38)+'…':N.bub.txt,s.x,by+1)}
+ if(N===RN){OX.globalAlpha=1;const k=N.F.hp/N.F.mhp,by=y+(info?17:5);OX.fillStyle='rgba(0,0,0,.6)';OX.fillRect(s.x-24,by,48,4);OX.fillStyle=k>.5?'#7dffb0':k>.25?'#ffc34d':'#ff5a4a';OX.fillRect(s.x-24,by,48*k,4)}}
 OX.globalAlpha=1;if(W7.raid&&!W7.raid.N.gone)edgeMarker(W7.raid.N.F.pos,'#ff5a4a','SOS · '+W7.raid.N.name,'🆘')}catch(e){OX.globalAlpha=1}}}
 // ----- service de station : trafic et nouvelles -----
 svcAdd({o:11,ic:'ship',t:'Trafic et nouvelles du secteur',show:st=>!st.ground,html:st=>{let h='';const eff=GOODS.map(g=>[g,w7Eff(st.n,g.id)]).filter(x=>Math.abs(x[1])>=.03).sort((a,b)=>a[1]-b[1]);

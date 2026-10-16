@@ -296,7 +296,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261016-184956"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261016-190101"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -8831,8 +8831,8 @@ function radar(){const W=innerWidth,H=innerHeight,land=W>H&&H<520,mr=DESK?80:lan
 const bg=OX.createRadialGradient(mx,my-10,4,mx,my,mr);bg.addColorStop(0,'rgba(12,34,60,.84)');bg.addColorStop(1,'rgba(3,9,20,.9)');OX.fillStyle=bg;OX.beginPath();OX.arc(mx,my,mr,0,TAU);OX.fill();
 OX.save();OX.beginPath();OX.arc(mx,my,mr,0,TAU);OX.clip();OX.fillStyle='rgba(90,200,255,.1)';const sw=t*1.3;OX.beginPath();OX.moveTo(mx,my);OX.arc(mx,my,mr,sw,sw+.7);OX.closePath();OX.fill();
 OX.strokeStyle='rgba(120,200,255,.16)';OX.lineWidth=1;OX.beginPath();OX.arc(mx,my,mr*.5,0,TAU);OX.moveTo(mx-mr,my);OX.lineTo(mx+mr,my);OX.moveTo(mx,my-mr);OX.lineTo(mx,my+mr);OX.stroke();
-const blip=(p,c,r,always,star)=>{_v.set(p.x-S.pos.x,p.y-S.pos.y,p.z-S.pos.z).applyQuaternion(inv);let dx=_v.x/R*mr,dy=_v.z/R*mr;const l=Math.hypot(dx,dy);if(l>mr-4){if(!always)return;dx*=(mr-4)/l;dy*=(mr-4)/l}const el=clamp(-_v.y/R*mr*.8,-14,14);
-if(Math.abs(el)>1.5){OX.strokeStyle=c;OX.globalAlpha=.6;OX.beginPath();OX.moveTo(mx+dx,my+dy);OX.lineTo(mx+dx,my+dy+el);OX.stroke();OX.globalAlpha=1}OX.fillStyle=c;if(star){starPath(OX,mx+dx,my+dy+el,r*2,r*.85);OX.save();OX.shadowColor=c;OX.shadowBlur=8;OX.fill();OX.restore()}else{OX.beginPath();OX.arc(mx+dx,my+dy+el,r,0,TAU);OX.fill()}};
+const blip=(p,c,r,always,star,sh)=>{_v.set(p.x-S.pos.x,p.y-S.pos.y,p.z-S.pos.z).applyQuaternion(inv);let dx=_v.x/R*mr,dy=_v.z/R*mr;const l=Math.hypot(dx,dy);if(l>mr-4){if(!always)return;dx*=(mr-4)/l;dy*=(mr-4)/l}const el=clamp(-_v.y/R*mr*.8,-14,14);
+if(Math.abs(el)>1.5){OX.strokeStyle=c;OX.globalAlpha=.6;OX.beginPath();OX.moveTo(mx+dx,my+dy);OX.lineTo(mx+dx,my+dy+el);OX.stroke();OX.globalAlpha=1}OX.fillStyle=c;if(star){starPath(OX,mx+dx,my+dy+el,r*2,r*.85);OX.save();OX.shadowColor=c;OX.shadowBlur=8;OX.fill();OX.restore()}else if(sh){const X=mx+dx,Y=my+dy+el;OX.beginPath();if(sh=='sq')OX.rect(X-r,Y-r,r*2,r*2);else if(sh=='dia'){OX.moveTo(X,Y-r*1.35);OX.lineTo(X+r*1.1,Y);OX.lineTo(X,Y+r*1.35);OX.lineTo(X-r*1.1,Y)}else{OX.moveTo(X,Y-r*1.4);OX.lineTo(X+r*1.2,Y+r);OX.lineTo(X-r*1.2,Y+r)}OX.closePath();OX.fill()}else{OX.beginPath();OX.arc(mx+dx,my+dy+el,r,0,TAU);OX.fill()}};
 if(mode=='space'){const cx=cof(S.pos.x),cz=cof(S.pos.z);for(let i=-2;i<=2;i++)for(let l=-2;l<=2;l++)for(let j=-1;j<=1;j++){const c=cdata(cx+i,j,cz+l);if(c.pl)blip(c.pl,G.disc.has(c.pl.name)?`hsl(${c.pl.hue},60%,62%)`:'rgba(160,190,220,.6)',3);if(c.st)blip(c.st,'#ffc845',2.6)}for(let i=-3;i<=3;i++)for(let l=-3;l<=3;l++){const c=cdata(cx+i,0,cz+l);if(c.sun)blip(c.sun,'#ffd27a',4.2,true,true)}for(const d of DROPS)blip(d.p,d.min?'#'+MINC[d.min].toString(16).padStart(6,'0'):'#5ff',1.4)}
 else if(mode=='int')derRadar(blip);else if(mode=='vox')vxRadar(blip);else{const I=SURF.info();if(SURF.radar)SURF.radar(blip);for(const c of I.crys)blip(c.pos,'#5ff',1.8);for(const a of I.arts)blip(a.pos,'#ffd060',3,true);for(const T of I.tur)blip(T.pos,'#ff7050',2.4)}
 for(const e of en)blip(e.pos,e.boss?'#d27bff':'#ff4d4d',e.boss?3.6:2.2,e.boss);if(G.m&&G.m.tg&&mode!='vox')blip(G.m.tg,'#4f8',3.2,true);mpRadar(blip);OX.restore();
@@ -9315,7 +9315,7 @@ let WGT=0;STICK.push(dt=>{WGT-=dt;if(WGT<=0){WGT=1;wingSync()}updFR(dt);
 if(WG.list.length&&(G.time||0)-WG.paid>600){WG.paid=G.time||0;let tot=0;for(const w of [...WG.list]){const c=wWage(w);if(G.cr>=c){G.cr-=c;tot+=c;w.unpaid=0}else{w.unpaid=(w.unpaid||0)+1;if(w.unpaid>=2){wingFire(w.id);toast('💸 '+w.n+' est parti : salaire impayé');}else toast('💸 Impossible de payer '+w.n+' — il partira à la prochaine paie manquée')}}if(tot)toast('💸 Salaires de l\'escadrille : −'+fmt(tot)+' ¢')}else if(!WG.list.length)WG.paid=G.time||0});
 // HUD : noms et santé des alliés, radar
 {const _ov=overlay;overlay=function(){_ov();if(mode!='space'||S.dead)return;for(const F of FR){if(F.gone||F.kind=='npc7')continue;const s=proj(F.pos);if(!s.front||s.d>2500)continue;const nm=F.w?F.w.n.split(' ')[0]:F.name||'';if(!nm&&F.kind=='ally')continue;const y=s.y-22;OX.textAlign='center';OX.font="700 11px 'Chakra Petch',system-ui";OX.fillStyle=F.kind=='freighter'||F.kind=='platform'?'#ffd257':'#8dffb8';OX.fillText(nm||'Allié',s.x,y);OX.fillStyle='rgba(0,0,0,.5)';OX.fillRect(s.x-18,y+4,36,3);OX.fillStyle=F.hp/F.mhp<.35?'#ff5a5a':'#5af0a0';OX.fillRect(s.x-18,y+4,36*clamp(F.hp/F.mhp,0,1),3)}}}
-{const _mr=mpRadar;mpRadar=function(blip){_mr(blip);if(mode=='space')for(const F of FR)if(!F.gone)blip(F.pos,F.kind=='freighter'||F.kind=='platform'?'#ffd257':'#6dffa0',F.kind=='freighter'||F.kind=='platform'?3:2,F.kind!='wing'&&F.kind!='ally')}}
+{const _mr=mpRadar;mpRadar=function(blip){_mr(blip);if(mode=='space')for(const F of FR)if(!F.gone&&F.kind!='npc7')blip(F.pos,F.kind=='freighter'||F.kind=='platform'?'#ffd257':'#6dffa0',F.kind=='freighter'||F.kind=='platform'?3:2,F.kind!='wing'&&F.kind!='ally')}}
 {const _ci=contentInfo;contentInfo=function(){let s=_ci();if(mode=='space'&&WG.list.length&&(en.length||FR.some(F=>F.w&&F.hp<F.mhp*.95)))s+=(s?'<br>':'')+'<span style="color:#8dffb8">🛩 '+WG.list.map(w=>{const F=FR.find(f=>f.w===w&&!f.gone);return esc(w.n.split(' ')[0])+' '+(w.st=='inj'?'blessé':F?Math.round(F.hp/F.mhp*100)+' %':'…')}).join(' · ')+'</span>';return s}}
 // voyage rapide et mort : l'escadrille suit
 {const _ft=fastTravel;fastTravel=function(o){_ft(o);setTimeout(()=>{for(const F of FR)if(F.kind=='wing'&&!F.gone){F.pos.copy(S.pos).add(new V3(rv(60),20,80).applyQuaternion(S.q))}},500)}}
@@ -13310,11 +13310,20 @@ W7.simT-=dt;if(W7.simT<=0){W7.simT=60+Math.random()*50;const sts=w7Sts();if(sts.
 TICK.push(()=>{if(mode!='space'&&W7.L.length){for(const N of W7.L)w7Remove(N);W7.L=[]}});
 // ----- étiquettes, bulles et SOS à l'écran -----
 {const _ov=overlay;overlay=function(){_ov();if(mode!='space'||S.dead||S.docked||(typeof SI!='undefined'&&SI.on))return;try{
-for(const N of W7.L){if(N.gone)continue;const p=N.F.pos,s=proj(p);if(!s.front||s.d>1700||s.x<0||s.x>innerWidth||s.y<40||s.y>innerHeight)continue;const J=W7J[N.job],a=clamp(1.3-s.d/1700,.25,1);OX.globalAlpha=a;OX.textAlign='center';
- const y=s.y-Math.min(46,10+900/Math.max(60,s.d));OX.font="700 11px 'Chakra Petch',system-ui";OX.fillStyle=J.col;OX.fillText(N.name,s.x,y);
- if(s.d<900){OX.font="600 9.5px 'Chakra Petch',system-ui";OX.fillStyle='rgba(205,230,255,.85)';const st=N.toN||(N.to&&N.to.n);let info=N.inf?N.inf:N.job=='patrol'?'Alliance · sécurité':N.ph=='mine'?'Minage · '+w7G(N.g).n:N.ph=='undock'?'Départ de '+(N.from?N.from.n:'la station'):N.ph=='approach'||N.ph=='dockin'?'Amarrage à '+(st||''):N.q&&N.g?(N.q+' t de '+w7G(N.g).n+(st?' → '+st:'')):(st?'→ '+st:N.co);OX.fillText(info,s.x,y+12)}
- if(N.bub&&t<N.bub.t){OX.globalAlpha=1;OX.font="600 11px 'Chakra Petch',system-ui";const w=Math.min(260,OX.measureText(N.bub.txt).width+16),by=y-30;OX.fillStyle='rgba(6,16,28,.88)';OX.fillRect(s.x-w/2,by-14,w,22);OX.fillStyle=J.col;OX.fillRect(s.x-w/2,by-14,2,22);OX.fillStyle='#eaf6ff';OX.fillText(N.bub.txt.length>40&&w>=260?N.bub.txt.slice(0,38)+'…':N.bub.txt,s.x,by+1)}
- if(W7.raid&&W7.raid.N===N){OX.globalAlpha=1;const k=N.F.hp/N.F.mhp;OX.fillStyle='rgba(0,0,0,.6)';OX.fillRect(s.x-24,y+17,48,4);OX.fillStyle=k>.5?'#7dffb0':k>.25?'#ffc34d':'#ff5a4a';OX.fillRect(s.x-24,y+17,48*k,4)}}
+const LB=[],RN=W7.raid&&W7.raid.N;for(const N of W7.L){if(N.gone)continue;const s=proj(N.F.pos);if(!s.front||s.d>1700||s.x<0||s.x>innerWidth||s.y<40||s.y>innerHeight)continue;LB.push([N,s])}
+LB.sort((a,b)=>((b[0]===RN)-(a[0]===RN))||((b[0].bub&&t<b[0].bub.t)-(a[0].bub&&t<a[0].bub.t))||a[1].d-b[1].d);
+// étiquettes sans chevauchement : la plus proche d'abord, les suivantes se décalent ou se taisent
+const occ=[],hit=(x0,y0,x1,y1)=>occ.some(r=>x0<r[2]&&x1>r[0]&&y0<r[3]&&y1>r[1]);let nL=0;
+for(const[N,s]of LB){if(nL>=(DESK?9:6)&&N!==RN)break;const J=W7J[N.job],a=clamp(1.3-s.d/1700,.25,1),y0=s.y-Math.min(46,10+900/Math.max(60,s.d)),full=s.d<900;
+ const st=N.toN||(N.to&&N.to.n);let info='';if(full)info=N.inf?N.inf:N.job=='patrol'?'Alliance · sécurité':N.ph=='mine'?'Minage · '+w7G(N.g).n:N.ph=='undock'?'Départ de '+(N.from?N.from.n:'la station'):N.ph=='approach'||N.ph=='dockin'?'Amarrage à '+(st||''):N.q&&N.g?(N.q+' t de '+w7G(N.g).n+(st?' → '+st:'')):(st?'→ '+st:N.co);
+ OX.font="700 11px 'Chakra Petch',system-ui";let w=OX.measureText(N.name).width;if(info){OX.font="600 9.5px 'Chakra Petch',system-ui";w=Math.max(w,OX.measureText(info).width)}const hh=info?28:15;
+ let y=null;for(const dy of[0,-30,30,-60]){const yy=y0+dy;if(!hit(s.x-w/2-4,yy-12,s.x+w/2+4,yy-12+hh)){y=yy;break}}if(y===null&&N!==RN)continue;if(y===null)y=y0;
+ occ.push([s.x-w/2-4,y-12,s.x+w/2+4,y-12+hh]);nL++;OX.globalAlpha=a;OX.textAlign='center';
+ if(y!==y0){OX.strokeStyle=J.col;OX.globalAlpha=a*.4;OX.lineWidth=1;OX.beginPath();OX.moveTo(s.x,s.y-4);OX.lineTo(s.x,y+(y<y0?hh-10:-12));OX.stroke();OX.globalAlpha=a}
+ OX.font="700 11px 'Chakra Petch',system-ui";OX.fillStyle=J.col;OX.fillText(N.name,s.x,y);
+ if(info){OX.font="600 9.5px 'Chakra Petch',system-ui";OX.fillStyle='rgba(205,230,255,.85)';OX.fillText(info,s.x,y+12)}
+ if(N.bub&&t<N.bub.t){OX.globalAlpha=1;OX.font="600 11px 'Chakra Petch',system-ui";const bw=Math.min(260,OX.measureText(N.bub.txt).width+16),by=y-30;occ.push([s.x-bw/2,by-14,s.x+bw/2,by+8]);OX.fillStyle='rgba(6,16,28,.88)';OX.fillRect(s.x-bw/2,by-14,bw,22);OX.fillStyle=J.col;OX.fillRect(s.x-bw/2,by-14,2,22);OX.fillStyle='#eaf6ff';OX.fillText(N.bub.txt.length>40&&bw>=260?N.bub.txt.slice(0,38)+'…':N.bub.txt,s.x,by+1)}
+ if(N===RN){OX.globalAlpha=1;const k=N.F.hp/N.F.mhp,by=y+(info?17:5);OX.fillStyle='rgba(0,0,0,.6)';OX.fillRect(s.x-24,by,48,4);OX.fillStyle=k>.5?'#7dffb0':k>.25?'#ffc34d':'#ff5a4a';OX.fillRect(s.x-24,by,48*k,4)}}
 OX.globalAlpha=1;if(W7.raid&&!W7.raid.N.gone)edgeMarker(W7.raid.N.F.pos,'#ff5a4a','SOS · '+W7.raid.N.name,'🆘')}catch(e){OX.globalAlpha=1}}}
 // ----- service de station : trafic et nouvelles -----
 svcAdd({o:11,ic:'ship',t:'Trafic et nouvelles du secteur',show:st=>!st.ground,html:st=>{let h='';const eff=GOODS.map(g=>[g,w7Eff(st.n,g.id)]).filter(x=>Math.abs(x[1])>=.03).sort((a,b)=>a[1]-b[1]);
@@ -15044,8 +15053,8 @@ function a2Tick(dt){const s=a2S(),ch=s.ch;
     ['tess','(à voix basse) Pilote… je n\'ai pas confiance. Je pars avec la clé sur ma navette. Escorte-moi hors de la base, vite.']])}
   else if(!A2.tw){A2.tw=1;setTimeout(()=>A2.tw=0,20000);toast('Il faut 8 cristal et 4 titane en soute — creuse les astéroïdes géants ou les planètes')}}}
  else if(ch==5){const B=P.length();
-  if(s.sub=='wait'){if(!S.docked&&B>350&&B<4500&&!DLG.open){if(!s.st)s.st=storyFindStation()||{n:'Base Alpha',x:0,y:0,z:0};s.sub='esc';s.k1=s.k2=0;
-    fwd();A2.sh=frSpawn({kind:'freighter',name:'Navette de Tess',p:P.clone().addScaledVector(_f,180).add(new V3(60,0,0)),hp:520,mhp:520,sp:85,dest:new V3(s.st.x,s.st.y,s.st.z)});A2.sh.onDie=a2ShDie;A2.sh.onArrive=a2ShArr;A2.sh.d0=A2.sh.pos.distanceTo(A2.sh.dest);
+  if(s.sub=='wait'){if(!S.docked&&B>350&&B<4500&&!DLG.open){if(!s.st)s.st=a2EscSt();s.sub='esc';s.k1=s.k2=0;
+    fwd();A2.sh=frSpawn({kind:'freighter',name:'Navette de Tess',p:P.clone().addScaledVector(_f,180).add(new V3(60,0,0)),hp:a2ShHp(),mhp:a2ShHp(),sp:85,dest:w7Berth(s.st,1,1100)});A2.sh.onDie=a2ShDie;A2.sh.onArrive=a2ShArr;A2.sh.d0=A2.sh.pos.distanceTo(A2.sh.dest);
     if(s.c1=='save'){A2.al.push(a2Ally('Corbeau',0x2a2226,0xff3b3b,P),a2Ally('Pirate de Corbeau',0x3a2a2e,0xff6a3b,P));say([['corbeau','Je t\'avais promis de payer ma dette. Mes gars et moi, on couvre la navette.']])}
     say([['tess','Navette en route vers '+s.st.n+'. Reste près de moi !']])}
    else if(B>=4500&&!A2.tw){A2.tw=1;setTimeout(()=>A2.tw=0,30000);toast('Retourne près de la Base Alpha : la navette de Tess t\'y attend')}}
@@ -15066,7 +15075,10 @@ function a2CorDie(){const s=a2S();A2.cor=null;for(const e of en)if(e.a2)e.tgF=nu
 function a2Ch3(){if(a2S().ch!=2)return;a2Go(3);say([['tess','Revenons à la Porte. D\'après les journaux, le Kepler transportait une pièce pour l\'ouvrir : son cœur. Il est toujours dans l\'épave.'],['iris','Les Xil la surveillent sûrement. Extrais ce cœur et ne traîne pas.']])}
 function a2Ch4(lines){a2Go(4);say(lines.concat([['tess','Il me faut une clé de phase pour l\'utiliser : 8 cristal et 4 titane. Les astéroïdes géants et les profondeurs des planètes en sont pleins.']]))}
 function a2ShDie(){const s=a2S();A2.sh=null;s.sub='wait';for(const e of en)if(e.a2)e.tgF=null;a2ClearAl();say([['iris','La navette… elle a explosé ! Tess s\'est éjectée, une patrouille l\'a récupérée.'],['tess','Je vais bien. J\'ai encore la clé. On recommence : rejoins-moi près de la Base Alpha.']])}
-function a2ShArr(F){const s=a2S();A2.sh=null;frRemove(F);a2ClearAl();for(const e of en)if(e.a2)e.tgF=null;G.cr+=900;SFX.win();a2Go(6);
+const a2ShHp=()=>Math.round(115*(typeof DF3!='undefined'&&DF3.lv==2?1.3:1));
+function a2EscSt(){let b=null,bd=1e18;for(let i=-4;i<=4;i++)for(let l=-4;l<=4;l++)for(let j=-1;j<=1;j++){const c=cdata(i,j,l).st;if(!c||c.n=='Base Alpha')continue;const d=Math.hypot(c.x,c.y,c.z),k=Math.abs(d-8000);if(d>4500&&k<bd){bd=k;b=c}}
+ b=b||storyFindStation();return b?{n:b.n,x:b.x,y:b.y,z:b.z}:{n:'Base Alpha',x:0,y:0,z:0}}
+function a2ShArr(F){const s=a2S();if(!F.a2d){F.a2d=1;F.arr=0;F.dest=w7Berth(s.st,1,125);F.sp=40;F.d0=1;for(const e of en)if(e.a2)e.tgF=null;toast('🛬 La navette entre dans le couloir d\'amarrage');return}A2.sh=null;frRemove(F);a2ClearAl();for(const e of en)if(e.a2)e.tgF=null;G.cr+=900;SFX.win();a2Go(6);
  say([['tess','Arrivée ! Merci, pilote. (+900 ¢)'],['tess','J\'ai lu les ordres de Kessler. Il veut ouvrir la Porte de force et faire de sa puissance une arme. Les Xil seraient exterminés.'],
   ['iris','Si c\'est vrai, il a trahi l\'Alliance. Va à la Porte avant lui. J\'ai marqué ses coordonnées.'],['echo','… la Porte … ne la laissez pas … à celui qui veut la briser …'],['ia','La Porte est loin : fais le plein de carburant avant le saut.']])}
 function a2Boss(first){const s=a2S(),Pp=a2Pos('porte');A2.boss=1;spawnBoss(Pp.clone().add(new V3(700,120,-500)),{story:true,a2:1,nm:'CROISEUR VENGEUR (KESSLER)'});toast('⚠ Le Vengeur de Kessler garde la Porte !');
@@ -15190,6 +15202,12 @@ function w10Lanes(dt){const sts=w7Sts().filter(s=>Math.hypot(s.x-S.pos.x,s.y-S.p
  P.needsUpdate=true;W10.lane.visible=mode=='space'}
 STICK.push(dt=>{if(mode!='space'||S.dead)return;W10.lt+=dt;w10Lanes(dt)});
 TICK.push(()=>{if(W10.lane&&mode!='space')W10.lane.visible=false});
+// ----- radar : une forme par type de PNJ (carré = cargo, losange = Alliance, petit point = civil), plus discrets au loin -----
+const W10C={cargo:['#e8c070','rgba(232,192,112,.45)','sq',2],pat:['#7fb0ff','rgba(127,176,255,.45)','dia',2],civ:['rgba(175,210,240,.8)','rgba(175,210,240,.35)',null,1.4]};
+{const _mr=mpRadar;mpRadar=function(blip){_mr(blip);if(mode!='space')return;const RN=W7.raid&&W7.raid.N;for(const N of W7.L){if(N.gone)continue;
+  if(N===RN){blip(N.F.pos,(t%.8)<.4?'#ff9a40':'#ff5a3a',3.2,true);continue}const c=W10C[N.job=='cargo'?'cargo':N.job=='patrol'?'pat':'civ'],far=N.F.pos.distanceTo(S.pos)>4000;blip(N.F.pos,c[far?1:0],far?c[3]*.8:c[3],false,false,c[2])}}}
+// ----- conseils de départ : disparaissent dès qu'on commence à jouer -----
+{const k=()=>{if(t>2&&hint>1.2)hint=1.2};addEventListener('keydown',k,true);addEventListener('pointerdown',k,true)}
 
 // ===== MODE PHOTO : pause, caméra libre autour du vaisseau, filtres, flou, cadres, enregistrement de l'image =====
 const PH={on:false,yaw:0,pitch:.2,dist:30,fov:60,roll:0,anc:new V3(),f:'none',b:'none',fr:'none',hide:false,drag:null,pinch:null,shots:0};

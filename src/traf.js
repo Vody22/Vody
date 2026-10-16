@@ -67,3 +67,9 @@ function w10Lanes(dt){const sts=w7Sts().filter(s=>Math.hypot(s.x-S.pos.x,s.y-S.p
  P.needsUpdate=true;W10.lane.visible=mode=='space'}
 STICK.push(dt=>{if(mode!='space'||S.dead)return;W10.lt+=dt;w10Lanes(dt)});
 TICK.push(()=>{if(W10.lane&&mode!='space')W10.lane.visible=false});
+// ----- radar : une forme par type de PNJ (carré = cargo, losange = Alliance, petit point = civil), plus discrets au loin -----
+const W10C={cargo:['#e8c070','rgba(232,192,112,.45)','sq',2],pat:['#7fb0ff','rgba(127,176,255,.45)','dia',2],civ:['rgba(175,210,240,.8)','rgba(175,210,240,.35)',null,1.4]};
+{const _mr=mpRadar;mpRadar=function(blip){_mr(blip);if(mode!='space')return;const RN=W7.raid&&W7.raid.N;for(const N of W7.L){if(N.gone)continue;
+  if(N===RN){blip(N.F.pos,(t%.8)<.4?'#ff9a40':'#ff5a3a',3.2,true);continue}const c=W10C[N.job=='cargo'?'cargo':N.job=='patrol'?'pat':'civ'],far=N.F.pos.distanceTo(S.pos)>4000;blip(N.F.pos,c[far?1:0],far?c[3]*.8:c[3],false,false,c[2])}}}
+// ----- conseils de départ : disparaissent dès qu'on commence à jouer -----
+{const k=()=>{if(t>2&&hint>1.2)hint=1.2};addEventListener('keydown',k,true);addEventListener('pointerdown',k,true)}
