@@ -65,7 +65,7 @@ function sdf(x,y,z){const r=Math.sqrt(x*x+y*y+z*z);let ds;
   let cv=(Math.sqrt(n1*n1+n2*n2)-w)/(fc*2.3);
   if(dep>12){const vf=P.vF,n3=sn(x*vf+5.5,y*vf-2.2,z*vf-9.1);const cav=(P.vT-n3)/(vf*2.4)+Math.max(0,40-dep)*.6;if(cav<cv)cv=cav}
   if(-cv>f){f=-cv;m=0}}
- if(r<P.cR+40){const cr=P.cR+7*sn(x*.021,y*.021,z*.021);if(cr-r>f){f=cr-r;m=0}const cs=r-P.cS;if(cs<f){f=cs;m=2}}
+ if(r<P.cR+40){const cr=P.cR+7*sn(x*.021,y*.021,z*.021);if(cr-r>f){f=cr-r;m=0}if(P.cS>0){const cs=r-P.cS;if(cs<f){f=cs;m=2}}}
  const S=P.sh;for(let i=0;i<S.length;i+=5){const t=x*S[i]+y*S[i+1]+z*S[i+2];if(t<P.cR*.6||t>P.Rx+40)continue;const qx=x-S[i]*t,qy=y-S[i+1]*t,qz=z-S[i+2]*t;
   const rad=S[i+3]*(1+.28*sn(t*.013+S[i+4],S[i+4],0)),v=rad-Math.sqrt(qx*qx+qy*qy+qz*qz);if(v>f){f=v;m=0}}
  if(CAV)for(let i=0;i<NDG;i+=4){const dx=x-DG[i],dy=y-DG[i+1],dz=z-DG[i+2],v=DG[i+3]-Math.sqrt(dx*dx+dy*dy+dz*dz);if(v>f){f=v;m=0}}
@@ -119,7 +119,7 @@ function mesh0(ox,oy,oz,size,N,cav,digs){CAV=cav;DG=digs;NDG=digs?digs.length:0;
  return{pos,nor,dep,mat,orw,idx,nv,nt:ni/3}}
 // minerais : filons en amas (bruit), plus rares et plus précieux en profondeur — 1 fer, 2 titane, 3 cristal, 4 or
 const ORE=[[1.5,.56,11.3],[10,.61,37.7],[24,.655,73.1],[48,.70,151.9]];
-function ore(x,y,z,dep){if(dep<1.5)return 0;const f=1/9.5;let best=0,bv=0;for(let k=0;k<4;k++){const t=ORE[k];if(dep<t[0])continue;const v=sn(x*f+t[2],y*f-t[2]*.7,z*f+t[2]*.3)-t[1];if(v>bv){bv=v;best=k+1}}OUT.ow=Math.min(1,bv/.05);return best}
+function ore(x,y,z,dep){if(dep<1.5)return 0;const f=1/9.5;let best=0,bv=0;for(let k=0;k<4;k++){const t=ORE[k];if(dep<t[0])continue;const v=sn(x*f+t[2],y*f-t[2]*.7,z*f+t[2]*.3)-t[1]+(P.oreB||0);if(v>bv){bv=v;best=k+1}}OUT.ow=Math.min(1,bv/.05);return best}
 // carte d'élévation équirectangulaire (profondeur de l'eau près des côtes en R, relief en G)
 function emap(w,h){const D=new Uint8Array(w*h*4),sea=P.Rs>0?P.Rs-P.R:P.eMin-50,rg=Math.max(1,P.eMax-P.eMin);
  for(let j=0;j<h;j++){const th=(j+.5)/h*Math.PI,y=Math.cos(th),q=Math.sin(th);for(let i=0;i<w;i++){const ph=((i+.5)/w-.5)*2*Math.PI,e=elev(Math.cos(ph)*q,y,Math.sin(ph)*q),o=(i+j*w)*4,wd=sea-e;
@@ -147,6 +147,9 @@ function vxPreset(ty,seed,R,hue){let s=(seed>>>0)||1;const r=()=>{s^=s<<13;s>>>=
   pal={sand:C(15,.15,.12),low:C(10,.1,.13),high:C(5,.08,.1),rock:C(12,.1,.17),rock2:C(5,.12,.08),snow:C(20,.2,.3),deep:C(5,.2,.08),vein:C(18,1,.5),sea:C(10,1,.4),sea2:C(28,1,.5),atm:C(14,.5,.45),snowL:9,glow:1}}
  else if(ty=='Cristalline'){P.seaQ=.18;P.sea='cristal';P.ter=R*.012;P.mW=1;
   pal={sand:C(H+40,.25,.6),low:C(H,.3,.45),high:C(H+20,.35,.4),rock:C(H+180,.12,.32),rock2:C(H+200,.15,.22),snow:C(H,.3,.85),deep:C(H+180,.2,.15),vein:C(H,1,.6),sea:C(H,.8,.4),sea2:C(H+30,.8,.6),atm:C(H,.6,.62),snowL:.95}}
+ else if(ty=='Astéroïde'){const hol=r()<.4;Object.assign(P,{seaQ:0,atm:0,amp:R*.2,fC:1/(R*.85),fM:1/(R*.3),mW:.9,warp:R*.35,det:2.5,cF:1/(R*.5+28),cW:.19,vF:1/(R*.7+20),vT:.5,cR:hol?R*.42:R*.1,cS:0,oreB:.035,sh:[]});
+  for(const d of dirs(hol?3:2))P.sh.push(d[0],d[1],d[2],Math.max(9,R*.11),r()*50);for(const d of dirs(14))P.cr.push(d[0],d[1],d[2],Math.cos(.12+r()*.3),R*(.02+r()*.05));P.hol=hol;
+  const h=20+r()*30,g=r()*.05;pal={sand:C(h,.08,.32),low:C(h,.05+g,.27),high:C(h+10,.05,.22),rock:C(h,.07,.25),rock2:C(h-10,.09,.15),snow:C(h,.1,.55),deep:C(h,.12,.13),vein:C(r()*360,.85,.55),sea:[0,0,0],sea2:[0,0,0],atm:[0,0,0],snowL:9}}
  else{P.seaQ=0;P.mW=.35;P.amp=R*.07;P.atm=0;P.det=1.2;for(const d of dirs(26))P.cr.push(d[0],d[1],d[2],Math.cos(.04+r()*.14),R*(.008+r()*.02));
   pal={sand:C(40,.05,.5),low:C(40,.06,.45),high:C(40,.05,.38),rock:C(40,.04,.3),rock2:C(40,.04,.22),snow:C(40,.05,.6),deep:C(40,.05,.16),vein:C(200,.8,.55),sea:[0,0,0],sea2:[0,0,0],atm:[0,0,0],snowL:9}}
  P.col=pal;return P}
