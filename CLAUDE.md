@@ -243,3 +243,11 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - Combinaison du pilote (casque + graine `pilot…`) : plastron et épaulières, genouillères, bandes lumineuses (couleur d'accent), plaque nominative (pseudo, `c4Tag`), écusson drapeau sur l'épaule droite. Visière animée (`u.visor`, `u.visorT`, `c4Visor`) : relevée dans le hangar (WK3), se referme quand le pilote sort sur une planète (enveloppe de `footEnter`).
 - Habitants des stations (w8.js) : tenue et accessoires selon le métier (cuisinier = tablier, pilote = veste, journaliste = manteau/veste + casque audio, touriste = lunettes de soleil/sac…).
 - Banc d'essai visuel : page avec un `WebGLRenderer` à part et une rangée de `buildHuman` (script `t_ch.py` dans le dossier de travail).
+
+## Personnages vivants (chars5.js, après chars4.js)
+- `hmMood(m, 'joie'|'colere'|'triste'|'surpris'|'fatigue'|'peur'|null, durée)` : sans durée = humeur de base (`u.md5B`), avec durée = humeur passagère puis retour à la base. Joue sur les sourcils (deux pivots `u.brows`, `hm3BrowGeo(F, côté)`), les paupières, les coins de la bouche (`u.mc5`) et le pli du sourire/de la moue (`u.sl5`, tore), la tête et les épaules (`H5E`).
+- `hmGest(m, clé, durée)` : gestes `H5G` ponctuels (salut, montrer, hausser, oui, non, rire, applaudir, joie, etirer, montre, reflechir) ou en boucle (bras croisés `bras`, `hanches`, mains dans le `dos` : durée Infinity, `hmGest(m,null)` pour arrêter). Un nouveau geste interrompt le précédent (`u.g5n`).
+- `hmWork(m, clé|null)` : gestes de métier `H5W` en boucle avec accessoire (`h5Prop`) : essuyer (chiffon), tablette (posée devant la poitrine), boire (tasse), cle (clé), caisse (portée en marchant). `hmBusy(m)`.
+- Bras posés par quaternions dans `h5Arm` : pose = [avant, écart vers l'extérieur, torsion de l'avant-bras vers l'intérieur, coude], mélangée à la pose d'`animHuman`.
+- Pilote au repos (à pied, hangar, intérieur du vaisseau) : un geste au hasard toutes les 8–17 s (`h5Idle`, vitesse lue dans `u.v5`).
+- Branchements : habitants des stations (`w8Act` : métier selon le poste `A.poi`, humeurs des discussions, salut quand le pilote passe à 3,2 m → le pilote répond), comptoirs de walk3, mécaniciens du hangar (clé), PNJ des avant-postes (salut). chars4 : signe du dos voûté corrigé (penché en avant = rotation x négative pour le dos).

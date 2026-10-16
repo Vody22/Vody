@@ -30,8 +30,8 @@ const fr=new THREE.MeshStandardMaterial({color:0x2a313a,metalness:.7,roughness:.
 for(const[x,z]of W8DOORS){const s=Math.sign(x);add(RB3(.6,3.6,3.2),fr,x+s*.9,1.8,z);add(new THREE.PlaneGeometry(2.4,3),pn,x+s*.55,1.6,z,-s*Math.PI/2);const L=sprite(0x3fa8ff,3,.6);L.position.set(x+s*.4,3.7,z);sc.add(L)}
 let n=0;for(const P of R){if(n>=max)break;if(night&&!P.night&&P.J.k!='cuisto'&&P.J.k!='garde')continue;if(!night&&Math.random()<.15)continue;
  const jk=P.J.k,rr=rng(P.seed%2147483646+1),m=buildHuman({role:P.J.role,suit:P.suit,robe:jk=='marchand'?P.suit:undefined,helmet:false,closed:false,fem:P.fem,seed:P.seed,hs:rr()<.6?undefined:P.hs,tool:jk=='meca',outfit:jk=='cuisto'?'tablier':jk=='pilote'?'veste':jk=='journa'?(rr()<.5?'manteau':'veste'):undefined,acc2:jk=='touriste'?(rr()<.5?['solaires','sac']:['audio','sac','lunettes'].slice(0,1+(rr()*2|0))):jk=='journa'?['audio']:undefined});m.userData.noAO=1;
- const out=Math.random()<.25,dr=W8DOORS[Math.random()*2|0],p0=out?new V3(dr[0],0,dr[1]):w8Pt(P.J.go[Math.random()*P.J.go.length|0]);m.position.copy(p0);m.visible=!out;sc.add(m);
- W8.A.push({P,m,p:m.position,yaw:Math.random()*TAU,ph:Math.random()*6,st:out?'away':'idle',wait:out?3+Math.random()*25:Math.random()*6,tg:null,spd:0,mate:null,talkT:0,bub:null});n++}
+ const out=Math.random()<.25,dr=W8DOORS[Math.random()*2|0],p0=out?new V3(dr[0],0,dr[1]):w8Pt(P.J.go[W8.pk=Math.random()*P.J.go.length|0]);m.position.copy(p0);m.visible=!out;sc.add(m);
+ if(night&&jk!='cuisto'&&jk!='garde')hmMood(m,'fatigue');W8.A.push({poi:P.J.go[W8.pk],P,m,p:m.position,yaw:Math.random()*TAU,ph:Math.random()*6,st:out?'away':'idle',wait:out?3+Math.random()*25:Math.random()*6,tg:null,spd:0,mate:null,talkT:0,bub:null});n++}
 w8Spots()}
 function w8Pt(k){const L=W8P[k]||W8P.center,q=L[Math.random()*L.length|0];return new V3(q[0]+rv(.8),0,q[1]+rv(.8))}
 function w8Pick(A){const h=w8Hour(),night=h>=22||h<6,go=A.P.J.go.slice();if(night)go.push('bar','bar');if(Math.random()<.18)go.push('center','bench');return go[Math.random()*go.length|0]}
@@ -43,7 +43,7 @@ function w8Spots(){if(WK3.built!==W8.sc)return;WK3.spots=WK3.spots.filter(s=>!s.
 // ----- vie de la foule -----
 const _w8a=new V3();
 function w8Tick(dt){if(!H3.on||!H3.sc){return}if(W8.sc!==H3.sc)w8Build();const pl=WK3.on?WK3.p:null;
-for(const A of W8.A){if(A.st=='away'){A.wait-=dt;if(A.wait<=0){const d=W8DOORS[Math.random()*2|0];A.p.set(d[0],0,d[1]);A.m.visible=true;A.st='walk';A.tg=w8Pt(w8Pick(A))}continue}
+for(const A of W8.A){if(A.st=='away'){A.wait-=dt;if(A.wait<=0){const d=W8DOORS[Math.random()*2|0];A.p.set(d[0],0,d[1]);A.m.visible=true;A.st='walk';A.tg=w8Pt(A.poi=w8Pick(A))}continue}
  let spd=0,talk=0,look=null;
  if(A.st=='talk'){if(!pl||Math.hypot(pl.x-A.p.x,pl.z-A.p.z)>5||t>A.talkT){A.st='idle';A.wait=2+Math.random()*3}else{const ty=Math.atan2(pl.x-A.p.x,pl.z-A.p.z)+Math.PI;let d=ty-A.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));A.yaw+=d*damp(6,dt);talk=DLG.open?1:0}}
  else if(A.st=='walk'||A.st=='leave'||A.st=='meet'){_w8a.copy(A.tg).sub(A.p);_w8a.y=0;const d=_w8a.length();
@@ -55,10 +55,10 @@ for(const A of W8.A){if(A.st=='away'){A.wait-=dt;if(A.wait<=0){const d=W8DOORS[M
    if(!A.bub&&!B.bub&&A.P.seed<B.P.seed&&Math.random()<dt*.15){const L=w8Pick2(W8CHAT);A.bub={txt:L[0],t:t+3.5};B.bub={txt:L[1],t:t+7,t0:t+3.5}}}}
  else{A.wait-=dt;if(pl){const q=Math.hypot(pl.x-A.p.x,pl.z-A.p.z);if(q<4)look=Math.atan2(pl.x-A.p.x,pl.z-A.p.z)+Math.PI-A.yaw}
   if(A.wait<=0){const r=Math.random();if(r<.12){const d=W8DOORS[Math.random()*2|0];A.st='leave';A.tg=new V3(d[0],0,d[1])}
-   else if(r<.32){const B=W8.A.find(o=>o!==A&&o.st=='idle'&&o.p.distanceTo(A.p)<22);if(B){const mid=A.p.clone().add(B.p).multiplyScalar(.5);w8Coll(mid);const off=_w8a.copy(B.p).sub(A.p).normalize().multiplyScalar(.75);A.st=B.st='meet';A.mate=B;B.mate=A;A.tg=mid.clone().sub(off);B.tg=mid.clone().add(off)}else{A.st='walk';A.tg=w8Pt(w8Pick(A))}}
-   else{A.st='walk';A.tg=w8Pt(w8Pick(A))}}}
+   else if(r<.32){const B=W8.A.find(o=>o!==A&&o.st=='idle'&&o.p.distanceTo(A.p)<22);if(B){const mid=A.p.clone().add(B.p).multiplyScalar(.5);w8Coll(mid);const off=_w8a.copy(B.p).sub(A.p).normalize().multiplyScalar(.75);A.st=B.st='meet';A.mate=B;B.mate=A;A.tg=mid.clone().sub(off);B.tg=mid.clone().add(off)}else{A.st='walk';A.tg=w8Pt(A.poi=w8Pick(A))}}
+   else{A.st='walk';A.tg=w8Pt(A.poi=w8Pick(A))}}}
  if(look!=null)look=Math.atan2(Math.sin(look),Math.cos(look));if(look!=null&&Math.abs(look)>1.3)look=null;
- A.ph+=dt*hm3Rate(spd);A.m.rotation.y=A.yaw;try{animHuman(A.m,A.ph,spd,false,false,talk,look)}catch(e){}
+ try{w8Act(A,pl,dt,talk)}catch(e){}A.ph+=dt*hm3Rate(spd);A.m.rotation.y=A.yaw;try{animHuman(A.m,A.ph,spd,false,false,talk,look)}catch(e){}
  if(A.bub&&t>A.bub.t)A.bub=null}
 // points de dialogue qui suivent les habitants
 if(WK3.built===W8.sc)for(const s of WK3.spots)if(s.w8){const A=s.w8;if(A.st=='away'){s.x=1e4;s.z=1e4}else{s.x=A.p.x;s.z=A.p.z}}}
@@ -75,7 +75,7 @@ return'Le secteur est calme en ce moment. Profites-en.'}
 const W8LINES={pilote:['Trois jours de saut sans dormir. Je rêve d\'un vrai lit.','Le couloir d\'amarrage est trop étroit pour mon cargo, je te jure.'],meca:['Ton vaisseau fait un drôle de bruit, non ? Je plaisante… peut-être.','Je répare tout, sauf les cœurs brisés.'],docker:['Cent caisses par jour. Mon dos me déteste.','Les caisses rouges, on n\'ouvre jamais. Jamais.'],marchand:['Tout se vend, tout s\'achète, même les souvenirs.','J\'ai des pierres de lune authentiques. Enfin, presque.'],
 touriste:['C\'est mon premier voyage dans l\'espace ! Tout est si grand !','J\'ai fait cent photos de la nébuleuse.'],mineur:['Le cristal, ça chante quand tu le fores. Si si.','Un jour je trouverai un filon d\'or et je prendrai ma retraite.'],inge:['Le réacteur de cette station a 40 ans. Croise les doigts.','Les boucliers hexagonaux, c\'est mon invention. Enfin, presque.'],
 garde:['Circule, pilote. Mais sois prudent dehors.','Pas de bagarre dans mon hangar.'],cuisto:['Ce soir, ragoût de racines de Jungle. Un délice.','Le secret du café ? Un peu de poussière de comète.'],journa:['Je prépare un article sur les pirates. Tu as des infos ?','Les gens adorent les histoires de sauvetage. Tu en as une ?']};
-function w8Talk(A){if(DLG.open)return;const P=A.P,M=w8Mem(P.id),k=w8Char(A),nick=w8Nick(),L=[];A.st='talk';A.talkT=t+40;W8.lastNear=A;W8.talkA=A;
+function w8Talk(A){if(DLG.open)return;const P=A.P,M=w8Mem(P.id),k=w8Char(A),nick=w8Nick(),L=[];A.st='talk';A.talkT=t+40;W8.lastNear=A;W8.talkA=A;hmWork(A.m,null);hmGest(A.m,'salut');hmMood(A.m,M.q>=2?'joie':M.n?'joie':'surpris',M.n?8:3);
 const Q=G.x.w8q;
 // mission de minerai en cours avec cet habitant : on rapporte ?
 if(Q&&Q.k=='min'&&Q.id==P.id){const have=(G.cargo[Q.g]||0);if(have>=Q.n){G.cargo[Q.g]-=Q.n;G.cr+=Q.pay;gainXP(50);M.q++;G.x.w8q=null;try{SFX.win()}catch(e){}L.push([k,`Parfait, ${Q.n} unités de ${w7G(Q.g).n.toLowerCase()} ! Voilà ${Q.pay} ¢, comme promis. Merci, ${nick} !`]);M.n++;M.t=Date.now();say(L);save();return}
@@ -109,3 +109,16 @@ try{if(!H3.on||!H3.cam||!W8.A.length)return;const cam=H3.cam,W=innerWidth,H=inne
 const c=H3.cam,P=WK3.p,mx=(P.x+A.p.x)/2,mz=(P.z+A.p.z)/2,dx=A.p.x-P.x,dz=A.p.z-P.z,l=Math.hypot(dx,dz)||1;let px=-dz/l,pz=dx/l;const cx=Math.sin(WK3.cy),cz=Math.cos(WK3.cy);if(px*cx+pz*cz<0){px=-px;pz=-pz}
 const tx=clamp(mx+px*3.4,-35,35),tz=clamp(mz+pz*3.4,-47,47);if(!W8.cp)W8.cp=c.position.clone();W8.cp.lerp(_w8a.set(tx,1.75,tz),damp(4,dt));c.position.copy(W8.cp);c.lookAt(mx,1.45,mz)}}
 TICK.push(()=>{if(!W8.talkA&&W8.cp)W8.cp=null});
+// ----- gestes : métier à son poste, bras croisés / mains dans le dos, humeurs des discussions, saluts au pilote (chars5.js) -----
+const W8MOOD=['joie','joie','joie','surpris','triste','colere',null];
+function w8Act(A,pl,dt,talk){const m=A.m,jk=A.P.J.k,st=A.st,p=A.poi||'';let wk=null,lg=null;
+ if(st=='idle'){if(jk=='cuisto'&&p=='bar')wk='essuyer';else if(jk=='meca'&&/ship|front|rear/.test(p))wk='cle';else if((jk=='journa'||jk=='inge')&&p!='bar')wk='tablette';else if(p=='bar')wk='boire';
+  else if(jk=='garde')lg='dos';else if(p=='window')lg=A.P.seed%2?'dos':'bras';else if(jk=='marchand')lg='hanches';else if(A.P.seed%3==0)lg='bras'}
+ else if(st=='walk'&&jk=='docker'&&p!='crates')wk='caisse';
+ hmWork(m,wk);const u=m.userData;if(lg!==A.lg||lg&&!u.g5k){A.lg=lg;hmGest(m,lg,lg?Infinity:0)}
+ if(st=='chat'){if(A.cm!==A.talkT){A.cm=A.talkT;const md=W8MOOD[Math.random()*W8MOOD.length|0];if(md)hmMood(m,md,Math.max(1,A.talkT-t))}
+ }
+ if(st=='talk'||st=='chat'){if(talk&&!hmBusy(m)&&Math.random()<dt*.4)hmGest(m,['hausser','oui','montrer','non','rire','oui'][Math.random()*6|0])}
+ // salut quand le pilote passe tout près (une fois par visite)
+ if(pl&&!A.gr&&(st=='idle'||st=='walk')&&Math.hypot(pl.x-A.p.x,pl.z-A.p.z)<3.2){A.gr=1;const M=w8Mem(A.P.id);if(M.n>0||Math.random()<.55){hmWork(m,null);hmGest(m,'salut');hmMood(m,'joie',3);W8.wb=t+.7;if(st=='idle')A.wait=Math.max(A.wait,2.5)}else hmGest(m,'oui')}}
+TICK.push(()=>{if(W8.wb&&t>W8.wb){W8.wb=0;try{if(WK3.on&&WK3.m&&!hmBusy(WK3.m))hmGest(WK3.m,'salut')}catch(e){}}});

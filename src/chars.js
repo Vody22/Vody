@@ -149,15 +149,15 @@ F.fem=fem;F.alien=al;F.seed=(sd>>>0)%100000;F.skin=al?(o.skin||0x6fd08a):(o.skin
 F.age=al?0:clamp(o.age!=null?o.age:0,0,1);F.frk=al?0:(o.frk!=null?o.frk:(r()<.22?1:0));F.scar=al?0:(o.scar||0);F.tat=al?0:(o.tat||0);F.beard=(!fem&&!al&&o.beard!==0)?(o.beard!=null?o.beard:(r()<.35?(r()<.45?2:1):0)):0;F.brw=v(.4);F.iris=HM3IRIS[r()*HM3IRIS.length|0];
 const ex=al?.055:.0305,ey=al?.012:.017;F.eyeC=[-1,1].map(s=>{const q=hm3Surf(F,s*(al?.5:.4),al?.08:.16,-1);return new V3(s*ex,ey,q.z+(al?.022:.0062))});return F}
 // ----- détails du visage : sourcils en relief (rubans qui suivent le front), cils sur les paupières (bougent avec les clignements), dents -----
-function hm3BrowGeo(F){return hm3Sh('h3bw'+F.key,()=>{const P=[],I=[],N=12;for(const s of[-1,1]){const b0=P.length/3;for(let j=0;j<=N;j++){const f=j/N,ax=.07+.46*f,by=.29+(F.fem?.075:.055)*Math.sin(Math.PI*Math.min(1,f*1.15))-f*.03,tb=(F.fem?.019:.03)*(1-.45*f)*F.brw*(j==0?.6:1);
+function hm3BrowGeo(F,sd){return hm3Sh('h3bw'+F.key+(sd||''),()=>{const P=[],I=[],N=12;for(const s of(sd?[sd]:[-1,1])){const b0=P.length/3;for(let j=0;j<=N;j++){const f=j/N,ax=.07+.46*f,by=.29+(F.fem?.075:.055)*Math.sin(Math.PI*Math.min(1,f*1.15))-f*.03,tb=(F.fem?.019:.03)*(1-.45*f)*F.brw*(j==0?.6:1);
  for(const e of[1,-1]){const yy=by+e*tb*.5,zz=-Math.sqrt(Math.max(.05,1-ax*ax-yy*yy)),q=hm3Surf(F,s*ax,yy,zz),n=q.clone().normalize();q.addScaledVector(n,.0013+(e>0?.0007:0));P.push(q.x,q.y,q.z)}
  if(j<N){const a=b0+j*2;I.push(a,a+1,a+2,a+1,a+3,a+2)}}}
 const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setIndex(I);g.computeVertexNormals();return g})}
 function hm3FaceDet(F,hg,lids,fem){const hc=new THREE.Color(F.hair).multiplyScalar(F.age>.6?1.15:.75),BR=hm3M('brw'+hc.getHex(),()=>new THREE.MeshStandardMaterial({color:hc,roughness:.85,metalness:0,side:THREE.DoubleSide}));
-const bw=new THREE.Mesh(hm3BrowGeo(F),BR);hg.add(bw);
+const brows=[];for(const sd of[-1,1]){const c=hm3Surf(F,sd*.3,.32,-.9),pv=new THREE.Group();pv.position.copy(c);const bw=new THREE.Mesh(hm3BrowGeo(F,sd),BR);bw.position.copy(c).multiplyScalar(-1);pv.add(bw);pv.userData.y0=c.y;hg.add(pv);brows.push(pv)}
 const LA=hm3M('lash',()=>new THREE.MeshStandardMaterial({color:0x14100e,roughness:.7,side:THREE.DoubleSide}));for(const ul of lids){const l=new THREE.Mesh(hm3Sh('h3la'+(fem?1:0),()=>new THREE.TorusGeometry(.0131,fem?.0011:.0008,3,16,Math.PI).rotateX(-Math.PI/2)),LA);l.scale.set(1.02,fem?1.6:1.2,1.02);ul.add(l)}
 const ub=hm3Surf(F,0,-.4,-.92),lb=hm3Surf(F,0,-.5,-.87),TE=hm3M('teeth',()=>new THREE.MeshStandardMaterial({color:0xf0ebe0,roughness:.3,metalness:0}));
-for(const[k,dy]of[[0,.0022],[1,-.0028]]){const t=new THREE.Mesh(hm3Sh('h3tt',()=>new THREE.CylinderGeometry(.0125,.0125,.0034,16,1,false,-1.1,2.2).rotateY(Math.PI)),TE);t.position.set(0,(ub.y+lb.y)/2+dy,(ub.z+lb.z)/2+.0125);t.scale.set(1.25,1,1);hg.add(t)}}
+for(const[k,dy]of[[0,.0022],[1,-.0028]]){const t=new THREE.Mesh(hm3Sh('h3tt',()=>new THREE.CylinderGeometry(.0125,.0125,.0034,16,1,false,-1.1,2.2).rotateY(Math.PI)),TE);t.position.set(0,(ub.y+lb.y)/2+dy,(ub.z+lb.z)/2+.0125);t.scale.set(1.25,1,1);hg.add(t)}return brows}
 // ----- corps : tubes à sections superelliptiques fusionnés, avec poids de peau pour le squelette -----
 const HM3BX={m:{sh:.186,hip:.095,el:.205,wr:.214},f:{sh:.168,hip:.1,el:.186,wr:.196}};
 const HM3TOR={m:[[.80,.07,.06,.07,.01,2],[.84,.13,.085,.095,.01,2.2],[.90,.162,.092,.108,.012,2.3],[.97,.163,.09,.105,.01,2.3],[1.04,.146,.086,.094,.006,2.2],[1.12,.149,.093,.094,0,2.2],[1.21,.162,.106,.097,-.004,2.3],[1.30,.172,.113,.1,-.004,2.4],[1.37,.176,.106,.1,0,2.5],[1.42,.17,.09,.096,.006,2.6],[1.455,.152,.074,.089,.012,2.5],[1.49,.112,.062,.074,.012,2.2],[1.52,.072,.058,.062,.01,2],[1.55,.058,.054,.058,.008,2],[1.60,.056,.052,.055,.006,2],[1.64,.052,.048,.05,.004,2]],
@@ -230,7 +230,7 @@ const HC=new V3(0,1.638,-.012),hp=BW.get(head),hg=new THREE.Group();hg.position.
 const sk=new THREE.Mesh(hm3HeadGeo(F),SKf);sk.castShadow=DESK;hg.add(sk);const eyes=[],lids=[];
 for(let i=0;i<2;i++){const ec=F.eyeC[i],ep=new THREE.Group();ep.position.copy(ec);hg.add(ep);const eb=new THREE.Mesh(hm3Sh(alien?'h3eyA':'h3ey',()=>alien?new THREE.SphereGeometry(.03,16,12):new THREE.SphereGeometry(.0118,18,14)),EYE);if(alien){eb.scale.set(1,.62,.5);eb.rotation.z=(i?1:-1)*-.4}ep.add(eb);eyes.push(ep);
 if(!alien){const ul=new THREE.Mesh(hm3Sh('h3ul',()=>new THREE.SphereGeometry(.0128,16,8,0,TAU,0,Math.PI*.5)),SKp);ul.rotation.x=.6;ep.add(ul);lids.push(ul)}}
-if(!alien)hm3FaceDet(F,hg,lids,fem);
+const brows=alien?[]:hm3FaceDet(F,hg,lids,fem);
 let hsw=null,visorM=null;let lip=null,mou=null;if(!alien){const ub=hm3Surf(F,0,-.4,-.92),lb=hm3Surf(F,0,-.5,-.87);const up=new THREE.Mesh(hm3Sh('h3lu',()=>new THREE.SphereGeometry(1,16,8)),LIP);up.scale.set(.018*(fem?1:1.05),.0034,.0046);up.position.set(0,ub.y,ub.z+.0016);hg.add(up);
 lip=new THREE.Mesh(hm3Sh('h3lu',()=>new THREE.SphereGeometry(1,16,8)),LIP);lip.scale.set(.0164,.0042*(fem?1.15:1),.005);lip.position.set(0,lb.y+.003,lb.z+.0016);lip.userData.y0=lip.position.y;hg.add(lip);
 mou=new THREE.Mesh(hm3Sh('h3mo',()=>new THREE.SphereGeometry(1,12,6)),MOU);mou.scale.set(.016,.002,.004);mou.position.set(0,(ub.y+lb.y)/2,(ub.z+lb.z)/2+.006);hg.add(mou)}
@@ -285,7 +285,7 @@ if(o.tool){tool=new THREE.Group();arms[1].hd.add(tool);tool.position.set(-.005,-
 const bar=new THREE.Mesh(hm3Sh('h3tb',()=>new THREE.CylinderGeometry(.022,.026,.13,10)),MW);bar.position.set(0,-.23,-.04);tool.add(bar);const ab=new THREE.Mesh(RB3(.02,.17,.07),A);ab.position.set(-.032,-.07,-.035);tool.add(ab);const tp=sprite(0x5ff0ff,.28);tp.position.set(0,-.31,-.04);tool.add(tp)}
 // fusion des accessoires par os et par matériau
 for(const e of acc.values()){const q=new THREE.Mesh(hm3Merge(e.L),e.m);q.castShadow=DESK;e.b.add(q)}
-const hb=BW.get(hips);g.userData={hsw,hswA:0,hswV:0,visor:visorM,hg,BW,legs,arms,sp:spine,chest,neck,head,hips,clav,tool,prop,role,eyes,lids,lip,mou,ph:Math.random()*9,R:{L1:.43,L2:.405,AH:.085,HO:.04,hy0:hb.y+.01},
+const hb=BW.get(hips);g.userData={brows,hsw,hswA:0,hswV:0,visor:visorM,hg,BW,legs,arms,sp:spine,chest,neck,head,hips,clav,tool,prop,role,eyes,lids,lip,mou,ph:Math.random()*9,R:{L1:.43,L2:.405,AH:.085,HO:.04,hy0:hb.y+.01},
 k:0,rn:0,ai:0,am:0,tk:0,hyw:0,bT:1+Math.random()*3,bl:0,sT:0,ex:0,ey:0,fem,rig:1};
 g.scale.setScalar(o.h!=null?o.h:(fem?.95:1)*(o.seed!=null?1:.96+Math.random()*.07));return g}
 // ----- animation : marche/course réalistes (pied posé, bassin qui roule, buste en contre-rotation), repos (appui alterné, respiration),

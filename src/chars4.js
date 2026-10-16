@@ -61,7 +61,7 @@ if(o.helmet!==false&&P.pilot){const ac=new THREE.Color(o.acc!=null?o.acc:0xff8a2
  fl.position.set(BX.sh+.052*(fem?.86:1)-w.x,1.36-w.y,-w.z);fl.rotation.y=Math.PI/2;R2.add(fl)}}
 // ----- animations : dos voûté avec l'âge, pans du manteau, visière du casque qui se ferme -----
 {const _ah=animHuman;animHuman=function(m,ph,spd,air,aim,talk,look){_ah.apply(this,arguments);const u=m.userData;if(!u||!u.rig)return;
- if(u.stoop){u.sp.rotation.x+=u.stoop*.5;u.chest.rotation.x+=u.stoop*.35;u.neck.rotation.x-=u.stoop*.55}
+ if(u.stoop){u.sp.rotation.x-=u.stoop*.5;u.chest.rotation.x-=u.stoop*.35;u.neck.rotation.x+=u.stoop*.55}
  if(u.coat){const v=Math.max(0,spd||0);u.coat.rotation.x=lerp(u.coat.rotation.x,Math.min(.35,v*.05)+Math.sin(ph*2)*.03*Math.min(1,v),.15)}
  if(u.visor){const tg=u.visorT!=null?u.visorT:0;u.visA=u.visA==null?tg:u.visA+(tg-u.visA)*Math.min(1,(u.visDt=clamp(t-(u.visLt==null?t:u.visLt),0,.1))*6);u.visLt=t;u.visor.rotation.x=u.visA;}}}
 // le pilote : visière relevée dans le hangar, elle se referme (animation) quand il sort sur une planète
