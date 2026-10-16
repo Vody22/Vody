@@ -212,17 +212,17 @@ void main(){float r=length(vO);vec3 up=vO/r;float alt=r-R,aS=r-Rs,dep=vD;vec3 no
  float n1=t1.r,n2=t2.g,n3=t3.g,hN=alt/amp+(n2-.5)*.25+(n3-.5)*.35,sw=1.-smoothstep(.5,3.5,dep);
  vec3 lo=mix(cLow,cLow*vec3(1.12,1.02,.72),smoothstep(.35,.7,n3)),cs=mix(lo,cHigh,smoothstep(.0,.7,hN+(n2-.5)*.3));
  if(hasSea>.5){float b=smoothstep(.5,2.6,aS+(n1-.5)*1.6);cs=mix(mix(cSand*.62,cSand,smoothstep(-.2,.7,aS)),cs,b);}
- float rk=smoothstep(.84,.64,sl+(n2-.5)*.16);vec3 rc=mix(cRock,cRock2,smoothstep(.25,.75,n2+(t0.r-.5)*.3))*(1.-smoothstep(.4,.05,t2.b)*.35);cs=mix(cs,rc,rk);
+ float rk=smoothstep(.84,.64,sl+(n2-.5)*.16);vec3 rc=mix(cRock,cRock2,smoothstep(.25,.75,n2+(t0.r-.5)*.3))*(1.-smoothstep(.3,.04,t1.b)*.25);cs=mix(cs,rc,rk);
  if(snowL<2.){float sk=smoothstep(snowL-.05,snowL+.05,hN+(n1-.5)*.12)*smoothstep(.48,.7,sl);cs=mix(cs,cSnow,sk);}
  cs*=.82+.24*n1+.14*t0.r;
  float band=sin(r*.42+n2*7.)*.5+.5;vec3 cu=mix(cRock2,cRock,band*.65+n1*.35)*(.78+.3*t1.r+.14*t0.r);cu=mix(cu,cDeep,smoothstep(15.,R*.45,dep));cu*=1.-smoothstep(.35,.0,t2.b)*.35;
  vec3 col=mix(cu,cs,sw),emis=vec3(0.);
  float vein=smoothstep(.6,.76,t2.a)*smoothstep(5.,16.,dep);col=mix(col,cVein*.35,vein);emis+=cVein*vein*(1.1+.4*sin(tm*1.3+r*.2));
  if(glow>0.){float ck=smoothstep(.16,.02,t2.b)*smoothstep(.45,.75,n3)*sw;emis+=vec3(1.,.3,.05)*ck*glow*(.9+.3*sin(tm*1.5+r*.1));col=mix(col,vec3(.05,.02,.01),ck);}
- float hot=smoothstep(cR*1.75,cR*1.02,r);emis+=hot*vec3(1.,.32,.06)*(.25+.75*t1.r)*1.3;col=mix(col,vec3(.08,.03,.02),hot*.7);
+ float hot=smoothstep(cR*1.75,cR*1.02,r);emis+=hot*vec3(1.,.3,.05)*(.2+.8*t1.r)*.55*smoothstep(.45,.75,t2.r+hot*.3);col=mix(col,vec3(.08,.03,.02),hot*.7);
  float id=vM.x*255.,spec=.05*sw;
  if(id>.5&&id<1.5){col=mix(cSea2,cSnow,t2.r*.6)*(.85+.3*n1);col*=1.-smoothstep(.25,.0,t1.b)*.3;spec=.7;}
- else if(id>1.5){float fl=tri(vO*.05+vec3(tm*.03),bw).r;col=vec3(.15,.04,.02);emis=mix(vec3(1.,.25,.03),vec3(1.,.75,.2),fl)*(1.6+.5*sin(tm*2.+r))*smoothstep(.2,.7,fl+.3);}
+ else if(id>1.5){float fl=tri(vO*.05+vec3(tm*.03),bw).r;col=vec3(.15,.04,.02);emis=mix(vec3(.9,.2,.03),vec3(1.,.55,.12),fl)*(.75+.2*sin(tm*2.+r))*smoothstep(.2,.7,fl+.3);}
  vec3 upW=normalize(vW-pc),N=normalize(vN);vec3 T=normalize(cross(N,abs(N.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.))),B=cross(N,T);
  N=normalize(N+(T*(t0.r-.5+t1.g-.5)+B*(t0.g-.5+t1.r-.5))*.32);
  float term=smoothstep(-.14,.12,dot(upW,sunDir)),vis=1.-smoothstep(1.5,9.,dep),ao=vM.y;
@@ -246,7 +246,7 @@ void main(){vec3 up=normalize(vO),bw=pow(abs(up),vec3(4.));bw/=dot(bw,vec3(1.));
  vec3 sk=vxSky(Rf,upW,sunDir,atm,sunCol,max(dens,.35),0.);
  vec3 base=mix(cSea,cSea2,shl*.85+a.g*.15)*(.25+dif*.85)*day;
  vec3 c=mix(base,sk,fr*.8)+sunCol*pow(max(dot(Rf,sunDir),0.),240.)*3.5*term;
- float fo=smoothstep(1.1,0.,wd)*smoothstep(.42,.7,a.r*.7+b.g*.5+.25*sin(tm*1.8+wd*4.));c=mix(c,vec3(.92,.95,.97)*(.3+.7*day),fo*.85);
+ float fo=smoothstep(1.1,0.,wd)*smoothstep(.42,.7,a.r*.7+b.g*.5+.25*sin(tm*1.8+wd*4.));c=mix(c,vec3(.92,.95,.97)*(day*.95+.02+vxLamp(upW,vW)*.8),fo*.85);
  if(kind>2.5)c+=cSea2*.3*(.6+.4*sin(tm*1.1+a.r*5.));
  c+=vec3(1.)*vxLamp(N,vW)*.6;gl_FragColor=vec4(vxFog(c,vW),clamp(mix(.95,.42,shl)+fr*.5+fo,0.,1.));}`;
 function vxSeaMat(U,kind){return new THREE.ShaderMaterial({uniforms:Object.assign({kind:{value:kind}},U),vertexShader:VX_SVS,fragmentShader:VX_SFS,transparent:kind!=2,side:THREE.DoubleSide,depthWrite:kind==2})}
@@ -271,7 +271,7 @@ let VXPID=0;
 function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup(P);vxPoolPlanet(pid,P);
  const N=o.N||32,leaf=o.leaf||32;let W=leaf;while(W<2*(P.Rx+48))W*=2;
  const U=o.U||vxU(P),mat=vxTerrainMat(U),g=new THREE.Group();g.name='vox-'+pid;
- {const ew=o.ew||1024,eh=ew>>1;vxPoolJob(pid,{t:'e',w:ew,h:eh},D=>{if(!D)return;const t=new THREE.DataTexture(D,ew,eh,THREE.RGBAFormat);t.wrapS=THREE.RepeatWrapping;t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;U.em.value=t})}
+ const emReq=()=>{const ew=o.ew||1024,eh=ew>>1;vxPoolJob(pid,{t:'e',w:ew,h:eh},D=>{if(!D)return;const t=new THREE.DataTexture(D,ew,eh,THREE.RGBAFormat);t.wrapS=THREE.RepeatWrapping;t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;U.em.value=t})};
  const V={pid,P,core,N,leaf,W,U,mat,g,ch:new Map(),want:new Map(),digs:[],K:o.K||.75,space:!!o.space,cam:new THREE.Vector3(1e9,0,0),under:0,tw:0,ready:false,tri:0,dirty:true,cav:o.cav!==false,maxCav:o.maxCav||2.01,pend:0};
  const dBox=(x,y,z,s,px,py,pz)=>{const dx=Math.max(x-px,0,px-x-s),dy=Math.max(y-py,0,py-y-s),dz=Math.max(z-pz,0,pz-z-s);return Math.sqrt(dx*dx+dy*dy+dz*dz)};
  const maxD=(x,y,z,s)=>{const ax=Math.max(Math.abs(x),Math.abs(x+s)),ay=Math.max(Math.abs(y),Math.abs(y+s)),az=Math.max(Math.abs(z),Math.abs(z+s));return Math.sqrt(ax*ax+ay*ay+az*az)};
@@ -280,7 +280,7 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
   const rec=(d,ix,iy,iz)=>{const s=W/2**d,x=-W2+ix*s,y=-W2+iy*s,z=-W2+iz*s,bmin=dBox(x,y,z,s,0,0,0);if(bmin>P.Rx)return;const bmax=maxD(x,y,z,s),deep=bmax<P.Rn,cav=V.cav&&s/N<=V.maxCav;
    if(V.space){if(deep&&bmin>P.cR+45)return;if(deep)return;if(s>W/4){for(let k=0;k<8;k++)rec(d+1,ix*2+(k&1),iy*2+(k>>1&1),iz*2+(k>>2&1));return}out.set(d+':'+ix+':'+iy+':'+iz,{d,x,y,z,s,cav:false,pr:d});return}
    const dc=dBox(x,y,z,s,c.x,c.y,c.z);
-   if(deep){if(!deepOK&&dc>110)return;if(!cav&&bmin>P.cR+45&&s<=128)return}
+   if(deep&&!deepOK&&dc>110)return;
    // sous-arbre sans surface : distance au centre bien plus grande que le morceau (marge pour les pentes raides)
    {const hx=x+s/2,hy=y+s/2,hz=z+s/2,hd=s*.866;V.near(hx,hy,hz,hd*3+4);core.setCav(cav,core.dg);const f=core.sdf(hx,hy,hz);if(Math.abs(f)>hd*3+4)return;if(core.OUT.ds<-(hd*3+4)&&!deepOK&&dc>60)return}
    if(s>leaf&&dc<V.K*s){for(let k=0;k<8;k++)rec(d+1,ix*2+(k&1),iy*2+(k>>1&1),iz*2+(k>>2&1));return}
@@ -305,7 +305,7 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
    if(c.st!==2||!c.mesh){if(!c.mesh||c.st!==2)drop(c);continue}
    let rel=false,ok=true;for(const[k,w]of V.want){if(inside(c,w)||inside(w,c)){rel=true;const q=V.ch.get(k);if(!q||q.st!==2){ok=false;break}}}
    if(!rel||ok)drop(c);else c.mesh.visible=true}}
- V.update=function(camLocal,dt){V.tw-=dt||0;const moved=camLocal.distanceTo(V.cam)>(V.space?1e9:leaf*.22);
+ V.update=function(camLocal,dt){if(!V.emq){V.emq=1;emReq()}V.tw-=dt||0;const moved=camLocal.distanceTo(V.cam)>(V.space?1e9:leaf*.22);
   if(moved||V.tw<=0||V.dirty&&!V.want.size){if(!V.space){V.cam.copy(camLocal);const f=core.sdf(camLocal.x,camLocal.y,camLocal.z);V.under=-core.OUT.ds}
    else V.cam.set(0,0,0);if(moved||V.tw<=0||!V.want.size){V.want=traverse();V.tw=.6;V.dirty=true}}
   for(const[k,w]of V.want){let c=V.ch.get(k);if(!c){c={k,...w,st:0,mesh:null};V.ch.set(k,c)}}

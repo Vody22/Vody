@@ -23,7 +23,7 @@ const VXINV=new THREE.MeshBasicMaterial({visible:false});
 
 // ----- vue de l'espace -----
 function vxSpaceApply(p,g){const ud=g&&g.userData;if(!ud||!ud.sph||ud.vx||p.ring)return;const P=vxP(p);
- const U=vxU(P);U.space.value=1;const V=vxPlanet(P,{space:true,N:DESK?40:28,U,cav:false,ew:DESK?1024:512});V.g.visible=false;ud.sph.add(V.g);
+ const U=vxU(P);U.space.value=1;const V=vxPlanet(P,{space:true,N:DESK?36:26,U,cav:false,ew:DESK?1024:512});V.g.visible=false;ud.sph.add(V.g);
  let sea=null;if(P.Rs>0&&!P.ice){sea=new THREE.Mesh(new THREE.SphereGeometry(1,DESK?128:80,DESK?64:40),vxSeaMat(U,vxSeaK(P)));sea.visible=false;sea.renderOrder=1;ud.sph.add(sea)}
  let atm=null;if(P.atm){atm=vxAtmo(P,U,P.R+P.eMax*.8+P.R*.035);atm.visible=false;g.add(atm)}
  const lt=lightFor(p.x,p.y,p.z);U.sunDir.value.copy(lt.dir);U.sunCol.value.copy(lt.col).multiplyScalar(lt.s?1.05:.92);U.pc.value.copy(g.position);
@@ -42,14 +42,17 @@ pl4Toggle=function(){WG4.mode={vox:'world',world:'style',style:'real',real:'vox'
  toast('🪐 Planètes : '+{vox:'voxel, entièrement visitables',world:'mondes générés',style:'stylisées',real:'réalistes'}[WG4.mode]+(mode=='vox'||mode=='surf'?' (au prochain atterrissage)':''))};
 pl4Btn=function(){const b=$('pl4b');if(b)b.textContent={vox:'Voxel (visitables)',world:'Mondes générés',style:'Stylisées',real:'Réalistes'}[WG4.mode]};
 {let lt=performance.now();TICK.push(()=>{const n=performance.now(),dt=Math.min(.1,(n-lt)/1000);lt=n;if(typeof planets=='undefined')return;
- for(const p of planets){const g=p.mesh,X=g&&g.userData&&g.userData.vx;if(!X)continue;X.U.pc.value.copy(g.position);X.U.tm.value=t;if(!X.V.ready||X.V.pend)X.V.update(_vxA.set(0,0,0),dt);if(X.V.ready&&!X.on)vxSpaceShow(g)}})}
+ // une seule planète calculée à la fois, la plus proche d'abord (la scène voxel passe avant)
+ let best=null,bd=1e18;for(const p of planets){const g=p.mesh,X=g&&g.userData&&g.userData.vx;if(!X)continue;X.U.pc.value.copy(g.position);X.U.tm.value=t;if(X.V.ready&&!X.V.pend){if(!X.on)vxSpaceShow(g);continue}
+  if(X.V.pend){X.V.update(_vxA.set(0,0,0),dt);continue}const d=(p.x-camera.position.x)**2+(p.y-camera.position.y)**2+(p.z-camera.position.z)**2;if(d<bd){bd=d;best=X}}
+ if(best&&!(VX.V&&VX.V.pend>0&&mode!='space'))best.V.update(_vxA.set(0,0,0),dt)})}
 
 // ----- repère de la planète (rotation de la sphère dans l'espace) -----
 function vxFrame(p){const sph=p&&p.mesh&&p.mesh.userData&&p.mesh.userData.sph;if(sph){p.mesh.updateMatrixWorld(true);sph.getWorldQuaternion(VX.Q);VX.C.copy(p.mesh.position)}else{VX.Q.identity();VX.C.set(p.x,p.y,p.z)}}
 const vxToLocal=(w,o)=>o.copy(w).sub(VX.C).applyQuaternion(_vxQ2.copy(VX.Q).invert());
 // prépare la scène voxel d'une planète (aussi en approche, pour que les morceaux soient prêts à l'arrivée)
 function vxPrep(p){if(VX.p===p&&VX.V)return;if(VX.on)return;vxFree();const P=vxP(p),U=vxU(P);
- const V=vxPlanet(P,{N:DESK?32:24,leaf:32,K:DESK?.8:.62,U,ew:DESK?2048:1024});VX.sc.add(V.g);
+ const V=vxPlanet(P,{N:DESK?32:24,leaf:32,K:DESK?.72:.56,U,ew:DESK?2048:1024});VX.sc.add(V.g);
  const dg=GX('vxd',{})[p.name];if(Array.isArray(dg))for(let i=0;i+3<dg.length;i+=4)V.digs.push([dg[i],dg[i+1],dg[i+2],dg[i+3]]);
  VX.sea=null;if(P.Rs>0&&!P.ice){VX.sea=new THREE.Mesh(new THREE.SphereGeometry(1,DESK?320:192,DESK?160:96),vxSeaMat(U,vxSeaK(P)));VX.sea.renderOrder=1;VX.sea.frustumCulled=false;VX.sc.add(VX.sea)}
  VX.atm=P.atm?vxAtmo(P,U,P.R+P.eMax*.8+P.R*.035):null;if(VX.atm)VX.sc.add(VX.atm);
@@ -108,8 +111,9 @@ function vxFootEnter(){if(!vxCanExit())return;const P=VX.P,up=_vxA.copy(S.pos).n
  if(P.Rs>0&&!P.ice&&S.pos.length()<P.Rs+12){vxF(S.pos.x,S.pos.y,S.pos.z,1);if(VX.V.core.OUT.ds>-1&&S.pos.length()-VX.V.core.OUT.ds<P.Rs){toast('Impossible de sortir au-dessus de '+(P.sea=='lave'?'la lave':'l\'eau')+' — pose-toi sur la terre ferme');return}}
  fwd();const ft=_vxB.copy(_f).addScaledVector(up,-_f.dot(up));if(ft.lengthSq()<1e-4)ft.set(1,0,0);ft.normalize();const rt=_vxC.crossVectors(ft,up).normalize();
  // point de départ à côté du vaisseau, posé sur le sol
- const st=S.pos.clone().addScaledVector(rt,7.5).addScaledVector(up,2);let ok=null;for(let k=0;k<70;k++){const x=st.clone().addScaledVector(up,-k*.5);if(vxF(x.x,x.y,x.z,2)<.35){ok=x.addScaledVector(up,.4);break}}
- VX.fp.copy(ok||S.pos.clone().addScaledVector(up,-2));VX.fv.set(0,0,0);VX.fq.copy(basisQ(ft,up));VX.cy=0;VX.cp=.2;VX.yaw=0;VX.fuel=1;VX.gr=false;VX.ph=0;
+ let ok=null;for(const[a,b]of[[1,0],[-1,0],[0,-1],[0,1],[1,1],[-1,1]]){const st=S.pos.clone().addScaledVector(rt,7.5*a).addScaledVector(ft,8*b).addScaledVector(up,2);for(let k=0;k<70;k++){const x=st.clone().addScaledVector(up,-k*.5);if(vxF(x.x,x.y,x.z,2)<.35){if(!(P.Rs>0&&!P.ice&&x.length()<P.Rs+.2))ok=x.addScaledVector(up,.4);break}}if(ok)break}
+ if(!ok){toast('Pas de terre ferme à côté du vaisseau — pose-toi ailleurs');return}
+ VX.fp.copy(ok);VX.fv.set(0,0,0);VX.fq.copy(basisQ(ft,up));VX.cy=0;VX.cp=.2;VX.yaw=0;VX.fuel=1;VX.gr=false;VX.ph=0;
  vxPilot().visible=true;VX.foot=true;VX.park=1;VX.ck=COCKPIT;COCKPIT=false;S.spd=0;S.vel.set(0,0,0);S.thr=0;clearWeapons();camInit=true;
  btnSet('fire','drill','Creuser');btnSet('boost','jump','Saut');btnSet('brake','run','Course');document.body.classList.add('foot');setD('footb','none');SFX.buy();tone(300,180,.25,'sine',.08);
  if(!VX.told.foot){VX.told.foot=1;toast('🚶 '+(DESK?'ZQSD pour marcher, souris pour regarder, clic pour creuser, Espace = saut/jetpack':'joystick pour marcher, glisse à droite pour regarder, CREUSER pour creuser'))}}
@@ -126,7 +130,7 @@ function vxFootUpdate(dt){const P=VX.P,p=VX.fp,v=VX.fv;if(COCKPIT){VX.ck=!VX.ck;
  const vr=v.dot(up),vt=v.clone().addScaledVector(up,-vr),want=fw.clone().multiplyScalar(iz).addScaledVector(rt,ix).multiplyScalar(sp);vt.lerp(want,damp(VX.gr?10:inSea?3:2.2,dt));
  let nvr=vr;const jump=B.boost||K.Space;
  if(VX.gr){VX.fuel=Math.min(1,VX.fuel+dt*.5);if(jump&&!VX.jl){nvr=7.5;VX.gr=false;tone(200,320,.12,'sine',.05)}}else if(jump&&VX.fuel>0&&nvr<6){nvr+=30*dt;VX.fuel-=dt*.4/(1+.25*talR('jet'));if(Math.random()<.6){const b=p.clone().addScaledVector(up,1.1);FIRE.emit(b.x,b.y,b.z,-up.x*12+rv(2),-up.y*12+rv(2),-up.z*12+rv(2),.25,.6,.75,1,.18)}}VX.jl=jump;
- const gk=9.2;nvr-=gk*dt;if(inSea){nvr=lerp(nvr,1.6,damp(2.5,dt))}if(VX.gr&&nvr<0)nvr=Math.max(nvr,-3);
+ const gk=9.2;if(inSea){const dd=P.Rs-.95-L;nvr=lerp(nvr,dd>0?Math.min(2.6,dd*1.5):(jump?3:0),damp(2.4,dt));VX.fuel=Math.min(1,VX.fuel+dt*.3)}else nvr-=gk*dt;if(VX.gr&&nvr<0)nvr=Math.max(nvr,-3);
  v.copy(vt).addScaledVector(up,nvr);
  // déplacement par petits pas + collisions (deux sphères : pieds et tête)
  const steps=Math.max(1,Math.ceil(v.length()*dt/.25)),h=dt/steps;let gr=false,impact=0;
@@ -147,10 +151,11 @@ function vxStep(hs){try{const k=VX.P.ice?'ice':VX.P.ty=='Désertique'?'sand':'ro
 // creuser : rayon depuis la caméra, sphère de 2,3 m enlevée au point touché
 function vxDig(dt){VX.digT-=dt;const hand=VX.pm&&VX.pm.userData.tool;if(!isFire()||S.dead){hideBeam(VX.beam);return}
  const o=camera.position,dir=_vxB.set(0,0,-1).applyQuaternion(camera.quaternion);const head=_vxC.copy(VX.fp).addScaledVector(_vxA.copy(VX.fp).normalize(),1.5);
- let tt=Math.max(0,o.distanceTo(head)-1),hit=null;const max=tt+10;for(let i=0;i<120&&tt<max;i++){const x=o.x+dir.x*tt,y=o.y+dir.y*tt,z=o.z+dir.z*tt,f=vxF(x,y,z,2);if(f<.06){hit=new V3(x,y,z);break}tt+=Math.max(.06,f*.8)}
+ let tt=Math.max(0,o.distanceTo(head)-1.5),hit=null;const max=tt+16;for(let i=0;i<160&&tt<max;i++){const x=o.x+dir.x*tt,y=o.y+dir.y*tt,z=o.z+dir.z*tt,f=vxF(x,y,z,2);if(f<.06){hit=new V3(x,y,z);break}tt+=Math.max(.06,f*.8)}
+ if(hit&&hit.distanceTo(head)>12)hit=null;
  const src=hand?hand.getWorldPosition(new V3()):head.clone();if(!VX.beam)VX.beam=mkBeam(0x7fe8ff);
- if(!hit){placeBeam(VX.beam,src,src.clone().addScaledVector(dir,8),.12,false);return}
- placeBeam(VX.beam,src,hit,.2,true);if(VX.digT>0)return;VX.digT=.17;const P=VX.P;
+ if(!hit){placeBeam(VX.beam,src,src.clone().addScaledVector(dir,8),.06,false);return}
+ placeBeam(VX.beam,src,hit,.09,false);if(VX.digT>0)return;VX.digT=.17;const P=VX.P;
  const c=hit.addScaledVector(dir,.7),r=DESK?2.3:2.5,dg=VX.V.digs;if(dg.length>=4000){if(!VX.told.max){VX.told.max=1;toast('⛏ Trop de galeries sur cette planète — les plus anciennes se referment')}dg.shift()}
  VX.V.dig(Math.round(c.x*10)/10,Math.round(c.y*10)/10,Math.round(c.z*10)/10,r);VX.dirty=1;
  const n=_vxA.copy(c).sub(o).normalize().negate(),col=VX.V.core.OUT.m==2?0xff7030:0x9a8270;for(let i=0;i<6;i++)SPK.emit(c.x,c.y,c.z,n.x*6+rv(4),n.y*6+rv(4),n.z*6+rv(4),.4+Math.random()*.4,.62,.52,.42,.6);

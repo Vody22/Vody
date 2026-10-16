@@ -296,7 +296,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261016-142435"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261016-153523"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -14468,17 +14468,17 @@ void main(){float r=length(vO);vec3 up=vO/r;float alt=r-R,aS=r-Rs,dep=vD;vec3 no
  float n1=t1.r,n2=t2.g,n3=t3.g,hN=alt/amp+(n2-.5)*.25+(n3-.5)*.35,sw=1.-smoothstep(.5,3.5,dep);
  vec3 lo=mix(cLow,cLow*vec3(1.12,1.02,.72),smoothstep(.35,.7,n3)),cs=mix(lo,cHigh,smoothstep(.0,.7,hN+(n2-.5)*.3));
  if(hasSea>.5){float b=smoothstep(.5,2.6,aS+(n1-.5)*1.6);cs=mix(mix(cSand*.62,cSand,smoothstep(-.2,.7,aS)),cs,b);}
- float rk=smoothstep(.84,.64,sl+(n2-.5)*.16);vec3 rc=mix(cRock,cRock2,smoothstep(.25,.75,n2+(t0.r-.5)*.3))*(1.-smoothstep(.4,.05,t2.b)*.35);cs=mix(cs,rc,rk);
+ float rk=smoothstep(.84,.64,sl+(n2-.5)*.16);vec3 rc=mix(cRock,cRock2,smoothstep(.25,.75,n2+(t0.r-.5)*.3))*(1.-smoothstep(.3,.04,t1.b)*.25);cs=mix(cs,rc,rk);
  if(snowL<2.){float sk=smoothstep(snowL-.05,snowL+.05,hN+(n1-.5)*.12)*smoothstep(.48,.7,sl);cs=mix(cs,cSnow,sk);}
  cs*=.82+.24*n1+.14*t0.r;
  float band=sin(r*.42+n2*7.)*.5+.5;vec3 cu=mix(cRock2,cRock,band*.65+n1*.35)*(.78+.3*t1.r+.14*t0.r);cu=mix(cu,cDeep,smoothstep(15.,R*.45,dep));cu*=1.-smoothstep(.35,.0,t2.b)*.35;
  vec3 col=mix(cu,cs,sw),emis=vec3(0.);
  float vein=smoothstep(.6,.76,t2.a)*smoothstep(5.,16.,dep);col=mix(col,cVein*.35,vein);emis+=cVein*vein*(1.1+.4*sin(tm*1.3+r*.2));
  if(glow>0.){float ck=smoothstep(.16,.02,t2.b)*smoothstep(.45,.75,n3)*sw;emis+=vec3(1.,.3,.05)*ck*glow*(.9+.3*sin(tm*1.5+r*.1));col=mix(col,vec3(.05,.02,.01),ck);}
- float hot=smoothstep(cR*1.75,cR*1.02,r);emis+=hot*vec3(1.,.32,.06)*(.25+.75*t1.r)*1.3;col=mix(col,vec3(.08,.03,.02),hot*.7);
+ float hot=smoothstep(cR*1.75,cR*1.02,r);emis+=hot*vec3(1.,.3,.05)*(.2+.8*t1.r)*.55*smoothstep(.45,.75,t2.r+hot*.3);col=mix(col,vec3(.08,.03,.02),hot*.7);
  float id=vM.x*255.,spec=.05*sw;
  if(id>.5&&id<1.5){col=mix(cSea2,cSnow,t2.r*.6)*(.85+.3*n1);col*=1.-smoothstep(.25,.0,t1.b)*.3;spec=.7;}
- else if(id>1.5){float fl=tri(vO*.05+vec3(tm*.03),bw).r;col=vec3(.15,.04,.02);emis=mix(vec3(1.,.25,.03),vec3(1.,.75,.2),fl)*(1.6+.5*sin(tm*2.+r))*smoothstep(.2,.7,fl+.3);}
+ else if(id>1.5){float fl=tri(vO*.05+vec3(tm*.03),bw).r;col=vec3(.15,.04,.02);emis=mix(vec3(.9,.2,.03),vec3(1.,.55,.12),fl)*(.75+.2*sin(tm*2.+r))*smoothstep(.2,.7,fl+.3);}
  vec3 upW=normalize(vW-pc),N=normalize(vN);vec3 T=normalize(cross(N,abs(N.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.))),B=cross(N,T);
  N=normalize(N+(T*(t0.r-.5+t1.g-.5)+B*(t0.g-.5+t1.r-.5))*.32);
  float term=smoothstep(-.14,.12,dot(upW,sunDir)),vis=1.-smoothstep(1.5,9.,dep),ao=vM.y;
@@ -14502,7 +14502,7 @@ void main(){vec3 up=normalize(vO),bw=pow(abs(up),vec3(4.));bw/=dot(bw,vec3(1.));
  vec3 sk=vxSky(Rf,upW,sunDir,atm,sunCol,max(dens,.35),0.);
  vec3 base=mix(cSea,cSea2,shl*.85+a.g*.15)*(.25+dif*.85)*day;
  vec3 c=mix(base,sk,fr*.8)+sunCol*pow(max(dot(Rf,sunDir),0.),240.)*3.5*term;
- float fo=smoothstep(1.1,0.,wd)*smoothstep(.42,.7,a.r*.7+b.g*.5+.25*sin(tm*1.8+wd*4.));c=mix(c,vec3(.92,.95,.97)*(.3+.7*day),fo*.85);
+ float fo=smoothstep(1.1,0.,wd)*smoothstep(.42,.7,a.r*.7+b.g*.5+.25*sin(tm*1.8+wd*4.));c=mix(c,vec3(.92,.95,.97)*(day*.95+.02+vxLamp(upW,vW)*.8),fo*.85);
  if(kind>2.5)c+=cSea2*.3*(.6+.4*sin(tm*1.1+a.r*5.));
  c+=vec3(1.)*vxLamp(N,vW)*.6;gl_FragColor=vec4(vxFog(c,vW),clamp(mix(.95,.42,shl)+fr*.5+fo,0.,1.));}`;
 function vxSeaMat(U,kind){return new THREE.ShaderMaterial({uniforms:Object.assign({kind:{value:kind}},U),vertexShader:VX_SVS,fragmentShader:VX_SFS,transparent:kind!=2,side:THREE.DoubleSide,depthWrite:kind==2})}
@@ -14527,7 +14527,7 @@ let VXPID=0;
 function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup(P);vxPoolPlanet(pid,P);
  const N=o.N||32,leaf=o.leaf||32;let W=leaf;while(W<2*(P.Rx+48))W*=2;
  const U=o.U||vxU(P),mat=vxTerrainMat(U),g=new THREE.Group();g.name='vox-'+pid;
- {const ew=o.ew||1024,eh=ew>>1;vxPoolJob(pid,{t:'e',w:ew,h:eh},D=>{if(!D)return;const t=new THREE.DataTexture(D,ew,eh,THREE.RGBAFormat);t.wrapS=THREE.RepeatWrapping;t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;U.em.value=t})}
+ const emReq=()=>{const ew=o.ew||1024,eh=ew>>1;vxPoolJob(pid,{t:'e',w:ew,h:eh},D=>{if(!D)return;const t=new THREE.DataTexture(D,ew,eh,THREE.RGBAFormat);t.wrapS=THREE.RepeatWrapping;t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;U.em.value=t})};
  const V={pid,P,core,N,leaf,W,U,mat,g,ch:new Map(),want:new Map(),digs:[],K:o.K||.75,space:!!o.space,cam:new THREE.Vector3(1e9,0,0),under:0,tw:0,ready:false,tri:0,dirty:true,cav:o.cav!==false,maxCav:o.maxCav||2.01,pend:0};
  const dBox=(x,y,z,s,px,py,pz)=>{const dx=Math.max(x-px,0,px-x-s),dy=Math.max(y-py,0,py-y-s),dz=Math.max(z-pz,0,pz-z-s);return Math.sqrt(dx*dx+dy*dy+dz*dz)};
  const maxD=(x,y,z,s)=>{const ax=Math.max(Math.abs(x),Math.abs(x+s)),ay=Math.max(Math.abs(y),Math.abs(y+s)),az=Math.max(Math.abs(z),Math.abs(z+s));return Math.sqrt(ax*ax+ay*ay+az*az)};
@@ -14536,7 +14536,7 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
   const rec=(d,ix,iy,iz)=>{const s=W/2**d,x=-W2+ix*s,y=-W2+iy*s,z=-W2+iz*s,bmin=dBox(x,y,z,s,0,0,0);if(bmin>P.Rx)return;const bmax=maxD(x,y,z,s),deep=bmax<P.Rn,cav=V.cav&&s/N<=V.maxCav;
    if(V.space){if(deep&&bmin>P.cR+45)return;if(deep)return;if(s>W/4){for(let k=0;k<8;k++)rec(d+1,ix*2+(k&1),iy*2+(k>>1&1),iz*2+(k>>2&1));return}out.set(d+':'+ix+':'+iy+':'+iz,{d,x,y,z,s,cav:false,pr:d});return}
    const dc=dBox(x,y,z,s,c.x,c.y,c.z);
-   if(deep){if(!deepOK&&dc>110)return;if(!cav&&bmin>P.cR+45&&s<=128)return}
+   if(deep&&!deepOK&&dc>110)return;
    // sous-arbre sans surface : distance au centre bien plus grande que le morceau (marge pour les pentes raides)
    {const hx=x+s/2,hy=y+s/2,hz=z+s/2,hd=s*.866;V.near(hx,hy,hz,hd*3+4);core.setCav(cav,core.dg);const f=core.sdf(hx,hy,hz);if(Math.abs(f)>hd*3+4)return;if(core.OUT.ds<-(hd*3+4)&&!deepOK&&dc>60)return}
    if(s>leaf&&dc<V.K*s){for(let k=0;k<8;k++)rec(d+1,ix*2+(k&1),iy*2+(k>>1&1),iz*2+(k>>2&1));return}
@@ -14561,7 +14561,7 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
    if(c.st!==2||!c.mesh){if(!c.mesh||c.st!==2)drop(c);continue}
    let rel=false,ok=true;for(const[k,w]of V.want){if(inside(c,w)||inside(w,c)){rel=true;const q=V.ch.get(k);if(!q||q.st!==2){ok=false;break}}}
    if(!rel||ok)drop(c);else c.mesh.visible=true}}
- V.update=function(camLocal,dt){V.tw-=dt||0;const moved=camLocal.distanceTo(V.cam)>(V.space?1e9:leaf*.22);
+ V.update=function(camLocal,dt){if(!V.emq){V.emq=1;emReq()}V.tw-=dt||0;const moved=camLocal.distanceTo(V.cam)>(V.space?1e9:leaf*.22);
   if(moved||V.tw<=0||V.dirty&&!V.want.size){if(!V.space){V.cam.copy(camLocal);const f=core.sdf(camLocal.x,camLocal.y,camLocal.z);V.under=-core.OUT.ds}
    else V.cam.set(0,0,0);if(moved||V.tw<=0||!V.want.size){V.want=traverse();V.tw=.6;V.dirty=true}}
   for(const[k,w]of V.want){let c=V.ch.get(k);if(!c){c={k,...w,st:0,mesh:null};V.ch.set(k,c)}}
@@ -14601,7 +14601,7 @@ const VXINV=new THREE.MeshBasicMaterial({visible:false});
 
 // ----- vue de l'espace -----
 function vxSpaceApply(p,g){const ud=g&&g.userData;if(!ud||!ud.sph||ud.vx||p.ring)return;const P=vxP(p);
- const U=vxU(P);U.space.value=1;const V=vxPlanet(P,{space:true,N:DESK?40:28,U,cav:false,ew:DESK?1024:512});V.g.visible=false;ud.sph.add(V.g);
+ const U=vxU(P);U.space.value=1;const V=vxPlanet(P,{space:true,N:DESK?36:26,U,cav:false,ew:DESK?1024:512});V.g.visible=false;ud.sph.add(V.g);
  let sea=null;if(P.Rs>0&&!P.ice){sea=new THREE.Mesh(new THREE.SphereGeometry(1,DESK?128:80,DESK?64:40),vxSeaMat(U,vxSeaK(P)));sea.visible=false;sea.renderOrder=1;ud.sph.add(sea)}
  let atm=null;if(P.atm){atm=vxAtmo(P,U,P.R+P.eMax*.8+P.R*.035);atm.visible=false;g.add(atm)}
  const lt=lightFor(p.x,p.y,p.z);U.sunDir.value.copy(lt.dir);U.sunCol.value.copy(lt.col).multiplyScalar(lt.s?1.05:.92);U.pc.value.copy(g.position);
@@ -14620,14 +14620,17 @@ pl4Toggle=function(){WG4.mode={vox:'world',world:'style',style:'real',real:'vox'
  toast('🪐 Planètes : '+{vox:'voxel, entièrement visitables',world:'mondes générés',style:'stylisées',real:'réalistes'}[WG4.mode]+(mode=='vox'||mode=='surf'?' (au prochain atterrissage)':''))};
 pl4Btn=function(){const b=$('pl4b');if(b)b.textContent={vox:'Voxel (visitables)',world:'Mondes générés',style:'Stylisées',real:'Réalistes'}[WG4.mode]};
 {let lt=performance.now();TICK.push(()=>{const n=performance.now(),dt=Math.min(.1,(n-lt)/1000);lt=n;if(typeof planets=='undefined')return;
- for(const p of planets){const g=p.mesh,X=g&&g.userData&&g.userData.vx;if(!X)continue;X.U.pc.value.copy(g.position);X.U.tm.value=t;if(!X.V.ready||X.V.pend)X.V.update(_vxA.set(0,0,0),dt);if(X.V.ready&&!X.on)vxSpaceShow(g)}})}
+ // une seule planète calculée à la fois, la plus proche d'abord (la scène voxel passe avant)
+ let best=null,bd=1e18;for(const p of planets){const g=p.mesh,X=g&&g.userData&&g.userData.vx;if(!X)continue;X.U.pc.value.copy(g.position);X.U.tm.value=t;if(X.V.ready&&!X.V.pend){if(!X.on)vxSpaceShow(g);continue}
+  if(X.V.pend){X.V.update(_vxA.set(0,0,0),dt);continue}const d=(p.x-camera.position.x)**2+(p.y-camera.position.y)**2+(p.z-camera.position.z)**2;if(d<bd){bd=d;best=X}}
+ if(best&&!(VX.V&&VX.V.pend>0&&mode!='space'))best.V.update(_vxA.set(0,0,0),dt)})}
 
 // ----- repère de la planète (rotation de la sphère dans l'espace) -----
 function vxFrame(p){const sph=p&&p.mesh&&p.mesh.userData&&p.mesh.userData.sph;if(sph){p.mesh.updateMatrixWorld(true);sph.getWorldQuaternion(VX.Q);VX.C.copy(p.mesh.position)}else{VX.Q.identity();VX.C.set(p.x,p.y,p.z)}}
 const vxToLocal=(w,o)=>o.copy(w).sub(VX.C).applyQuaternion(_vxQ2.copy(VX.Q).invert());
 // prépare la scène voxel d'une planète (aussi en approche, pour que les morceaux soient prêts à l'arrivée)
 function vxPrep(p){if(VX.p===p&&VX.V)return;if(VX.on)return;vxFree();const P=vxP(p),U=vxU(P);
- const V=vxPlanet(P,{N:DESK?32:24,leaf:32,K:DESK?.8:.62,U,ew:DESK?2048:1024});VX.sc.add(V.g);
+ const V=vxPlanet(P,{N:DESK?32:24,leaf:32,K:DESK?.72:.56,U,ew:DESK?2048:1024});VX.sc.add(V.g);
  const dg=GX('vxd',{})[p.name];if(Array.isArray(dg))for(let i=0;i+3<dg.length;i+=4)V.digs.push([dg[i],dg[i+1],dg[i+2],dg[i+3]]);
  VX.sea=null;if(P.Rs>0&&!P.ice){VX.sea=new THREE.Mesh(new THREE.SphereGeometry(1,DESK?320:192,DESK?160:96),vxSeaMat(U,vxSeaK(P)));VX.sea.renderOrder=1;VX.sea.frustumCulled=false;VX.sc.add(VX.sea)}
  VX.atm=P.atm?vxAtmo(P,U,P.R+P.eMax*.8+P.R*.035):null;if(VX.atm)VX.sc.add(VX.atm);
@@ -14686,8 +14689,9 @@ function vxFootEnter(){if(!vxCanExit())return;const P=VX.P,up=_vxA.copy(S.pos).n
  if(P.Rs>0&&!P.ice&&S.pos.length()<P.Rs+12){vxF(S.pos.x,S.pos.y,S.pos.z,1);if(VX.V.core.OUT.ds>-1&&S.pos.length()-VX.V.core.OUT.ds<P.Rs){toast('Impossible de sortir au-dessus de '+(P.sea=='lave'?'la lave':'l\'eau')+' — pose-toi sur la terre ferme');return}}
  fwd();const ft=_vxB.copy(_f).addScaledVector(up,-_f.dot(up));if(ft.lengthSq()<1e-4)ft.set(1,0,0);ft.normalize();const rt=_vxC.crossVectors(ft,up).normalize();
  // point de départ à côté du vaisseau, posé sur le sol
- const st=S.pos.clone().addScaledVector(rt,7.5).addScaledVector(up,2);let ok=null;for(let k=0;k<70;k++){const x=st.clone().addScaledVector(up,-k*.5);if(vxF(x.x,x.y,x.z,2)<.35){ok=x.addScaledVector(up,.4);break}}
- VX.fp.copy(ok||S.pos.clone().addScaledVector(up,-2));VX.fv.set(0,0,0);VX.fq.copy(basisQ(ft,up));VX.cy=0;VX.cp=.2;VX.yaw=0;VX.fuel=1;VX.gr=false;VX.ph=0;
+ let ok=null;for(const[a,b]of[[1,0],[-1,0],[0,-1],[0,1],[1,1],[-1,1]]){const st=S.pos.clone().addScaledVector(rt,7.5*a).addScaledVector(ft,8*b).addScaledVector(up,2);for(let k=0;k<70;k++){const x=st.clone().addScaledVector(up,-k*.5);if(vxF(x.x,x.y,x.z,2)<.35){if(!(P.Rs>0&&!P.ice&&x.length()<P.Rs+.2))ok=x.addScaledVector(up,.4);break}}if(ok)break}
+ if(!ok){toast('Pas de terre ferme à côté du vaisseau — pose-toi ailleurs');return}
+ VX.fp.copy(ok);VX.fv.set(0,0,0);VX.fq.copy(basisQ(ft,up));VX.cy=0;VX.cp=.2;VX.yaw=0;VX.fuel=1;VX.gr=false;VX.ph=0;
  vxPilot().visible=true;VX.foot=true;VX.park=1;VX.ck=COCKPIT;COCKPIT=false;S.spd=0;S.vel.set(0,0,0);S.thr=0;clearWeapons();camInit=true;
  btnSet('fire','drill','Creuser');btnSet('boost','jump','Saut');btnSet('brake','run','Course');document.body.classList.add('foot');setD('footb','none');SFX.buy();tone(300,180,.25,'sine',.08);
  if(!VX.told.foot){VX.told.foot=1;toast('🚶 '+(DESK?'ZQSD pour marcher, souris pour regarder, clic pour creuser, Espace = saut/jetpack':'joystick pour marcher, glisse à droite pour regarder, CREUSER pour creuser'))}}
@@ -14704,7 +14708,7 @@ function vxFootUpdate(dt){const P=VX.P,p=VX.fp,v=VX.fv;if(COCKPIT){VX.ck=!VX.ck;
  const vr=v.dot(up),vt=v.clone().addScaledVector(up,-vr),want=fw.clone().multiplyScalar(iz).addScaledVector(rt,ix).multiplyScalar(sp);vt.lerp(want,damp(VX.gr?10:inSea?3:2.2,dt));
  let nvr=vr;const jump=B.boost||K.Space;
  if(VX.gr){VX.fuel=Math.min(1,VX.fuel+dt*.5);if(jump&&!VX.jl){nvr=7.5;VX.gr=false;tone(200,320,.12,'sine',.05)}}else if(jump&&VX.fuel>0&&nvr<6){nvr+=30*dt;VX.fuel-=dt*.4/(1+.25*talR('jet'));if(Math.random()<.6){const b=p.clone().addScaledVector(up,1.1);FIRE.emit(b.x,b.y,b.z,-up.x*12+rv(2),-up.y*12+rv(2),-up.z*12+rv(2),.25,.6,.75,1,.18)}}VX.jl=jump;
- const gk=9.2;nvr-=gk*dt;if(inSea){nvr=lerp(nvr,1.6,damp(2.5,dt))}if(VX.gr&&nvr<0)nvr=Math.max(nvr,-3);
+ const gk=9.2;if(inSea){const dd=P.Rs-.95-L;nvr=lerp(nvr,dd>0?Math.min(2.6,dd*1.5):(jump?3:0),damp(2.4,dt));VX.fuel=Math.min(1,VX.fuel+dt*.3)}else nvr-=gk*dt;if(VX.gr&&nvr<0)nvr=Math.max(nvr,-3);
  v.copy(vt).addScaledVector(up,nvr);
  // déplacement par petits pas + collisions (deux sphères : pieds et tête)
  const steps=Math.max(1,Math.ceil(v.length()*dt/.25)),h=dt/steps;let gr=false,impact=0;
@@ -14725,10 +14729,11 @@ function vxStep(hs){try{const k=VX.P.ice?'ice':VX.P.ty=='Désertique'?'sand':'ro
 // creuser : rayon depuis la caméra, sphère de 2,3 m enlevée au point touché
 function vxDig(dt){VX.digT-=dt;const hand=VX.pm&&VX.pm.userData.tool;if(!isFire()||S.dead){hideBeam(VX.beam);return}
  const o=camera.position,dir=_vxB.set(0,0,-1).applyQuaternion(camera.quaternion);const head=_vxC.copy(VX.fp).addScaledVector(_vxA.copy(VX.fp).normalize(),1.5);
- let tt=Math.max(0,o.distanceTo(head)-1),hit=null;const max=tt+10;for(let i=0;i<120&&tt<max;i++){const x=o.x+dir.x*tt,y=o.y+dir.y*tt,z=o.z+dir.z*tt,f=vxF(x,y,z,2);if(f<.06){hit=new V3(x,y,z);break}tt+=Math.max(.06,f*.8)}
+ let tt=Math.max(0,o.distanceTo(head)-1.5),hit=null;const max=tt+16;for(let i=0;i<160&&tt<max;i++){const x=o.x+dir.x*tt,y=o.y+dir.y*tt,z=o.z+dir.z*tt,f=vxF(x,y,z,2);if(f<.06){hit=new V3(x,y,z);break}tt+=Math.max(.06,f*.8)}
+ if(hit&&hit.distanceTo(head)>12)hit=null;
  const src=hand?hand.getWorldPosition(new V3()):head.clone();if(!VX.beam)VX.beam=mkBeam(0x7fe8ff);
- if(!hit){placeBeam(VX.beam,src,src.clone().addScaledVector(dir,8),.12,false);return}
- placeBeam(VX.beam,src,hit,.2,true);if(VX.digT>0)return;VX.digT=.17;const P=VX.P;
+ if(!hit){placeBeam(VX.beam,src,src.clone().addScaledVector(dir,8),.06,false);return}
+ placeBeam(VX.beam,src,hit,.09,false);if(VX.digT>0)return;VX.digT=.17;const P=VX.P;
  const c=hit.addScaledVector(dir,.7),r=DESK?2.3:2.5,dg=VX.V.digs;if(dg.length>=4000){if(!VX.told.max){VX.told.max=1;toast('⛏ Trop de galeries sur cette planète — les plus anciennes se referment')}dg.shift()}
  VX.V.dig(Math.round(c.x*10)/10,Math.round(c.y*10)/10,Math.round(c.z*10)/10,r);VX.dirty=1;
  const n=_vxA.copy(c).sub(o).normalize().negate(),col=VX.V.core.OUT.m==2?0xff7030:0x9a8270;for(let i=0;i<6;i++)SPK.emit(c.x,c.y,c.z,n.x*6+rv(4),n.y*6+rv(4),n.z*6+rv(4),.4+Math.random()*.4,.62,.52,.42,.6);
