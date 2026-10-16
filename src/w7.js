@@ -98,13 +98,13 @@ if(N.F.hp<N.F.mhp*.5&&!N.half){N.half=1;w7Bub(N,'Coque à 50 % ! Vite, pilote !'
 function w7Bub(N,txt,dur){N.bub={txt,t:t+(dur||4)}}
 function w7Say(N,lines){const st=N.to||N.home;const km=st?(Math.hypot(st.x-N.F.pos.x,st.z-N.F.pos.z)/1000).toFixed(1):'?';const L=w7Pick(lines).replace('{g}',w7G(N.g||'fer').n.toLowerCase()).replace('{q}',N.q||20).replace('{d}',N.toN||(st&&st.n)||'la station').replace('{co}',N.co).replace('{km}',km);w7Bub(N,L,4.5);W7.sayT=t;try{tone(1200,900,.06,'sine',.02);setTimeout(()=>tone(900,1200,.06,'sine',.02),90)}catch(e){}}
 function w7Talk(N){if(N.gone||W7.raid&&W7.raid.N===N)return;const d=N.F.pos.distanceTo(S.pos);
-if(!N.greet&&d<360&&t-W7.sayT>5){N.greet=1;let L=W7SAY[N.job];if(N.job=='patrol'&&G.x.law&&G.x.law.b>0)L=['On a ton signalement… on te garde à l\'œil.'];w7Say(N,L)}
+if(!N.greet&&d<360&&t-W7.sayT>5){N.greet=1;let L=N.sayL||W7SAY[N.job];if(N.job=='patrol'&&G.x.law&&G.x.law.b>0)L=['On a ton signalement… on te garde à l\'œil.'];w7Say(N,L)}
 if(d<N.F.r+45&&t-N.cut>8){const rel=_w7a.copy(S.vel).sub(N.F.vel).length();if(rel>70){N.cut=t;w7Bub(N,w7Pick(W7CUT),3);try{tone(500,300,.15,'square',.02)}catch(e){}}}}
 // ----- boucle (simulation spatiale) -----
 STICK.push(dt=>{if(mode!='space'||S.dead||(typeof GZ!='undefined'&&GZ.on))return;const z=danger();
 for(const N of W7.L){if(N.gone)continue;if(N.F.gone){N.gone=1;continue}const d=N.F.pos.distanceTo(S.pos);if(d>9500){w7Remove(N);continue}w7Upd(N,dt);N.F.mesh.visible=d<6000;w7Talk(N)}
 W7.L=W7.L.filter(N=>!N.gone);
-W7.t-=dt;if(W7.t<=0){const tg=(DESK?10:7)*(w7Sts().some(s=>w7D(s)<6500)?1:.45),n=W7.L.length;W7.t=n<tg/2?1.5:4+Math.random()*6;if(n<tg&&!S.docked||n<tg/2)w7Spawn()}
+W7.t-=dt;if(W7.t<=0){const tg=(DESK?17:12)*(w7Sts().some(s=>w7D(s)<6500)?1:.6),n=W7.L.length;W7.t=n<tg/2?.9:2.5+Math.random()*4;if(n<tg&&!S.docked||n<tg/2)w7Spawn()}
 w7Raid(dt,z);if(!W7.raid){W7.raidT-=dt;if(W7.raidT<=0){const c=ai3Ctl();W7.raidT=(130+Math.random()*120)*(c=='alliance'?1.6:c=='pirates'?.7:1);if(!S.docked&&!(typeof RC!='undefined'&&RC.on)&&!(z==0&&Math.random()<.7))w7RaidStart(z)}}
 // la vie continue ailleurs : livraisons et pillages hors de vue
 W7.simT-=dt;if(W7.simT<=0){W7.simT=60+Math.random()*50;const sts=w7Sts();if(sts.length){const st=w7Pick(sts),ok=Math.random()<.75,g=w7Pick(GOODS.filter(x=>!x.min||Math.random()<.4)).id;if(ok){const q=20+Math.random()*40|0,dv=-(.06+.08*Math.random());w7Push(st.n,g,dv);w7News('📦',`Le cargo « ${w7Pick(W7NM)} » a livré ${q} t de ${w7G(g).n} à ${st.n} : prix ${Math.round(dv*100)} %`)}else{const dv=.1+.1*Math.random();w7Push(st.n,g,dv);w7News('☠',`Un convoi pour ${st.n} a été pillé : pénurie de ${w7G(g).n} (+${Math.round(dv*100)} %)`)}}}});
@@ -114,7 +114,7 @@ TICK.push(()=>{if(mode!='space'&&W7.L.length){for(const N of W7.L)w7Remove(N);W7
 {const _ov=overlay;overlay=function(){_ov();if(mode!='space'||S.dead||S.docked||(typeof SI!='undefined'&&SI.on))return;try{
 for(const N of W7.L){if(N.gone)continue;const p=N.F.pos,s=proj(p);if(!s.front||s.d>1700||s.x<0||s.x>innerWidth||s.y<40||s.y>innerHeight)continue;const J=W7J[N.job],a=clamp(1.3-s.d/1700,.25,1);OX.globalAlpha=a;OX.textAlign='center';
  const y=s.y-Math.min(46,10+900/Math.max(60,s.d));OX.font="700 11px 'Chakra Petch',system-ui";OX.fillStyle=J.col;OX.fillText(N.name,s.x,y);
- if(s.d<900){OX.font="600 9.5px 'Chakra Petch',system-ui";OX.fillStyle='rgba(205,230,255,.85)';const st=N.toN||(N.to&&N.to.n);let info=N.job=='patrol'?'Alliance · sécurité':N.ph=='mine'?'Minage · '+w7G(N.g).n:N.ph=='undock'?'Départ de '+(N.from?N.from.n:'la station'):N.ph=='approach'||N.ph=='dockin'?'Amarrage à '+(st||''):N.q&&N.g?(N.q+' t de '+w7G(N.g).n+(st?' → '+st:'')):(st?'→ '+st:N.co);OX.fillText(info,s.x,y+12)}
+ if(s.d<900){OX.font="600 9.5px 'Chakra Petch',system-ui";OX.fillStyle='rgba(205,230,255,.85)';const st=N.toN||(N.to&&N.to.n);let info=N.inf?N.inf:N.job=='patrol'?'Alliance · sécurité':N.ph=='mine'?'Minage · '+w7G(N.g).n:N.ph=='undock'?'Départ de '+(N.from?N.from.n:'la station'):N.ph=='approach'||N.ph=='dockin'?'Amarrage à '+(st||''):N.q&&N.g?(N.q+' t de '+w7G(N.g).n+(st?' → '+st:'')):(st?'→ '+st:N.co);OX.fillText(info,s.x,y+12)}
  if(N.bub&&t<N.bub.t){OX.globalAlpha=1;OX.font="600 11px 'Chakra Petch',system-ui";const w=Math.min(260,OX.measureText(N.bub.txt).width+16),by=y-30;OX.fillStyle='rgba(6,16,28,.88)';OX.fillRect(s.x-w/2,by-14,w,22);OX.fillStyle=J.col;OX.fillRect(s.x-w/2,by-14,2,22);OX.fillStyle='#eaf6ff';OX.fillText(N.bub.txt.length>40&&w>=260?N.bub.txt.slice(0,38)+'…':N.bub.txt,s.x,by+1)}
  if(W7.raid&&W7.raid.N===N){OX.globalAlpha=1;const k=N.F.hp/N.F.mhp;OX.fillStyle='rgba(0,0,0,.6)';OX.fillRect(s.x-24,y+17,48,4);OX.fillStyle=k>.5?'#7dffb0':k>.25?'#ffc34d':'#ff5a4a';OX.fillRect(s.x-24,y+17,48*k,4)}}
 OX.globalAlpha=1;if(W7.raid&&!W7.raid.N.gone)edgeMarker(W7.raid.N.F.pos,'#ff5a4a','SOS · '+W7.raid.N.name,'🆘')}catch(e){OX.globalAlpha=1}}}

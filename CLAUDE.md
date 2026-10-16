@@ -325,3 +325,8 @@ Jeu spatial 3D monde ouvert (Three.js r128) de William, en français. En ligne :
 - Emplacements `a2Pos(relay|cor|porte)` écartés des étoiles/planètes/stations par `a2Safe`. Choix : `a2Choice` (boîte `#chc`, met le jeu en pause par `XPAUSE`). Les ennemis de l'acte (`e.a2`) sont recréés si on revient sur place.
 - Objectif en orange ✦ (enveloppes de `contentInfo`, `contentOverlay`, `mapItems`). Service « Campagne » : état des actes, choix, fins, « Passer directement à l'acte II » (`a2skip`), « Rejouer l'acte II » (`a2replay`, garde les fins).
 - Personnages ajoutés à `CHAR` : `kessler`, `xil`. Test : `t_a2.py` (déroule tout l'acte en appelant `a2Tick`).
+
+## Trafic spatial (traf.js, après saga.js) — état `W10`
+- w7.js : densité relevée (17 PNJ PC / 12 mobile près d'une station, × 0,6 en plein espace, apparition toutes les 0,9 s tant qu'on est sous la moitié). `N.inf` = 2e ligne de l'étiquette, `N.sayL` = répliques radio propres.
+- Enveloppe de `w7Spawn` : convois (cargo + 2–3 escortes `esc10` en formation, `N.lead`/`N.off`), escadrilles de l'Alliance en V (`sq10` + ailiers, pas en zone pirate), remorqueurs qui tournent autour d'une station (`tug10`, 4 max par station) puis s'amarrent, trafic des planètes à moins de 5,5 km (croisières en orbite `orb10`, décollages `lift10`, atterrissages `land10`), courses de pilotes (`race10`, 6 points de passage). Enveloppe de `w7Upd` pour ces phases ; les escortes se dispersent (saut) quand le chef s'amarre ou disparaît.
+- Couloirs de trafic lointains `w10Lanes` : un `THREE.Points` (couleurs par sommet) qui fait circuler 7–10 points par couloir entre les stations voisines (5 couloirs mobile / 8 PC, < 30 km), cachés à moins de 3,5 km du joueur.

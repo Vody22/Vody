@@ -296,7 +296,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261016-184520"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261016-184956"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -13296,13 +13296,13 @@ if(N.F.hp<N.F.mhp*.5&&!N.half){N.half=1;w7Bub(N,'Coque à 50 % ! Vite, pilote !'
 function w7Bub(N,txt,dur){N.bub={txt,t:t+(dur||4)}}
 function w7Say(N,lines){const st=N.to||N.home;const km=st?(Math.hypot(st.x-N.F.pos.x,st.z-N.F.pos.z)/1000).toFixed(1):'?';const L=w7Pick(lines).replace('{g}',w7G(N.g||'fer').n.toLowerCase()).replace('{q}',N.q||20).replace('{d}',N.toN||(st&&st.n)||'la station').replace('{co}',N.co).replace('{km}',km);w7Bub(N,L,4.5);W7.sayT=t;try{tone(1200,900,.06,'sine',.02);setTimeout(()=>tone(900,1200,.06,'sine',.02),90)}catch(e){}}
 function w7Talk(N){if(N.gone||W7.raid&&W7.raid.N===N)return;const d=N.F.pos.distanceTo(S.pos);
-if(!N.greet&&d<360&&t-W7.sayT>5){N.greet=1;let L=W7SAY[N.job];if(N.job=='patrol'&&G.x.law&&G.x.law.b>0)L=['On a ton signalement… on te garde à l\'œil.'];w7Say(N,L)}
+if(!N.greet&&d<360&&t-W7.sayT>5){N.greet=1;let L=N.sayL||W7SAY[N.job];if(N.job=='patrol'&&G.x.law&&G.x.law.b>0)L=['On a ton signalement… on te garde à l\'œil.'];w7Say(N,L)}
 if(d<N.F.r+45&&t-N.cut>8){const rel=_w7a.copy(S.vel).sub(N.F.vel).length();if(rel>70){N.cut=t;w7Bub(N,w7Pick(W7CUT),3);try{tone(500,300,.15,'square',.02)}catch(e){}}}}
 // ----- boucle (simulation spatiale) -----
 STICK.push(dt=>{if(mode!='space'||S.dead||(typeof GZ!='undefined'&&GZ.on))return;const z=danger();
 for(const N of W7.L){if(N.gone)continue;if(N.F.gone){N.gone=1;continue}const d=N.F.pos.distanceTo(S.pos);if(d>9500){w7Remove(N);continue}w7Upd(N,dt);N.F.mesh.visible=d<6000;w7Talk(N)}
 W7.L=W7.L.filter(N=>!N.gone);
-W7.t-=dt;if(W7.t<=0){const tg=(DESK?10:7)*(w7Sts().some(s=>w7D(s)<6500)?1:.45),n=W7.L.length;W7.t=n<tg/2?1.5:4+Math.random()*6;if(n<tg&&!S.docked||n<tg/2)w7Spawn()}
+W7.t-=dt;if(W7.t<=0){const tg=(DESK?17:12)*(w7Sts().some(s=>w7D(s)<6500)?1:.6),n=W7.L.length;W7.t=n<tg/2?.9:2.5+Math.random()*4;if(n<tg&&!S.docked||n<tg/2)w7Spawn()}
 w7Raid(dt,z);if(!W7.raid){W7.raidT-=dt;if(W7.raidT<=0){const c=ai3Ctl();W7.raidT=(130+Math.random()*120)*(c=='alliance'?1.6:c=='pirates'?.7:1);if(!S.docked&&!(typeof RC!='undefined'&&RC.on)&&!(z==0&&Math.random()<.7))w7RaidStart(z)}}
 // la vie continue ailleurs : livraisons et pillages hors de vue
 W7.simT-=dt;if(W7.simT<=0){W7.simT=60+Math.random()*50;const sts=w7Sts();if(sts.length){const st=w7Pick(sts),ok=Math.random()<.75,g=w7Pick(GOODS.filter(x=>!x.min||Math.random()<.4)).id;if(ok){const q=20+Math.random()*40|0,dv=-(.06+.08*Math.random());w7Push(st.n,g,dv);w7News('📦',`Le cargo « ${w7Pick(W7NM)} » a livré ${q} t de ${w7G(g).n} à ${st.n} : prix ${Math.round(dv*100)} %`)}else{const dv=.1+.1*Math.random();w7Push(st.n,g,dv);w7News('☠',`Un convoi pour ${st.n} a été pillé : pénurie de ${w7G(g).n} (+${Math.round(dv*100)} %)`)}}}});
@@ -13312,7 +13312,7 @@ TICK.push(()=>{if(mode!='space'&&W7.L.length){for(const N of W7.L)w7Remove(N);W7
 {const _ov=overlay;overlay=function(){_ov();if(mode!='space'||S.dead||S.docked||(typeof SI!='undefined'&&SI.on))return;try{
 for(const N of W7.L){if(N.gone)continue;const p=N.F.pos,s=proj(p);if(!s.front||s.d>1700||s.x<0||s.x>innerWidth||s.y<40||s.y>innerHeight)continue;const J=W7J[N.job],a=clamp(1.3-s.d/1700,.25,1);OX.globalAlpha=a;OX.textAlign='center';
  const y=s.y-Math.min(46,10+900/Math.max(60,s.d));OX.font="700 11px 'Chakra Petch',system-ui";OX.fillStyle=J.col;OX.fillText(N.name,s.x,y);
- if(s.d<900){OX.font="600 9.5px 'Chakra Petch',system-ui";OX.fillStyle='rgba(205,230,255,.85)';const st=N.toN||(N.to&&N.to.n);let info=N.job=='patrol'?'Alliance · sécurité':N.ph=='mine'?'Minage · '+w7G(N.g).n:N.ph=='undock'?'Départ de '+(N.from?N.from.n:'la station'):N.ph=='approach'||N.ph=='dockin'?'Amarrage à '+(st||''):N.q&&N.g?(N.q+' t de '+w7G(N.g).n+(st?' → '+st:'')):(st?'→ '+st:N.co);OX.fillText(info,s.x,y+12)}
+ if(s.d<900){OX.font="600 9.5px 'Chakra Petch',system-ui";OX.fillStyle='rgba(205,230,255,.85)';const st=N.toN||(N.to&&N.to.n);let info=N.inf?N.inf:N.job=='patrol'?'Alliance · sécurité':N.ph=='mine'?'Minage · '+w7G(N.g).n:N.ph=='undock'?'Départ de '+(N.from?N.from.n:'la station'):N.ph=='approach'||N.ph=='dockin'?'Amarrage à '+(st||''):N.q&&N.g?(N.q+' t de '+w7G(N.g).n+(st?' → '+st:'')):(st?'→ '+st:N.co);OX.fillText(info,s.x,y+12)}
  if(N.bub&&t<N.bub.t){OX.globalAlpha=1;OX.font="600 11px 'Chakra Petch',system-ui";const w=Math.min(260,OX.measureText(N.bub.txt).width+16),by=y-30;OX.fillStyle='rgba(6,16,28,.88)';OX.fillRect(s.x-w/2,by-14,w,22);OX.fillStyle=J.col;OX.fillRect(s.x-w/2,by-14,2,22);OX.fillStyle='#eaf6ff';OX.fillText(N.bub.txt.length>40&&w>=260?N.bub.txt.slice(0,38)+'…':N.bub.txt,s.x,by+1)}
  if(W7.raid&&W7.raid.N===N){OX.globalAlpha=1;const k=N.F.hp/N.F.mhp;OX.fillStyle='rgba(0,0,0,.6)';OX.fillRect(s.x-24,y+17,48,4);OX.fillStyle=k>.5?'#7dffb0':k>.25?'#ffc34d':'#ff5a4a';OX.fillRect(s.x-24,y+17,48*k,4)}}
 OX.globalAlpha=1;if(W7.raid&&!W7.raid.N.gone)edgeMarker(W7.raid.N.F.pos,'#ff5a4a','SOS · '+W7.raid.N.name,'🆘')}catch(e){OX.globalAlpha=1}}}
@@ -15120,6 +15120,76 @@ svcAdd({o:1,ic:'star',t:'Campagne',show:()=>true,html:()=>{const a1=G.story&&G.s
 SVC.act.a2skip=()=>{if(BOSS)return toast('Impossible pendant un combat');G.story=Object.assign(G.story||{},{ch:8,won:1,intro:1});const s=a2S();s.skip=1;A2.wait=0;save();
  say([['iris','Résumé : tu as suivi le signal de l\'Écho jusqu\'à l\'épave du Kepler et détruit le Némésis du pirate Corbeau. Corbeau a survécu.'],['ia','L\'acte II commence dès que tu repars dans l\'espace.']])};
 SVC.act.a2replay=()=>{const s=a2S(),e=s.ends;for(const k in s)delete s[k];s.ch=0;s.ends=e;s.end=null;A2.wait=0;a2ClearAl();save();toast('✦ L\'acte II recommence dès que tu repars dans l\'espace')};
+
+// ===== TRAFIC SPATIAL (traf.js, après saga.js) — état W10 =====
+// Plus de PNJ dans l'espace (w7.js) : convois escortés, escadrilles en formation, remorqueurs autour des stations,
+// navettes qui décollent des planètes / s'y posent, touristes en orbite, courses de pilotes, et au loin des couloirs
+// de trafic (points lumineux qui circulent entre les stations voisines). Nouvelles phases ajoutées par l'enveloppe de w7Upd.
+const W10={lane:null,lp:[],lk:'',lt:0};
+const _t10a=new V3(),_t10b=new V3(),_t10c=new V3(),_t10u=new V3(0,1,0);
+const W10SAY={escort:['Escorte en position, le convoi est sous protection.','On garde un œil sur le cargo.','Pas d\'imprudence près du convoi, pilote.'],
+ tug:['Remorqueur au travail, dégage le couloir !','Encore un conteneur à ranger…','Station en vue, on manœuvre.'],
+ tour:['Regardez cette vue ! Les passagers adorent.','Visite guidée de {p}, deuxième tour.','Souriez pour la photo !'],
+ lift:['Décollage réussi, cap sur l\'orbite !','On quitte {p}, tout le monde est attaché ?','Atmosphère traversée, ça secoue !'],
+ land:['Descente vers {p}, train sorti.','Approche de la surface, on se pose.','Rentrée atmosphérique dans 30 secondes.'],
+ race:['3… 2… 1… Partez !','Tu veux faire la course, pilote ?','Personne ne me rattrape !','Dernier virage, plein gaz !'],
+ squad:['Escadrille en formation, exercice en cours.','Formation serrée, on garde l\'alignement !','Exercice de patrouille, tout va bien.']};
+const w10P=a=>a[Math.random()*a.length|0];
+function w10N(job,pos,dir,nm,inf,say){const N=w7Make(job,pos,dir);if(nm)N.name=nm;N.inf=inf;N.sayL=say;return N}
+const w10Pl=()=>{let b=null,bd=1e18;for(const p of planets){if(p.ring&&!p.r)continue;const d=Math.hypot(p.x-S.pos.x,p.y-S.pos.y,p.z-S.pos.z)-p.r;if(d<bd){bd=d;b=p}}return bd<5500?b:null};
+// ----- apparitions spéciales -----
+function w10Convoy(){const sts=w7Sts(),near=sts.filter(s=>w7D(s)<6500);let L;const lab='Convoi « '+w10P(W7NM)+' »';
+ if(near.length){const st=w10P(near),p=new V3(st.x,st.y,st.z).add(new V3(rv(1),rv(.2),rv(1)).normalize().multiplyScalar(2600+Math.random()*1000));L=w7Make('cargo',p,_t10a.set(st.x,st.y,st.z).sub(p));L.to=st;L.toN=st.n;L.sg=Math.random()<.5?1:-1;const o=sts.filter(s=>s!==st);L.fromN=o.length?w10P(o).n:'Secteur lointain';L.g=w7Good(null,st);L.q=40+Math.random()*30|0;L.ph='cruise';L.goal=w7Berth(st,L.sg,1100)}
+ else{const a=Math.random()*TAU,p=S.pos.clone().add(new V3(Math.cos(a),rv(.1),Math.sin(a)).multiplyScalar(2600)),dir=S.pos.clone().sub(p).add(new V3(rv(900),0,rv(900))).normalize();L=w7Make('cargo',p,dir);L.toN='Secteur '+w10P(NA)+(1+Math.random()*9|0);L.g=w7Good(null,null);L.q=40+Math.random()*30|0;L.ph='cruise';L.jump=1;L.goal=p.clone().addScaledVector(dir,6000)}
+ L.name=lab;L.sp*=.85;const n=Math.random()<.5?2:3;for(let i=0;i<n;i++){const off=[[-70,15,30],[70,15,30],[0,40,-80]][i],E=w10N('patrol',L.F.pos.clone().add(new V3(off[0],off[1],off[2])),L.F.dir,'Escorte « '+w10P(W7NM)+' »','Escorte · '+lab,W10SAY.escort);E.ph='esc10';E.lead=L;E.off=off}
+ w7Warp(L);return true}
+function w10Squad(){if(ai3Ctl()=='pirates')return false;const a=Math.random()*TAU,p=S.pos.clone().add(new V3(Math.cos(a),rv(.2),Math.sin(a)).multiplyScalar(1800+Math.random()*900));
+ const L=w10N('patrol',p,new V3(rv(1),0,rv(1)),'Escadrille « '+w10P(W7NM)+' »','Alliance · exercice en formation',W10SAY.squad);L.ph='sq10';L.anc=p.clone();L.sp*=1.15;L.t10=50+Math.random()*50;
+ for(let i=0;i<3;i++){const off=[[-45,0,40],[45,0,40],[0,-10,85]][i],E=w10N('patrol',p.clone().add(new V3(off[0],off[1],off[2])),L.F.dir,'Ailier « '+w10P(W7NM)+' »','Escadrille · formation en V',W10SAY.squad);E.ph='esc10';E.lead=L;E.off=off}w7Warp(L);return true}
+function w10Tugs(){const near=w7Sts().filter(s=>w7D(s)<5000&&s.mesh);if(!near.length)return false;const st=w10P(near);if(W7.L.filter(N=>N.ph=='tug10'&&N.home===st).length>=4)return false;
+ for(let i=0;i<2;i++){const R=260+Math.random()*260,a=Math.random()*TAU,p=new V3(st.x+Math.cos(a)*R,st.y+rv(80),st.z+Math.sin(a)*R),N=w10N('shuttle',p,new V3(-Math.sin(a),0,Math.cos(a)),'Remorqueur « '+w10P(W7NM)+' »','Service de '+st.n,W10SAY.tug);
+  N.ph='tug10';N.home=st;N.R=R;N.pa=a;N.dy=rv(90);N.sp=60+Math.random()*30;N.t10=60+Math.random()*80;N.to=st;N.toN=st.n;N.sg=Math.random()<.5?1:-1}return true}
+function w10Planet(){const P=w10Pl();if(!P)return false;const pc=new V3(P.x,P.y,P.z),r=Math.random();const toMe=S.pos.clone().sub(pc).normalize();
+ const rdir=toMe.clone().add(new V3(rv(.8),rv(.5),rv(.8))).normalize();
+ if(r<.4){// touristes en orbite
+  const R=P.r*1.3+250+Math.random()*300,N=w10N('shuttle',pc.clone().addScaledVector(rdir,R),new V3(rv(1),0,rv(1)),'Croisière « '+w10P(W7NM)+' »','Tourisme · orbite de '+P.name,W10SAY.tour.map(s=>s.replace('{p}',P.name)));
+  N.ph='orb10';N.pl=P;N.R=R;N.ax=new V3(rv(.4),1,rv(.4)).normalize();N.v0=rdir.clone();N.pa=0;N.sp=70+Math.random()*30;N.t10=70+Math.random()*60;return true}
+ if(r<.72){// décollage
+  const N=w10N(Math.random()<.5?'shuttle':'cargo',pc.clone().addScaledVector(rdir,P.r*1.01),rdir,null,'Décollage de '+P.name,W10SAY.lift.map(s=>s.replace('{p}',P.name)));N.ph='lift10';N.pl=P;N.up=rdir;N.v10=8;N.toN='Orbite';N.g=w7Good(null,null);N.q=10+Math.random()*30|0;return true}
+ // atterrissage
+ const N=w10N('shuttle',pc.clone().addScaledVector(rdir,P.r*1.8+500),rdir.clone().negate(),null,'Atterrissage sur '+P.name,W10SAY.land.map(s=>s.replace('{p}',P.name)));N.ph='land10';N.pl=P;N.up=rdir;N.toN=P.name;w7Warp(N);return true}
+function w10Race(){if(W7.L.some(N=>N.ph=='race10'))return false;fwd();const c=S.pos.clone().addScaledVector(_f,900+Math.random()*600).add(new V3(rv(500),rv(150),rv(500))),wp=[];for(let i=0;i<6;i++)wp.push(c.clone().add(new V3(rv(1),rv(.25),rv(1)).normalize().multiplyScalar(500+Math.random()*900)));
+ const nm=['Éclair','Foudre'];for(let i=0;i<2;i++){const N=w10N('courier',c.clone().add(new V3(i*40-20,0,0)),wp[0].clone().sub(c),'Coureur « '+nm[i]+' »','Course de pilotes · '+(i?'2e':'1er'),W10SAY.race);N.ph='race10';N.wp=wp;N.wi=0;N.sp=300+i*25+Math.random()*30}w7Warp(W7.L[W7.L.length-1]);return true}
+{const _sp=w7Spawn;w7Spawn=function(){const r=Math.random();try{if(r<.2&&w10Convoy())return;if(r<.34&&w10Planet())return;if(r<.44&&w10Tugs())return;if(r<.5&&w10Race())return;if(r<.57&&w10Squad())return}catch(e){console.warn(e)}_sp()}}
+// ----- nouvelles phases -----
+function w10Form(N,dt){const L=N.lead;if(!L||L.gone||L.ph=='dockin'||L.ph=='approach'){N.ph='cruise';N.jump=1;N.lead=null;N.goal=N.F.pos.clone().addScaledVector(N.F.dir,1400).add(new V3(rv(300),rv(60),rv(300)));return}
+ if(L.ph=='jumpc'){N.ph='jumpc';N.jt=-Math.random()*.4;return}const f=L.F.dir,rt=_t10a.crossVectors(f,_t10u).normalize(),up=_t10b.crossVectors(rt,f).normalize();
+ const g=_t10c.copy(L.F.pos).addScaledVector(rt,N.off[0]).addScaledVector(up,N.off[1]).addScaledVector(f,-N.off[2]).addScaledVector(L.F.vel,1);w7Steer(N,g,Math.max(60,L.F.vel.length()*1.6),dt,3)}
+{const _u=w7Upd;w7Upd=function(N,dt){const F=N.F;
+ if(N.ph=='esc10'){w10Form(N,dt);return}
+ if(N.ph=='sq10'){N.t10-=dt;N.pa=(N.pa||0)+dt*.35;const A=N.anc;w7Steer(N,_t10a.set(A.x+Math.cos(N.pa)*900,A.y+Math.sin(N.pa*2)*160,A.z+Math.sin(N.pa)*900),N.sp*.75,dt,1.6);if(N.t10<=0){N.ph='cruise';N.jump=1;N.goal=F.pos.clone().addScaledVector(F.dir,900)}return}
+ if(N.ph=='tug10'){const st=N.home;N.t10-=dt;N.pa+=dt*N.sp/N.R;w7Steer(N,_t10a.set(st.x+Math.cos(N.pa)*N.R,st.y+N.dy+Math.sin(N.pa*3)*20,st.z+Math.sin(N.pa)*N.R),N.sp,dt,2.2);if(N.t10<=0){N.ph='approach';N.goal=w7Berth(st,N.sg,125)}return}
+ if(N.ph=='orb10'){const P=N.pl;N.t10-=dt;N.pa+=dt*N.sp/N.R;const v=_t10a.copy(N.v0).applyAxisAngle(N.ax,N.pa).multiplyScalar(N.R).add(_t10b.set(P.x,P.y,P.z));w7Steer(N,v,N.sp*1.2,dt,1.8);if(N.t10<=0){N.ph='jumpc';N.jt=0}return}
+ if(N.ph=='lift10'){const P=N.pl;N.v10=Math.min(N.sp*1.3,N.v10+dt*25);F.dir.lerp(N.up,damp(1,dt)).normalize();F.vel.copy(F.dir).multiplyScalar(N.v10);F.pos.addScaledVector(F.vel,dt);F.mesh.lookAt(_t10a.copy(F.pos).sub(F.dir));
+  for(const sp of F.mesh.userData.fl)sp.scale.setScalar((F.mesh.userData.fb||4)*(1.4+Math.random()*.5));if(F.pos.distanceTo(_t10b.set(P.x,P.y,P.z))>P.r*1.9){N.ph='jumpc';N.jt=0}return}
+ if(N.ph=='land10'){const P=N.pl,c=_t10b.set(P.x,P.y,P.z),d=F.pos.distanceTo(c);const g=_t10a.copy(c).addScaledVector(N.up,P.r*.98);w7Steer(N,g,d<P.r*1.25?45:N.sp,dt,1.4);
+  if(d<P.r*1.04){N.ph='dockin';N.dk=0}return}
+ if(N.ph=='race10'){const w=N.wp[N.wi];if(w7Steer(N,w,N.sp,dt,2.6)<120){N.wi++;if(N.wi>=N.wp.length){N.ph='jumpc';N.jt=0;w7Bub(N,N.name.includes('Éclair')?'Victoire !':'La prochaine fois…',3)}}
+  if(Math.random()<dt*20&&F.pos.distanceTo(S.pos)<2500){const q=F.pos;SPK.emit(q.x,q.y,q.z,rv(8),rv(8),rv(8),.3,.7,1,.25,.6)}return}
+ _u(N,dt)}}
+// ----- couloirs de trafic au loin : points lumineux entre stations voisines -----
+function w10Lanes(dt){const sts=w7Sts().filter(s=>Math.hypot(s.x-S.pos.x,s.y-S.pos.y,s.z-S.pos.z)<26000),k=sts.map(s=>s.n).join('|');
+ if(k!==W10.lk){W10.lk=k;W10.lp=[];const pr=[];for(let i=0;i<sts.length;i++)for(let j=i+1;j<sts.length;j++){const d=Math.hypot(sts[i].x-sts[j].x,sts[i].y-sts[j].y,sts[i].z-sts[j].z);if(d<30000)pr.push([d,sts[i],sts[j]])}
+  pr.sort((a,b)=>a[0]-b[0]);for(const[d,a,b]of pr.slice(0,DESK?8:5))for(let n=0;n<(DESK?10:7);n++)W10.lp.push({a,b,f:Math.random(),v:(140+Math.random()*120)/d*(Math.random()<.5?1:-1),o:new V3(rv(160),rv(60),rv(160)),c:Math.random()<.6})
+  const n=W10.lp.length;if(!W10.lane){const g=new THREE.BufferGeometry(),M=new THREE.PointsMaterial({size:DESK?26:30,map:GLOW,vertexColors:true,transparent:true,blending:ADDB,depthWrite:false,sizeAttenuation:true});W10.lane=new THREE.Points(g,M);W10.lane.frustumCulled=false;W10.lane.renderOrder=2;scene.add(W10.lane)}
+  const g=W10.lane.geometry;g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(Math.max(1,n)*3),3));const C=new Float32Array(Math.max(1,n)*3);W10.lp.forEach((p,i)=>{const c=p.c?[1,.82,.5]:[.6,.85,1];C.set(c,i*3)});g.setAttribute('color',new THREE.BufferAttribute(C,3));g.setDrawRange(0,n)}
+ if(!W10.lane)return;const P=W10.lane.geometry.attributes.position,A=P.array;let i=0;
+ for(const p of W10.lp){p.f+=p.v*dt;if(p.f>1)p.f-=1;if(p.f<0)p.f+=1;const a=p.a,b=p.b,x=a.x+(b.x-a.x)*p.f+p.o.x,y=a.y+(b.y-a.y)*p.f+p.o.y,z=a.z+(b.z-a.z)*p.f+p.o.z;
+  // les points proches sont repoussés hors de vue (les vrais PNJ prennent le relais à moins de 3,5 km)
+  const dd=Math.hypot(x-S.pos.x,y-S.pos.y,z-S.pos.z);if(dd<3500){A[i++]=0;A[i++]=-1e7;A[i++]=0}else{A[i++]=x;A[i++]=y;A[i++]=z}}
+ P.needsUpdate=true;W10.lane.visible=mode=='space'}
+STICK.push(dt=>{if(mode!='space'||S.dead)return;W10.lt+=dt;w10Lanes(dt)});
+TICK.push(()=>{if(W10.lane&&mode!='space')W10.lane.visible=false});
 
 // ===== MODE PHOTO : pause, caméra libre autour du vaisseau, filtres, flou, cadres, enregistrement de l'image =====
 const PH={on:false,yaw:0,pitch:.2,dist:30,fov:60,roll:0,anc:new V3(),f:'none',b:'none',fr:'none',hide:false,drag:null,pinch:null,shots:0};
