@@ -36,7 +36,7 @@ for(const[i,k]of[[7,'fire'],[0,'boost'],[6,'brake']]){if(edge(i)){B[k]=1;$(k).cl
 if(edge(1)){const l=$('land');if(l&&l.style.display!='none')l.click()}if(edge(2)||edge(5))cycleW(1);if(edge(4))cycleW(-1);if(edge(3))ckToggle();
 if(edge(9)){if(MAP.open)closeMap();else openMap()}if(edge(8))optToggle();if(edge(12))profToggle();if(edge(13)&&mode=='surf'&&!FOOT.on&&canExit())footEnter();GPD.prev=now}
 // ----- sauvegarde dans le cloud (code personnel) -----
-const CLOUD={code:'',last:'',msg:'',busy:false,ok:location.protocol.startsWith('http')&&!/claude|localhost|127\.0\.0\.1/.test(location.hostname)};
+const CLOUD={code:'',last:'',msg:'',busy:false,ok:!!window.SF_PORTAL||location.protocol.startsWith('http')&&!/claude|localhost|127\.0\.0\.1/.test(location.hostname)};
 {const AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';try{CLOUD.code=localStorage.getItem('sf-cloud')||''}catch(e){}if(!/^SF-[A-HJ-NP-Z2-9]{8}$/.test(CLOUD.code)){CLOUD.code='SF-'+Array.from({length:8},()=>AL[Math.random()*AL.length|0]).join('');try{localStorage.setItem('sf-cloud',CLOUD.code)}catch(e){}}}
 const cloudURL=c=>'/api/save?code='+encodeURIComponent(c);
 async function cloudSave(manual){if(!CLOUD.ok){if(manual){CLOUD.msg='La sauvegarde cloud n\'est disponible que sur le jeu publié (star-vody.vercel.app)';optRender()}return}if(CLOUD.busy)return;save();let data='';try{data=localStorage.getItem(SK)||''}catch(e){}if(!data)return;if(!manual&&data===CLOUD.last)return;

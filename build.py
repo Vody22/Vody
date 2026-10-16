@@ -2,7 +2,9 @@
 """Construit index.html (version en ligne, multijoueur PeerJS) à partir de src/.
    python3 build.py                 -> index.html
    python3 build.py --claude OUT    -> en plus, version artefact Claude (salon « room ») dans OUT
-   python3 build.py --check OUT.js  -> écrit aussi le JS concaténé (pour node --check)"""
+   python3 build.py --check OUT.js  -> écrit aussi le JS concaténé (pour node --check)
+   python3 build.py --portal        -> en plus, dist/crazygames.zip et dist/poki.zip (sites de jeux web : chemins relatifs,
+                                       Three.js inclus, serveurs du jeu sur star-vody.vercel.app, pas de mise à jour auto)"""
 import os, sys, time
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 S = D + 'src/'
@@ -26,3 +28,31 @@ a = sys.argv[1:]
 if '--claude' in a: open(a[a.index('--claude')+1],'w').write(sh.replace('%%THREE%%', cdn+chk+EX).replace('%%GAME%%', game))
 if '--check' in a: open(a[a.index('--check')+1],'w').write(game)
 print('ok', len(game))
+
+if '--portal' in a:
+    import shutil, zipfile
+    TH = D + 'dev/three.min.js'
+    API = 'https://star-vody.vercel.app'
+    for kind in ['crazygames', 'poki']:
+        head = ('<script>window.SF_PORTAL="%s";(function(){var B="%s",f=window.fetch.bind(window);'
+                'window.fetch=function(u,o){if(typeof u=="string"&&u.indexOf("/api/")==0)u=B+u;return f(u,o)};'
+                'if(navigator.sendBeacon){var sb=navigator.sendBeacon.bind(navigator);navigator.sendBeacon=function(u,d){if(typeof u=="string"&&u.indexOf("/api/")==0)u=B+u;return sb(u,d)}}})()</script>'
+                '<style>body{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}</style>') % (kind, API)
+        if kind == 'crazygames':
+            head += ('<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>'
+                     '<script>(function(){var st=0,ok=0;function S(){return window.CrazyGames&&CrazyGames.SDK&&CrazyGames.SDK.game}'
+                     'window.addEventListener("load",function(){try{CrazyGames.SDK.init().then(function(){ok=1}).catch(function(){})}catch(e){}});'
+                     'setInterval(function(){if(!ok||!S())return;var on=!(window.MENU3&&MENU3.on)&&!document.hidden;if(on&&!st){st=1;try{S().gameplayStart()}catch(e){}}else if(!on&&st){st=0;try{S().gameplayStop()}catch(e){}}},1000)})()</script>')
+        pjp = ('<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>\n'
+               '<script>window.Peer||document.write(\'<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\\/script>\')</script>')
+        html = sh.replace('%%THREE%%', head + '<script>window.SF_STANDALONE=1</script>' + pjp + '<script src="three.min.js"></script>' + chk + EX).replace('%%GAME%%', game)
+        out = D + 'dist/' + kind + '/'
+        shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
+        open(out + 'index.html', 'w').write(html)
+        shutil.copy(TH, out + 'three.min.js')
+        for sub in ['models', 'cities']: shutil.copytree(D + 'public/' + sub, out + sub)
+        z = D + 'dist/' + kind + '.zip'
+        with zipfile.ZipFile(z, 'w', zipfile.ZIP_DEFLATED) as Z:
+            for r, _, fs in os.walk(out):
+                for f in fs: Z.write(os.path.join(r, f), os.path.relpath(os.path.join(r, f), out))
+        print(kind, round(os.path.getsize(z) / 1e6, 1), 'Mo')
