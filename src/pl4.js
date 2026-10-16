@@ -65,7 +65,7 @@ function pl4Pre(p){const ty=ptype(p);return ty=='Géante gazeuse'?'gaseous':ty==
 function pl4Cols(P,p,key){const r=rng((seedOf(p.x,p.y,p.z,41)>>>0)%2147483646+1),ty=ptype(p),cs=P.c.map(c=>c.clone());let dh=(r()-.5)*.06;
  if(key=='gaseous')dh=((p.hue-35)/360);if(ty=='Cristalline')dh=((p.hue-205)/360);const hsl={};for(const c of cs){c.getHSL(hsl);c.setHSL((hsl.h+dh+1)%1,Math.min(1,hsl.s*(ty=='Cristalline'?1.3:1)),hsl.l)}
  const t=P.t.slice();if(ty=='Océanique'){t[0]+=.08;t[1]+=.08;t[2]+=.06;t[3]+=.04}if(pvar(p)=='archipel'){t[0]+=.12;t[1]+=.1;t[2]+=.08}return{cs,t}}
-function pl4Apply(p,g){if(!g||!g.userData||g.userData.pl4)return;const ud=g.userData,U=ud.U||{},sph=ud.sph;if(!sph)return;const key=pl4Pre(p),P=PL4P[key],seed=(seedOf(p.x,p.y,p.z,17)>>>0)%2147483646+1;
+function pl4Apply(p,g){if(!g||!g.userData||g.userData.pl4)return;if(typeof wg4Is=='function'&&wg4Is(p))return;const ud=g.userData,U=ud.U||{},sph=ud.sph;if(!sph)return;const key=pl4Pre(p),P=PL4P[key],seed=(seedOf(p.x,p.y,p.z,17)>>>0)%2147483646+1;
  const W=DESK?2048:1024,rt=pl4Bake(P,seed,W,W/2),{cs,t}=pl4Cols(P,p,key),sunDir=U.sunDir||{value:new V3(0,1,0)},sunCol=U.sunCol||{value:new THREE.Color(1,1,1)};
  const BU={tex:{value:rt.texture},c1:{value:cs[0]},c2:{value:cs[1]},c3:{value:cs[2]},c4:{value:cs[3]},c5:{value:cs[4]},th:{value:new THREE.Vector4(...t)},r1:{value:P.r1||0},e1:{value:P.e1||0},
   city:U.city||{value:0},sunDir,sunCol,hasR:{value:U.rN3?1:0},rN3:U.rN3||{value:new V3(0,1,0)},pc3:U.pc3||{value:g.position.clone()},rI3:U.rI3||{value:0},rO3:U.rO3||{value:0}};
