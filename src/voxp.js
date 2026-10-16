@@ -138,6 +138,7 @@ function vxFootUpdate(dt){const P=VX.P,p=VX.fp,v=VX.fv;if(COCKPIT){VX.ck=!VX.ck;
   for(const[off,r]of[[.45,.45],[1.35,.38]])for(let it=0;it<2;it++){const c=_vxC.copy(p).addScaledVector(u,off),f=vxF(c.x,c.y,c.z,2);if(f>r+.2)break;const g=vxN(c.x,c.y,c.z,f,.08),d=f/Math.max(1,g);if(d>=r)break;
    p.addScaledVector(_vxN,r-d);const vn=v.dot(_vxN);if(vn<0){if(off<1&&_vxN.dot(u)>.5)impact=Math.min(impact,v.dot(u));v.addScaledVector(_vxN,-vn)}if(off<1&&_vxN.dot(u)>.55)gr=true}}
  if(!gr&&VX.gr&&nvr<=0){const u=_vxA.copy(p).normalize(),c=_vxC.copy(p).addScaledVector(u,.45-.4),f=vxF(c.x,c.y,c.z,2);if(f<.5){p.addScaledVector(u,-Math.max(0,f-.02));gr=true}}
+ {const dx=_vxC.copy(p).sub(S.pos),dl=dx.length(),mr=(VX.shipR||3.4)*1.45;if(dl<mr&&dl>.01){p.addScaledVector(dx,(mr-dl)/dl);const vn=v.dot(dx)/dl;if(vn<0)v.addScaledVector(dx,-vn/dl)}}
  if(impact<-16)damage((-impact-16)*.8,'col');VX.gr=gr;
  if(P.sea=='lave'&&L<P.Rs+.3&&VX.V.core.OUT.ds>-3){damage(14*dt);if(Math.random()<dt*8)FIRE.emit(p.x,p.y,p.z,rv(3),rv(3),rv(3),.5,1,.5,.1,.4)}
  // corps : tourné dans le sens de la marche
@@ -151,15 +152,23 @@ function vxStep(hs){try{const k=VX.P.ice?'ice':VX.P.ty=='Désertique'?'sand':'ro
 // creuser : rayon depuis la caméra, sphère de 2,3 m enlevée au point touché
 function vxDig(dt){VX.digT-=dt;const hand=VX.pm&&VX.pm.userData.tool;if(!isFire()||S.dead){hideBeam(VX.beam);return}
  const o=camera.position,dir=_vxB.set(0,0,-1).applyQuaternion(camera.quaternion);const head=_vxC.copy(VX.fp).addScaledVector(_vxA.copy(VX.fp).normalize(),1.5);
- let tt=Math.max(0,o.distanceTo(head)-1.5),hit=null;const max=tt+16;for(let i=0;i<160&&tt<max;i++){const x=o.x+dir.x*tt,y=o.y+dir.y*tt,z=o.z+dir.z*tt,f=vxF(x,y,z,2);if(f<.06){hit=new V3(x,y,z);break}tt+=Math.max(.06,f*.8)}
- if(hit&&hit.distanceTo(head)>12)hit=null;
+ let tt=.2,hit=null;const max=7.5;for(let i=0;i<120&&tt<max;i++){const x=head.x+dir.x*tt,y=head.y+dir.y*tt,z=head.z+dir.z*tt,f=vxF(x,y,z,2);if(f<.06){hit=new V3(x,y,z);break}tt+=Math.max(.06,f*.8)}
  const src=hand?hand.getWorldPosition(new V3()):head.clone();if(!VX.beam)VX.beam=mkBeam(0x7fe8ff);
- if(!hit){placeBeam(VX.beam,src,src.clone().addScaledVector(dir,8),.06,false);return}
- placeBeam(VX.beam,src,hit,.09,false);if(VX.digT>0)return;VX.digT=.17;const P=VX.P;
+ if(!hit){placeBeam(VX.beam,src,src.clone().addScaledVector(dir,7),.06,false);vxBeamS();return}
+ placeBeam(VX.beam,src,hit,.09,false);vxBeamS();if(VX.digT>0)return;VX.digT=.17;const P=VX.P;
  const c=hit.addScaledVector(dir,.7),r=DESK?2.3:2.5,dg=VX.V.digs;if(dg.length>=4000){if(!VX.told.max){VX.told.max=1;toast('⛏ Trop de galeries sur cette planète — les plus anciennes se referment')}dg.shift()}
+ vxOreTake(c,r);
  VX.V.dig(Math.round(c.x*10)/10,Math.round(c.y*10)/10,Math.round(c.z*10)/10,r);VX.dirty=1;
  const n=_vxA.copy(c).sub(o).normalize().negate(),col=VX.V.core.OUT.m==2?0xff7030:0x9a8270;for(let i=0;i<6;i++)SPK.emit(c.x,c.y,c.z,n.x*6+rv(4),n.y*6+rv(4),n.z*6+rv(4),.4+Math.random()*.4,.62,.52,.42,.6);
  boom3(c,5,col,14);try{noise(.12,.06,320);tone(90,55,.12,'sawtooth',.025)}catch(e){}}
+// minerai récupéré en creusant : 7 points dans la sphère enlevée (seulement la roche encore pleine)
+const VXORE=['fer','titane','cristal','or'];
+function vxOreTake(c,r){const core=VX.V.core,got={};let n=0;for(const[a,b,d]of[[0,0,0],[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]]){const x=c.x+a*r*.55,y=c.y+b*r*.55,z=c.z+d*r*.55;
+  if(vxF(x,y,z,r+1)>=0||core.OUT.m!=0)continue;const o=core.ore(x,y,z,-core.OUT.ds);if(o&&Math.random()<.45){got[o]=(got[o]||0)+1;n++}}
+ if(!n)return;let room=cap()-cargoUsed();if(room<=0){if(!VX.told.full||t-VX.told.full>8){VX.told.full=t;toast('Soute pleine — vends le minerai dans une station')}return}
+ for(const o in got){const id=VXORE[o-1],q=Math.min(room,2,got[o]);if(q<=0)break;G.cargo[id]=(G.cargo[id]||0)+q;MINQ[id]=(MINQ[id]||0)+q;room-=q}MINT=t;SFX.pick();
+ if(!VX.told.ore){VX.told.ore=1;setTimeout(()=>toast('⛏ Les filons colorés valent cher : fer près de la surface, titane plus bas, cristal et or en profondeur'),1500)}}
+function vxBeamS(){const u=VX.beam.userData;u.s0.scale.multiplyScalar(.1);u.s1.scale.multiplyScalar(.13);u.s2.scale.multiplyScalar(.18)}
 function vxSaveDigs(){if(!VX.p||!VX.V)return;const D=GX('vxd',{}),a=[];for(const q of VX.V.digs.slice(-2000))a.push(q[0],q[1],q[2],q[3]);if(a.length)D[VX.p.name]=a;VX.dirty=0}
 
 // ----- boucle (appelée par hud.js à la place de SURF.update) -----
@@ -169,7 +178,7 @@ function vxUpdate(dt){if(!VX.V){mode='space';return}const p=VX.p,ud=p.mesh&&p.me
  if(!VX.foot)vxShipCol(dt);
  if(!VX.foot&&S.pos.length()>VX.P.R*1.45+330){vxExit(false);return}
  if(VX.dirty&&(VX.saveT-=dt)<=0){VX.saveT=25;vxSaveDigs()}
- vxStory(dt);if(S.hp<=0)die()}
+ vxStory(dt);if(MINT&&t-MINT>.6&&Object.keys(MINQ).length)minToast();if(S.hp<=0)die()}
 // uniformes, lumières et niveau de détail (après le placement de la caméra)
 function vxView(dt){const U=VX.U,P=VX.P;if(!U)return;const cp=camera.position,r=cp.length(),up=_vxA.copy(cp).normalize();
  VX.V.update(cp,dt);U.tm.value=t;U.camUp.value.copy(up);const top=P.R+P.eMax*.8+P.R*.035,alt=r-P.R,a=clamp(alt/(top-P.R),0,1.5);

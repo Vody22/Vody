@@ -109,19 +109,22 @@ function mesh0(ox,oy,oz,size,N,cav,digs){CAV=cav;DG=digs;NDG=digs?digs.length:0;
   if(k<=N&&s0!=(V[(i+1)+b+M2]<0))quad(cell(i-1,j-1,k),cell(i,j-1,k),cell(i,j,k),cell(i-1,j,k),!s0)}}
  if(!ni)return null;
  // projection des sommets sur la vraie surface (coutures entre niveaux de détail), normale = gradient, profondeur, occlusion
- const pos=P3.slice(0,nv*3),nor=new Int8Array(nv*4),dep=new Float32Array(nv),mat=new Uint8Array(nv*4),gh=Math.max(.05,h*.25),lim=h*.6,a1=Math.max(.8,h*1.2),a2=Math.max(3,h*3);
+ const pos=P3.slice(0,nv*3),nor=new Int8Array(nv*4),dep=new Float32Array(nv),mat=new Uint8Array(nv*4),orw=new Uint8Array(nv*4),gh=Math.max(.05,h*.25),lim=h*.6,a1=Math.max(.8,h*1.2),a2=Math.max(3,h*3);
  for(let v=0;v<nv;v++){let x=pos[v*3],y=pos[v*3+1],z=pos[v*3+2];
   {const f0=sdf(x,y,z),g=grad(x,y,z,f0,gh);let st=f0/Math.max(.3,g);st=st>lim?lim:st<-lim?-lim:st;x-=GN[0]*st;y-=GN[1]*st;z-=GN[2]*st}
   const f0=sdf(x,y,z),ds=OUT.ds,m=OUT.m;grad(x,y,z,f0,gh);const nx=GN[0],ny=GN[1],nz=GN[2];
   pos[v*3]=x;pos[v*3+1]=y;pos[v*3+2]=z;nor[v*4]=Math.round(nx*127);nor[v*4+1]=Math.round(ny*127);nor[v*4+2]=Math.round(nz*127);dep[v]=-ds;
-  const o1=sdf(x+nx*a1,y+ny*a1,z+nz*a1)/a1,o2=sdf(x+nx*a2,y+ny*a2,z+nz*a2)/a2,ao=Math.max(0,Math.min(1,.15+.42*o1+.43*o2));mat[v*4]=m;mat[v*4+1]=Math.round(ao*255)}
+  const o1=sdf(x+nx*a1,y+ny*a1,z+nz*a1)/a1,o2=sdf(x+nx*a2,y+ny*a2,z+nz*a2)/a2,ao=Math.max(0,Math.min(1,.15+.42*o1+.43*o2));mat[v*4]=m;mat[v*4+1]=Math.round(ao*255);if(m==0&&cav&&-ds>1.2){const o=ore(x,y,z,-ds);if(o)orw[v*4+o-1]=Math.round(OUT.ow*255)}}
  const idx=nv>65535?I.slice(0,ni):Uint16Array.from(I.subarray(0,ni));
- return{pos,nor,dep,mat,idx,nv,nt:ni/3}}
+ return{pos,nor,dep,mat,orw,idx,nv,nt:ni/3}}
+// minerais : filons en amas (bruit), plus rares et plus précieux en profondeur — 1 fer, 2 titane, 3 cristal, 4 or
+const ORE=[[1.5,.56,11.3],[10,.61,37.7],[24,.655,73.1],[48,.70,151.9]];
+function ore(x,y,z,dep){if(dep<1.5)return 0;const f=1/9.5;let best=0,bv=0;for(let k=0;k<4;k++){const t=ORE[k];if(dep<t[0])continue;const v=sn(x*f+t[2],y*f-t[2]*.7,z*f+t[2]*.3)-t[1];if(v>bv){bv=v;best=k+1}}OUT.ow=Math.min(1,bv/.05);return best}
 // carte d'élévation équirectangulaire (profondeur de l'eau près des côtes en R, relief en G)
 function emap(w,h){const D=new Uint8Array(w*h*4),sea=P.Rs>0?P.Rs-P.R:P.eMin-50,rg=Math.max(1,P.eMax-P.eMin);
  for(let j=0;j<h;j++){const th=(j+.5)/h*Math.PI,y=Math.cos(th),q=Math.sin(th);for(let i=0;i<w;i++){const ph=((i+.5)/w-.5)*2*Math.PI,e=elev(Math.cos(ph)*q,y,Math.sin(ph)*q),o=(i+j*w)*4,wd=sea-e;
   D[o]=Math.max(0,Math.min(255,wd*8+32));D[o+1]=Math.max(0,Math.min(255,(e-P.eMin)/rg*255));D[o+3]=255}}return D}
-return{setup,sdf,elev,grad,GN,OUT,mesh,sn,emap,setCav:(c,d)=>{CAV=c;DG=d;NDG=d?d.length:0},getP:()=>P}}
+return{setup,sdf,elev,grad,GN,OUT,mesh,sn,emap,ore,setCav:(c,d)=>{CAV=c;DG=d;NDG=d?d.length:0},getP:()=>P}}
 
 // ----- préréglages par type de planète (forme du relief, mer, grottes, noyau, couleurs) -----
 function vxPreset(ty,seed,R,hue){let s=(seed>>>0)||1;const r=()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s/4294967296};
@@ -154,7 +157,7 @@ function vxPoolInit(){if(VXW.init)return;VXW.init=true;
  const src='const vxCore='+vxCore.toString()+';const PL={};onmessage=e=>{const m=e.data;if(m.t=="p"){const c=vxCore();c.setup(m.P);PL[m.pid]=c;return}'+
   'if(m.t=="e"){const c=PL[m.pid],D=c?c.emap(m.w,m.h):null;postMessage({id:m.id,r:D},D?[D.buffer]:[]);return}'+
   'const c=PL[m.pid];let r=null,err=null;const t0=performance.now();try{r=c?c.mesh(m.x,m.y,m.z,m.s,m.N,m.cav,m.dg):null}catch(x){err=String(x)}const ms=performance.now()-t0;'+
-  'if(r)postMessage({id:m.id,r,ms},[r.pos.buffer,r.nor.buffer,r.dep.buffer,r.mat.buffer,r.idx.buffer]);else postMessage({id:m.id,r:null,err,ms})}';
+  'if(r)postMessage({id:m.id,r,ms},[r.pos.buffer,r.nor.buffer,r.dep.buffer,r.mat.buffer,r.orw.buffer,r.idx.buffer]);else postMessage({id:m.id,r:null,err,ms})}';
  try{const url=URL.createObjectURL(new Blob([src],{type:'text/javascript'}));const n=Math.max(1,Math.min(4,((navigator.hardwareConcurrency||4)>>1)));
   for(let i=0;i<n;i++){const w=new Worker(url);w.n=0;w.onmessage=e=>{w.n--;VXW.busy--;const m=e.data;VXW.ms=(VXW.ms||0)+(m.ms||0);VXW.nj=(VXW.nj||0)+1;const cb=VXW.cb.get(m.id);VXW.cb.delete(m.id);if(m.err)console.warn('vox worker',m.err);if(cb)cb(m.r)};
    w.onerror=e=>{console.warn('vox worker',e.message||e);VXW.ok=false};VXW.ws.push(w)}VXW.ok=true}catch(e){console.warn('vox: workers indisponibles',e);VXW.ok=false}}
@@ -195,8 +198,8 @@ function vxU(P){const c=a=>new THREE.Color(a[0],a[1],a[2]),K=P.col;
   R:{value:P.R},Rs:{value:P.Rs>0?P.Rs:P.R+P.eMin-50},amp:{value:P.amp},cR:{value:P.cR},snowL:{value:K.snowL},glow:{value:K.glow||0},hasSea:{value:P.Rs>0&&!P.ice?1:0},
   cSand:{value:c(K.sand)},cLow:{value:c(K.low)},cHigh:{value:c(K.high)},cRock:{value:c(K.rock)},cRock2:{value:c(K.rock2)},cSnow:{value:c(K.snow)},cDeep:{value:c(K.deep)},cVein:{value:c(K.vein)},
   cSea:{value:c(K.sea)},cSea2:{value:c(K.sea2)},atm:{value:c(K.atm)},tx:{value:vxTex()},em:{value:em}}}
-const VX_TVS=`attribute vec4 nrm;attribute float dp;attribute vec4 mt;varying vec3 vO,vNo,vW,vN;varying float vD;varying vec2 vM;
-void main(){vO=position;vNo=normalize(nrm.xyz);vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;vN=normalize(mat3(modelMatrix)*vNo);vD=dp;vM=mt.xy;gl_Position=projectionMatrix*viewMatrix*w;}`;
+const VX_TVS=`attribute vec4 nrm;attribute float dp;attribute vec4 mt,orw;varying vec3 vO,vNo,vW,vN;varying float vD;varying vec2 vM;varying vec4 vOr;
+void main(){vOr=orw;vO=position;vNo=normalize(nrm.xyz);vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;vN=normalize(mat3(modelMatrix)*vNo);vD=dp;vM=mt.xy;gl_Position=projectionMatrix*viewMatrix*w;}`;
 const VX_COMMON=`uniform vec3 sunDir,pc,camUp,lampPos,lampDir,atm,cSea,cSea2;uniform vec3 sunCol;uniform float dip,dens,fogK,caveK,waterK,lampK,tm,space,R,Rs;uniform sampler2D tx,em;
 `+VX_SKY+`
 vec4 tri(vec3 p,vec3 w){return texture2D(tx,p.yz)*w.x+texture2D(tx,p.xz)*w.y+texture2D(tx,p.xy)*w.z;}
@@ -206,7 +209,7 @@ vec3 vxFog(vec3 c,vec3 W){if(space>.5)return c;vec3 D=W-cameraPosition;float d=l
  float k=fogK*(1.-caveK)+caveK*.012+waterK*.05;return mix(c,fc,1.-exp(-d*k));}
 float vxLamp(vec3 N,vec3 W){if(lampK<.01)return 0.;vec3 L=lampPos-W;float d=length(L);L/=d;return lampK*smoothstep(.72,.93,dot(-L,lampDir))*max(dot(N,L),0.)/(1.+d*d*.005);}`;
 // ----- matériau du terrain : couches selon l'altitude, la pente et la profondeur, triplanaire, grottes sombres, lampe frontale, brouillard -----
-const VX_TFS=VX_COMMON+`uniform vec3 cSand,cLow,cHigh,cRock,cRock2,cSnow,cDeep,cVein;uniform float amp,cR,snowL,hasSea,glow;varying vec3 vO,vNo,vW,vN;varying float vD;varying vec2 vM;
+const VX_TFS=VX_COMMON+`uniform vec3 cSand,cLow,cHigh,cRock,cRock2,cSnow,cDeep,cVein;uniform float amp,cR,snowL,hasSea,glow;varying vec3 vO,vNo,vW,vN;varying float vD;varying vec2 vM;varying vec4 vOr;
 void main(){float r=length(vO);vec3 up=vO/r;float alt=r-R,aS=r-Rs,dep=vD;vec3 no=normalize(vNo);float sl=dot(no,up);
  vec3 bw=pow(abs(no),vec3(4.));bw/=dot(bw,vec3(1.));vec4 t1=tri(vO*.27,bw),t2=tri(vO*.031,bw),t3=tri(vO*.0043,bw),t0=tri(vO*1.3,bw);
  float n1=t1.r,n2=t2.g,n3=t3.g,hN=alt/amp+(n2-.5)*.25+(n3-.5)*.35,sw=1.-smoothstep(.5,3.5,dep);
@@ -217,10 +220,13 @@ void main(){float r=length(vO);vec3 up=vO/r;float alt=r-R,aS=r-Rs,dep=vD;vec3 no
  cs*=.82+.24*n1+.14*t0.r;
  float band=sin(r*.42+n2*7.)*.5+.5;vec3 cu=mix(cRock2,cRock,band*.65+n1*.35)*(.78+.3*t1.r+.14*t0.r);cu=mix(cu,cDeep,smoothstep(15.,R*.45,dep));cu*=1.-smoothstep(.35,.0,t2.b)*.35;
  vec3 col=mix(cu,cs,sw),emis=vec3(0.);
- float vein=smoothstep(.6,.76,t2.a)*smoothstep(5.,16.,dep);col=mix(col,cVein*.35,vein);emis+=cVein*vein*(1.1+.4*sin(tm*1.3+r*.2));
+ float vein=smoothstep(.66,.8,t2.a)*smoothstep(5.,16.,dep);col=mix(col,cVein*.3,vein);emis+=cVein*vein*(.22+.08*sin(tm*1.3+r*.2));
  if(glow>0.){float ck=smoothstep(.16,.02,t2.b)*smoothstep(.45,.75,n3)*sw;emis+=vec3(1.,.3,.05)*ck*glow*(.9+.3*sin(tm*1.5+r*.1));col=mix(col,vec3(.05,.02,.01),ck);}
  float hot=smoothstep(cR*1.75,cR*1.02,r);emis+=hot*vec3(1.,.3,.05)*(.2+.8*t1.r)*.55*smoothstep(.45,.75,t2.r+hot*.3);col=mix(col,vec3(.08,.03,.02),hot*.7);
  float id=vM.x*255.,spec=.05*sw;
+ // filons de minerai : fer rouillé, titane argenté, cristal lumineux, or brillant
+ {vec4 o=smoothstep(.15,.6,vOr)*smoothstep(.25,.6,t1.r*.6+t0.g*.6);float ot=o.x+o.y+o.z+o.w;if(ot>.01){vec3 oc=(vec3(.42,.18,.09)*o.x+vec3(.42,.47,.53)*o.y+vec3(.25,.85,1.)*o.z+vec3(1.,.74,.2)*o.w)/ot;float k=min(1.,ot);
+  col=mix(col,oc*(.75+.5*t0.r),k);spec=max(spec,k*(.15+.35*(o.y+o.w)/ot));emis+=(vec3(.15,.6,.8)*o.z*(.45+.2*sin(tm*2.+r*.3))+vec3(1.,.7,.2)*o.w*.12)*k;}}
  if(id>.5&&id<1.5){col=mix(cSea2,cSnow,t2.r*.6)*(.85+.3*n1);col*=1.-smoothstep(.25,.0,t1.b)*.3;spec=.7;}
  else if(id>1.5){float fl=tri(vO*.05+vec3(tm*.03),bw).r;col=vec3(.15,.04,.02);emis=mix(vec3(.9,.2,.03),vec3(1.,.55,.12),fl)*(.75+.2*sin(tm*2.+r))*smoothstep(.2,.7,fl+.3);}
  vec3 upW=normalize(vW-pc),N=normalize(vN);vec3 T=normalize(cross(N,abs(N.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.))),B=cross(N,T);
@@ -230,6 +236,7 @@ void main(){float r=length(vO);vec3 up=vO/r;float alt=r-R,aS=r-Rs,dep=vD;vec3 no
  vec3 sky=mix(atm,vec3(1.),.35)*(.2+.14*dot(N,upW))*smoothstep(-.3,.25,dot(upW,sunDir))*vis*max(dens,.3);
  vec3 lit=sunCol*dif*1.15*(.55+.45*ao)+sky*ao+vec3(.01,.011,.015)*ao+vec3(1.,.93,.8)*vxLamp(N,vW)*2.6*(.4+.6*ao);
  vec3 V=normalize(cameraPosition-vW);lit+=sunCol*pow(max(dot(reflect(-sunDir,N),V),0.),40.)*spec*term*vis;
+ if(lampK>.01){vec3 Lw=normalize(lampPos-vW);lit+=vec3(1.,.95,.85)*pow(max(dot(reflect(-Lw,N),V),0.),28.)*spec*vxLamp(N,vW)*1.4;}
  vec3 c=col*lit+emis;gl_FragColor=vec4(vxFog(c,vW),1.);}`;
 function vxTerrainMat(U){return new THREE.ShaderMaterial({uniforms:U,vertexShader:VX_TVS,fragmentShader:VX_TFS})}
 // mer d'eau / de lave / de cristal liquide : sphère au niveau de la mer, vagues, profondeur lue dans la carte d'élévation (bas-fonds clairs, écume)
@@ -291,7 +298,7 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
   vxPoolJob(pid,{x:c.x,y:c.y,z:c.z,s:c.s,N,cav:c.cav,dg:c.cav?digsFor(c):null},r=>{V.pend--;if(V.dead||V.ch.get(c.k)!==c||c.ver!==ver)return;c.req=0;c.st=2;
    if(c.mesh){V.g.remove(c.mesh);c.mesh.geometry.dispose();V.tri-=c.nt||0;c.mesh=null}c.nt=0;
    if(r){const G=new THREE.BufferGeometry();G.setAttribute('position',new THREE.BufferAttribute(r.pos,3));G.setAttribute('nrm',new THREE.BufferAttribute(r.nor,4,true));
-    G.setAttribute('dp',new THREE.BufferAttribute(r.dep,1));G.setAttribute('mt',new THREE.BufferAttribute(r.mat,4,true));G.setIndex(new THREE.BufferAttribute(r.idx,1));
+    G.setAttribute('dp',new THREE.BufferAttribute(r.dep,1));G.setAttribute('mt',new THREE.BufferAttribute(r.mat,4,true));G.setAttribute('orw',new THREE.BufferAttribute(r.orw,4,true));G.setIndex(new THREE.BufferAttribute(r.idx,1));
     G.boundingSphere=new THREE.Sphere(new THREE.Vector3(c.x+c.s/2,c.y+c.s/2,c.z+c.s/2),c.s*.87+3*c.s/N);G.boundingBox=new THREE.Box3(new THREE.Vector3(c.x,c.y,c.z).subScalar(2*c.s/N),new THREE.Vector3(c.x+c.s,c.y+c.s,c.z+c.s).addScalar(2*c.s/N));
     const m=new THREE.Mesh(G,mat);m.matrixAutoUpdate=false;m.visible=false;m.userData.vxc=c;c.mesh=m;c.nt=r.nt;V.tri+=r.nt;V.g.add(m)}
    V.dirty=true;pump()})}
