@@ -13,7 +13,7 @@ function vaCell(cx,cy,cz){const k=cx+','+cy+','+cz;if(VA.cells.has(k))return VA.
    if(c.pl&&Math.hypot(x-c.pl.x,y-c.pl.y,z-c.pl.z)<c.pl.r*1.6+900)continue;if(c.st&&Math.hypot(x-c.st.x,y-c.st.y,z-c.st.z)<1800)continue;
    o={id:'va'+k,x,y,z,R,seed:(seedOf(cx,cy,cz,4799)>>>0)||5,name:'Astéroïde '+['Kepler','Hadès','Ymir','Orcus','Talos','Nyx','Brontès','Pallas'][(h3(cx,cy,cz,4801)*8)|0]+'-'+((h3(cx,cy,cz,4802)*90+10)|0)};break}}}
  VA.cells.set(k,o);return o}
-function vaLoad(o){const P=vxPreset('Astéroïde',o.seed,o.R,null),U=vxU(P);U.space.value=1;const V=vxPlanet(P,{N:DESK?32:24,leaf:32,K:DESK?.8:.62,U,ew:64});
+function vaLoad(o){const P=vxPreset('Astéroïde',o.seed,o.R,null),U=vxU(P);U.space.value=1;const V=vxPlanet(P,{N:DESK?32:20,leaf:32,K:DESK?.75:.5,U,ew:64,fg:true});
  V.g.position.set(o.x,o.y,o.z);scene.add(V.g);const lt=lightFor(o.x,o.y,o.z);U.sunDir.value.copy(lt.dir);U.sunCol.value.copy(lt.col).multiplyScalar(lt.s?1.05:.92);U.pc.value.set(o.x,o.y,o.z);
  const dg=GX('vad',{})[o.id];if(Array.isArray(dg))for(let i=0;i+3<dg.length;i+=4)V.digs.push([dg[i],dg[i+1],dg[i+2],dg[i+3]]);
  const T={va:o,pos:new V3(o.x,o.y,o.z),r:4,max:1000,cone:.2,w:1.4,isAst:1,gone:1,label:o.name};T.hit=(d,p)=>vaHit(A,d,p);

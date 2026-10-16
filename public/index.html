@@ -296,7 +296,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261016-165429"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261016-175442"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -6279,7 +6279,7 @@ const LOADED=new Map(),SMALL=new Map(),DEAD=new Map();
 const planets=[],suns=[],stations=[],asts=[];
 function loadBig(c){const o={};if(DESK&&c.pl&&!c.pl.mesh){const p=c.pl;p.mesh=buildPlanetGPU(p);scene.add(p.mesh);planets.push(p)}else if(c.pl&&!c.pl.mesh&&!c.pl.pending){c.pl.pending=1;const p=c.pl;job(planetTexGen(p),tx=>{p.pending=0;if(!LOADED.has(c.k))return;p.mesh=buildPlanet(p,tx);const L=lightFor(p.x,p.y,p.z);p.mesh.userData.U.sunDir.value.copy(L.dir);p.mesh.userData.U.sunCol.value.copy(L.col).multiplyScalar(L.s?1.1:.9);scene.add(p.mesh);planets.push(p)},()=>Math.hypot(p.x-S.pos.x,p.y-S.pos.y,p.z-S.pos.z))}
 if(c.sun&&!c.sun.mesh){c.sun.mesh=buildSun(c.sun);scene.add(c.sun.mesh);suns.push(c.sun)}LOADED.set(c.k,c)}
-function disposeObj(o){o.traverse(m=>{if(m.geometry&&!AGEO.includes(m.geometry)&&m.geometry!==OREG)m.geometry.dispose();if(m.material&&m.material.uniforms){for(const u of Object.values(m.material.uniforms))if(u.value&&u.value.isTexture)u.value.dispose();m.material.dispose()}else if(m.material&&m.material.map&&m.isMesh){m.material.map.dispose();m.material.dispose()}})}
+function disposeObj(o){o.traverse(m=>{if(m.geometry&&!AGEO.includes(m.geometry)&&m.geometry!==OREG)m.geometry.dispose();if(m.material&&m.material.uniforms){for(const u of Object.values(m.material.uniforms))if(u.value&&u.value.isTexture&&!u.value.vxKeep)u.value.dispose();m.material.dispose()}else if(m.material&&m.material.map&&m.isMesh){m.material.map.dispose();m.material.dispose()}})}
 function unloadBig(c){if(c.pl&&c.pl.mesh){scene.remove(c.pl.mesh);disposeObj(c.pl.mesh);c.pl.mesh=null;planets.splice(planets.indexOf(c.pl),1)}if(c.sun&&c.sun.mesh){scene.remove(c.sun.mesh);c.sun.mesh=null;suns.splice(suns.indexOf(c.sun),1)}LOADED.delete(c.k)}
 function loadSmall(c){const dead=DEAD.get(c.k)||new Set();DEAD.set(c.k,dead);const list=[];
 for(const a of c.ast){if(dead.has(a.id))continue;const m=new THREE.Mesh(AGEO[a.v],AMAT[a.m]);m.position.set(a.x,a.y,a.z);m.scale.setScalar(a.r);m.rotation.set(a.rx,a.ry,0);if(a.ore)for(let i=0;i<3;i++){const o=new THREE.Mesh(OREG,MAT.ore);const d=new V3(rv(1),rv(1),rv(1)).normalize().multiplyScalar(.95);o.position.copy(d);o.scale.setScalar(.09);m.add(o)}
@@ -14010,10 +14010,15 @@ void main(){vec3 N=normalize(vN),V=normalize(cameraPosition-vW),L=normalize(sunD
 // ----- cuisson du bruit -----
 function pl4Mat(P,seed,W){const r=rng(seed),U={NT:{value:P.n},FT:{value:P.ft},OCT:{value:P.o},LAC:{value:P.l},GAIN:{value:P.g},FQ:{value:P.f*P.sc},GAS:{value:P.gas?1:0},CF:{value:P.cl?1.7:0},NORM:{value:0},
  SEED:{value:new V3(r()*80,r()*80,r()*80)},SEED2:{value:new V3(r()*80,r()*80,r()*80)},MM:{value:new THREE.Vector4(0,1,0,1)}};return new THREE.ShaderMaterial({uniforms:U,vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:PL4BAKE_FS,depthTest:false,depthWrite:false})}
-function pl4Bake(P,seed,W,H){const m=pl4Mat(P,seed),q=new THREE.Mesh(new THREE.PlaneGeometry(2,2),m),sc=new THREE.Scene();sc.add(q);const cam=new THREE.Camera(),old=R3.getRenderTarget(),oac=R3.autoClear;R3.autoClear=true;
+// cache des textures cuites (les planètes sont reconstruites à chaque retour dans la zone : on évite de recuire)
+const PL4C=new Map(),PL4KEEP=new Set(),PL4MM=new Map();
+function pl4Bake(P,seed,W,H){const ck=JSON.stringify([P.r1||0,P.e1||0,P.t||0,seed,W,H,P.c?P.c.length:0,P.gas?1:0])+(P.nm||'')+(PL4P&&Object.keys(PL4P).find(k=>PL4P[k]===P)||'');const hit=PL4C.get(ck);if(hit){PL4C.delete(ck);PL4C.set(ck,hit);return hit}
+ const rt=pl4Bake0(P,seed,W,H);rt.texture.vxKeep=1;PL4C.set(ck,rt);PL4KEEP.add(rt);if(PL4C.size>10){const[k0,r0]=PL4C.entries().next().value;PL4C.delete(k0);PL4KEEP.delete(r0);r0.dispose()}return rt}
+function pl4Bake0(P,seed,W,H){const m=pl4Mat(P,seed),q=new THREE.Mesh(new THREE.PlaneGeometry(2,2),m),sc=new THREE.Scene();sc.add(q);const cam=new THREE.Camera(),old=R3.getRenderTarget(),oac=R3.autoClear;R3.autoClear=true;
  // 1) statistiques sur une petite image (Godot normalise la texture de bruit entre son minimum et son maximum)
- const sw=128,sh=64,st=new THREE.WebGLRenderTarget(sw,sh,{depthBuffer:false});R3.setRenderTarget(st);R3.render(sc,cam);const px=new Uint8Array(sw*sh*4);R3.readRenderTargetPixels(st,0,0,sw,sh,px);st.dispose();
- let a=1,b=0,c=1,d=0;for(let i=0;i<px.length;i+=4){const x=px[i]/255,y=px[i+1]/255;if(x<a)a=x;if(x>b)b=x;if(y<c)c=y;if(y>d)d=y}m.uniforms.MM.value.set(a,b,c,d);m.uniforms.NORM.value=1;
+ // (mesuré une seule fois par préréglage : la relecture des pixels bloque la carte graphique → à-coup)
+ let mm=PL4MM.get(P);if(!mm){const sw=128,sh=64,st=new THREE.WebGLRenderTarget(sw,sh,{depthBuffer:false});R3.setRenderTarget(st);R3.render(sc,cam);const px=new Uint8Array(sw*sh*4);R3.readRenderTargetPixels(st,0,0,sw,sh,px);st.dispose();
+ let a=1,b=0,c=1,d=0;for(let i=0;i<px.length;i+=4){const x=px[i]/255,y=px[i+1]/255;if(x<a)a=x;if(x>b)b=x;if(y<c)c=y;if(y>d)d=y}mm=[a,b,c,d];PL4MM.set(P,mm)}m.uniforms.MM.value.set(...mm);m.uniforms.NORM.value=1;
  // 2) texture finale
  const rt=new THREE.WebGLRenderTarget(W,H,{depthBuffer:false,wrapS:THREE.RepeatWrapping,minFilter:THREE.LinearMipmapLinearFilter,magFilter:THREE.LinearFilter,generateMipmaps:true});R3.setRenderTarget(rt);R3.render(sc,cam);
  R3.setRenderTarget(old);R3.autoClear=oac;q.geometry.dispose();m.dispose();rt.texture.anisotropy=DESK?8:2;return rt}
@@ -14022,7 +14027,7 @@ function pl4Pre(p){const ty=ptype(p);return ty=='Géante gazeuse'?'gaseous':ty==
 function pl4Cols(P,p,key){const r=rng((seedOf(p.x,p.y,p.z,41)>>>0)%2147483646+1),ty=ptype(p),cs=P.c.map(c=>c.clone());let dh=(r()-.5)*.06;
  if(key=='gaseous')dh=((p.hue-35)/360);if(ty=='Cristalline')dh=((p.hue-205)/360);const hsl={};for(const c of cs){c.getHSL(hsl);c.setHSL((hsl.h+dh+1)%1,Math.min(1,hsl.s*(ty=='Cristalline'?1.3:1)),hsl.l)}
  const t=P.t.slice();if(ty=='Océanique'){t[0]+=.08;t[1]+=.08;t[2]+=.06;t[3]+=.04}if(pvar(p)=='archipel'){t[0]+=.12;t[1]+=.1;t[2]+=.08}return{cs,t}}
-function pl4Apply(p,g){if(!g||!g.userData||g.userData.pl4)return;if(typeof wg4Is=='function'&&wg4Is(p))return;const ud=g.userData,U=ud.U||{},sph=ud.sph;if(!sph)return;const key=pl4Pre(p),P=PL4P[key],seed=(seedOf(p.x,p.y,p.z,17)>>>0)%2147483646+1;
+function pl4Apply(p,g){if(!g||!g.userData||g.userData.pl4)return;if(typeof wg4Is=='function'&&wg4Is(p))return;if(!p.ring&&typeof vxEn=='function'&&vxEn())return;const ud=g.userData,U=ud.U||{},sph=ud.sph;if(!sph)return;const key=pl4Pre(p),P=PL4P[key],seed=(seedOf(p.x,p.y,p.z,17)>>>0)%2147483646+1;
  const W=DESK?2048:1024,rt=pl4Bake(P,seed,W,W/2),{cs,t}=pl4Cols(P,p,key),sunDir=U.sunDir||{value:new V3(0,1,0)},sunCol=U.sunCol||{value:new THREE.Color(1,1,1)};
  const BU={tex:{value:rt.texture},c1:{value:cs[0]},c2:{value:cs[1]},c3:{value:cs[2]},c4:{value:cs[3]},c5:{value:cs[4]},th:{value:new THREE.Vector4(...t)},r1:{value:P.r1||0},e1:{value:P.e1||0},
   city:U.city||{value:0},sunDir,sunCol,hasR:{value:U.rN3?1:0},rN3:U.rN3||{value:new V3(0,1,0)},pc3:U.pc3||{value:g.position.clone()},rI3:U.rI3||{value:0},rO3:U.rO3||{value:0}};
@@ -14040,7 +14045,7 @@ function pl4Apply(p,g){if(!g||!g.userData||g.userData.pl4)return;if(typeof wg4Is
   moons.push({m,g0:m.geometry,m0:m.material,rt:mr});m.geometry=new THREE.SphereGeometry(R,32,16);m.material=mm}
  sph.material=mat;ud.pl4={S,add,rt,moons,mat};PL4.list.push(g)}
 function pl4Revert(g){const ud=g.userData,s=ud&&ud.pl4;if(!s)return;ud.sph.material=s.S.sph;for(const[o,v]of s.S.hide)o.visible=v;for(const o of s.add){g.remove(o);o.geometry.dispose();o.material.dispose()}
- for(const M of s.moons){M.m.geometry.dispose();M.m.material.dispose();M.m.geometry=M.g0;M.m.material=M.m0;M.rt.dispose()}s.mat.dispose();s.rt.dispose();ud.pl4=null;ud.pl4cl=null}
+ for(const M of s.moons){M.m.geometry.dispose();M.m.material.dispose();M.m.geometry=M.g0;M.m.material=M.m0;if(!PL4KEEP.has(M.rt))M.rt.dispose()}s.mat.dispose();if(!PL4KEEP.has(s.rt))s.rt.dispose();ud.pl4=null;ud.pl4cl=null}
 // ----- branchements : planètes vues de l'espace (PC : buildPlanetGPU, mobile : buildPlanet), menu d'accueil compris -----
 {const _bg4=buildPlanetGPU;buildPlanetGPU=function(p){const g=_bg4.apply(this,arguments);try{if(PL4.on)pl4Apply(p,g);g.userData.pl4p=p}catch(e){console.warn('pl4',e)}return g}}
 {const _bp4=buildPlanet;buildPlanet=function(p,tx){const g=_bp4.apply(this,arguments);try{if(PL4.on)pl4Apply(p,g);g.userData.pl4p=p}catch(e){console.warn('pl4',e)}return g}}
@@ -14408,10 +14413,14 @@ function vxPreset(ty,seed,R,hue){let s=(seed>>>0)||1;const r=()=>{s^=s<<13;s>>>=
   const h=20+r()*30,g=r()*.05;pal={sand:C(h,.08,.32),low:C(h,.05+g,.27),high:C(h+10,.05,.22),rock:C(h,.07,.25),rock2:C(h-10,.09,.15),snow:C(h,.1,.55),deep:C(h,.12,.13),vein:C(r()*360,.85,.55),sea:[0,0,0],sea2:[0,0,0],atm:[0,0,0],snowL:9}}
  else{P.seaQ=0;P.mW=.35;P.amp=R*.07;P.atm=0;P.det=1.2;for(const d of dirs(26))P.cr.push(d[0],d[1],d[2],Math.cos(.04+r()*.14),R*(.008+r()*.02));
   pal={sand:C(40,.05,.5),low:C(40,.06,.45),high:C(40,.05,.38),rock:C(40,.04,.3),rock2:C(40,.04,.22),snow:C(40,.05,.6),deep:C(40,.05,.16),vein:C(200,.8,.55),sea:[0,0,0],sea2:[0,0,0],atm:[0,0,0],snowL:9}}
- P.col=pal;return P}
+ P.col=pal;
+ const CL={Jungle:[.5,.85,[1,1,1]],'Océanique':[.47,.85,[1,1,1]],'Désertique':[.7,.55,[.95,.86,.72]],'Glacée':[.53,.8,[.95,.97,1]],Volcanique:[.5,.85,[.3,.26,.24]],Cristalline:[.6,.6,[.92,.82,1]]}[ty];
+ if(CL)P.cl={v:CL[0],a:CL[1],c:CL[2]};
+ if(CL&&r()<.3){P.ring=1;P.ringT=(r()-.5)*.5;P.ringC=ty=='Glacée'||ty=='Cristalline'?[.85,.9,1]:ty=='Volcanique'?[.5,.4,.36]:[.82,.76,.66]}
+ return P}
 
 // ----- pool de workers (le calcul du maillage ne bloque pas l'image) -----
-const VXW={ws:[],q:[],busy:0,id:0,cb:new Map(),main:null,ok:false,init:false,P:new Map()};
+const VXW={ws:[],q:[],busy:0,id:0,cb:new Map(),main:null,ok:false,init:false,P:new Map(),fg:new Map(),bud:typeof DESK!='undefined'&&!DESK?1.6:2.5};
 function vxPoolInit(){if(VXW.init)return;VXW.init=true;
  const src='const vxCore='+vxCore.toString()+';const PL={};onmessage=e=>{const m=e.data;if(m.t=="p"){const c=vxCore();c.setup(m.P);PL[m.pid]=c;return}'+
   'if(m.t=="e"){const c=PL[m.pid],D=c?c.emap(m.w,m.h):null;postMessage({id:m.id,r:D},D?[D.buffer]:[]);return}'+
@@ -14442,7 +14451,7 @@ function vxTex(){if(VXTX)return VXTX;const S=256,D=new Uint8Array(S*S*4);let s=9
   let d1=9,d2=9;for(const p of pts){let dx=Math.abs(u-p[0]),dy=Math.abs(v-p[1]);dx=Math.min(dx,1-dx);dy=Math.min(dy,1-dy);const d=dx*dx+dy*dy;if(d<d1){d2=d1;d1=d}else if(d<d2)d2=d}
   const crack=Math.min(1,(Math.sqrt(d2)-Math.sqrt(d1))*14),rid=Math.pow(1-Math.abs(vn(L[1],u,v)*2-1),6)*.6+Math.pow(1-Math.abs(vn(L[2],u,v)*2-1),8)*.4,o=(x+y*S)*4;
   D[o]=fine*255;D[o+1]=med*255;D[o+2]=crack*255;D[o+3]=Math.min(1,rid)*255}
- const t=new THREE.DataTexture(D,S,S,THREE.RGBAFormat);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.generateMipmaps=true;t.needsUpdate=true;VXTX=t;return t}
+ const t=new THREE.DataTexture(D,S,S,THREE.RGBAFormat);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.generateMipmaps=true;t.needsUpdate=true;t.vxKeep=1;VXTX=t;return t}
 
 // ----- ciel (même formule pour le dôme, les reflets de l'eau et le brouillard du terrain) -----
 const VX_SKY=`vec3 vxSky(vec3 V,vec3 U,vec3 S,vec3 atm,vec3 sc,float dens,float dip){float sh=dot(U,S),day=smoothstep(-.22,.18,sh),h=(dot(V,U)+dip)/(1.+dip),ts=max(dot(V,S),0.);
@@ -14521,6 +14530,25 @@ const VX_AVS=`varying vec3 vNV,vN;void main(){vN=normalize(mat3(modelMatrix)*nor
 const VX_AFS=`uniform vec3 atm,sunDir;uniform float aK;varying vec3 vNV,vN;void main(){float i=pow(clamp(.86-abs(dot(vNV,vec3(0.,0.,1.))),0.,1.),3.2);float l=dot(vN,sunDir),day=smoothstep(-.18,.35,l);
  vec3 c=mix(vec3(1.,.5,.25),atm*1.2,smoothstep(-.12,.15,l))*day;gl_FragColor=vec4(c*i*1.6*aK,1.);}`;
 function vxAtmo(P,U,Ra){return new THREE.Mesh(new THREE.SphereGeometry(Ra,64,32),new THREE.ShaderMaterial({uniforms:{atm:U.atm,sunDir:U.sunDir,aK:{value:1}},vertexShader:VX_AVS,fragmentShader:VX_AFS,side:THREE.BackSide,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false}))}
+// couche de nuages qui tourne (vue de l'espace, traversée à l'atterrissage, plafond vu du sol)
+const VX_CVS=`varying vec3 vO,vW;void main(){vO=position;vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`;
+const VX_CFS=`uniform sampler2D tx;uniform vec3 sunDir,pc,cCol;uniform float tm,cov,cA;varying vec3 vO,vW;
+vec4 tri(vec3 p,vec3 w){return texture2D(tx,p.yz)*w.x+texture2D(tx,p.xz)*w.y+texture2D(tx,p.xy)*w.z;}
+void main(){vec3 d=normalize(vO),bw=pow(abs(d),vec3(4.));bw/=dot(bw,vec3(1.));
+ float n=tri(d*1.7+vec3(tm*.0035,0.,tm*.0021),bw).g*.55+tri(d*5.3-vec3(0.,tm*.005,tm*.003),bw).r*.3+tri(d*15.+vec3(tm*.01),bw).r*.15;
+ float a=smoothstep(cov,cov+.16,n);if(a<.01)discard;
+ vec3 upW=normalize(vW-pc);float l=dot(upW,sunDir),day=smoothstep(-.22,.2,l);
+ vec3 c=cCol*(.05+.9*day*(.55+.45*max(l,0.)))+vec3(1.,.42,.18)*smoothstep(.3,0.,abs(l))*.35*day;c*=.8+.4*smoothstep(cov,cov+.4,n);
+ float cd=length(vW-cameraPosition);a*=smoothstep(8.,90.,cd);gl_FragColor=vec4(c,a*cA);}`;
+function vxClouds(P,U,Rc){const cl=P.cl;if(!cl)return null;const m=new THREE.Mesh(new THREE.SphereGeometry(Rc,96,48),new THREE.ShaderMaterial({uniforms:{tx:U.tx,sunDir:U.sunDir,pc:U.pc,tm:U.tm,cCol:{value:new THREE.Color(cl.c[0],cl.c[1],cl.c[2])},cov:{value:cl.v},cA:{value:cl.a}},
+ vertexShader:VX_CVS,fragmentShader:VX_CFS,transparent:true,depthWrite:false,side:THREE.DoubleSide}));m.renderOrder=2;return m}
+// anneau de poussière et de glace (ombre de la planète)
+const VX_RFS=`uniform sampler2D tx;uniform vec3 sunDir,pc,rCol;uniform float R,Ri,Ro;varying vec3 vO,vW;
+void main(){float rr=length(vO),k=(rr-Ri)/(Ro-Ri);vec4 t=texture2D(tx,vec2(k*1.9,.37)),u=texture2D(tx,vec2(k*7.3,.71));
+ float a=smoothstep(.3,.62,t.g)*(.45+.55*u.r)*smoothstep(0.,.08,k)*smoothstep(1.,.85,k);vec3 o=vW-pc;float b=dot(o,sunDir),sh=1.;if(b<0.){float d2=dot(o,o)-b*b;sh=smoothstep(R*R*.92,R*R*1.06,d2);}
+ gl_FragColor=vec4(rCol*(.75+.5*u.g)*(.06+.94*sh),a*.8);}`;
+function vxRing(P,U){const Ri=P.R*1.45,Ro=P.R*2.35,m=new THREE.Mesh(new THREE.RingGeometry(Ri,Ro,160,1),new THREE.ShaderMaterial({uniforms:{tx:U.tx,sunDir:U.sunDir,pc:U.pc,rCol:{value:new THREE.Color(...(P.ringC||[.8,.75,.68]))},R:{value:P.R},Ri:{value:Ri},Ro:{value:Ro}},
+ vertexShader:VX_CVS,fragmentShader:VX_RFS,transparent:true,depthWrite:false,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2+(P.ringT||0);return m}
 // dôme du ciel depuis la surface (étoiles et nébuleuse de l'espace à travers l'atmosphère)
 const VX_KVS=`varying vec3 vD;void main(){vD=position;vec4 p=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_Position=p.xyww;}`;
 const VX_KFS=VX_SKY+`uniform vec3 sunDir,camUp,atm,sunCol;uniform float dip,dens,caveK,hasSpace;uniform sampler2D spaceTx;uniform mat3 skyRot;varying vec3 vD;
@@ -14538,42 +14566,53 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
  const N=o.N||32,leaf=o.leaf||32;let W=leaf;while(W<2*(P.Rx+48))W*=2;
  const U=o.U||vxU(P),mat=vxTerrainMat(U),g=new THREE.Group();g.name='vox-'+pid;
  const emReq=()=>{const ew=o.ew||1024,eh=ew>>1;vxPoolJob(pid,{t:'e',w:ew,h:eh},D=>{if(!D)return;const t=new THREE.DataTexture(D,ew,eh,THREE.RGBAFormat);t.wrapS=THREE.RepeatWrapping;t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;U.em.value=t})};
- const V={pid,P,core,N,leaf,W,U,mat,g,ch:new Map(),want:new Map(),digs:[],K:o.K||.75,space:!!o.space,cam:new THREE.Vector3(1e9,0,0),under:0,tw:0,ready:false,tri:0,dirty:true,cav:o.cav!==false,maxCav:o.maxCav||2.01,pend:0};
+ const V={pid,P,core,N,leaf,W,U,mat,g,ch:new Map(),want:new Map(),digs:[],K:o.K||.75,space:!!o.space,fg:!!o.fg,sLeaf:o.sLeaf||W/16,cam:new THREE.Vector3(1e9,0,0),under:0,tw:0,ready:false,tri:0,dirty:true,cav:o.cav!==false,maxCav:o.maxCav||2.01,pend:0};
  const dBox=(x,y,z,s,px,py,pz)=>{const dx=Math.max(x-px,0,px-x-s),dy=Math.max(y-py,0,py-y-s),dz=Math.max(z-pz,0,pz-z-s);return Math.sqrt(dx*dx+dy*dy+dz*dz)};
  const maxD=(x,y,z,s)=>{const ax=Math.max(Math.abs(x),Math.abs(x+s)),ay=Math.max(Math.abs(y),Math.abs(y+s)),az=Math.max(Math.abs(z),Math.abs(z+s));return Math.sqrt(ax*ax+ay*ay+az*az)};
  // ensemble des feuilles voulues autour de la caméra (coordonnées de la planète)
  function traverse(){const W2=W/2,c=V.cam,out=new Map(),deepOK=V.under>5;
   const rec=(d,ix,iy,iz)=>{const s=W/2**d,x=-W2+ix*s,y=-W2+iy*s,z=-W2+iz*s,bmin=dBox(x,y,z,s,0,0,0);if(bmin>P.Rx)return;const bmax=maxD(x,y,z,s),deep=bmax<P.Rn,cav=V.cav&&s/N<=V.maxCav;
-   if(V.space){if(deep&&bmin>P.cR+45)return;if(deep)return;if(s>W/4){for(let k=0;k<8;k++)rec(d+1,ix*2+(k&1),iy*2+(k>>1&1),iz*2+(k>>2&1));return}out.set(d+':'+ix+':'+iy+':'+iz,{d,x,y,z,s,cav:false,pr:d});return}
+   if(V.space){if(deep)return;const dc=dBox(x,y,z,s,c.x,c.y,c.z);if(s>W/4||s>V.sLeaf&&dc<V.K*s){for(let k=0;k<8;k++)rec(d+1,ix*2+(k&1),iy*2+(k>>1&1),iz*2+(k>>2&1));return}out.set(d+':'+ix+':'+iy+':'+iz,{d,ix,iy,iz,x,y,z,s,cav:false,pr:d*.6+dc/s*.4});return}
    const dc=dBox(x,y,z,s,c.x,c.y,c.z);
    if(deep&&!deepOK&&dc>110)return;
    // sous-arbre sans surface : distance au centre bien plus grande que le morceau (marge pour les pentes raides)
    {const hx=x+s/2,hy=y+s/2,hz=z+s/2,hd=s*.866;V.near(hx,hy,hz,hd*3+4);core.setCav(cav,core.dg);const f=core.sdf(hx,hy,hz);if(Math.abs(f)>hd*3+4)return;if(core.OUT.ds<-(hd*3+4)&&!deepOK&&dc>60)return}
    if(s>leaf&&dc<V.K*s){for(let k=0;k<8;k++)rec(d+1,ix*2+(k&1),iy*2+(k>>1&1),iz*2+(k>>2&1));return}
-   out.set(d+':'+ix+':'+iy+':'+iz,{d,x,y,z,s,cav,pr:d*.6+dc/s*.4})};
+   out.set(d+':'+ix+':'+iy+':'+iz,{d,ix,iy,iz,x,y,z,s,cav,pr:d*.6+dc/s*.4})};
   rec(0,0,0,0);return out}
  function digsFor(c){const h=c.s/N,m=3*h,L=[];for(const q of V.digs){if(q[0]+q[3]<c.x-m||q[0]-q[3]>c.x+c.s+m||q[1]+q[3]<c.y-m||q[1]-q[3]>c.y+c.s+m||q[2]+q[3]<c.z-m||q[2]-q[3]>c.z+c.s+m)continue;L.push(q[0],q[1],q[2],q[3])}return L.length?new Float32Array(L):null}
  function request(c){c.ver=(c.ver||0)+1;const ver=c.ver;c.req=1;V.pend++;
-  vxPoolJob(pid,{x:c.x,y:c.y,z:c.z,s:c.s,N,cav:c.cav,dg:c.cav?digsFor(c):null},r=>{V.pend--;if(V.dead||V.ch.get(c.k)!==c||c.ver!==ver)return;c.req=0;c.st=2;
+  vxPoolJob(pid,{x:c.x,y:c.y,z:c.z,s:c.s,N,cav:c.cav,dg:c.cav?digsFor(c):null},r=>{V.pend--;if(V.dead||V.ch.get(c.k)!==c||c.ver!==ver)return;c.req=0;
+   // construction différée : quelques maillages par image seulement (évite les à-coups)
+   c.res=r;c.rv=ver;if(c.st===0)c.st=1;V.bq.push(c);pump()})}
+ function build(c){const r=c.res;c.res=null;if(V.dead||V.ch.get(c.k)!==c||c.ver!==c.rv)return;c.st=2;
    if(c.mesh){V.g.remove(c.mesh);c.mesh.geometry.dispose();V.tri-=c.nt||0;c.mesh=null}c.nt=0;
    if(r){const G=new THREE.BufferGeometry();G.setAttribute('position',new THREE.BufferAttribute(r.pos,3));G.setAttribute('nrm',new THREE.BufferAttribute(r.nor,4,true));
     G.setAttribute('dp',new THREE.BufferAttribute(r.dep,1));G.setAttribute('mt',new THREE.BufferAttribute(r.mat,4,true));G.setAttribute('orw',new THREE.BufferAttribute(r.orw,4,true));G.setIndex(new THREE.BufferAttribute(r.idx,1));
     G.boundingSphere=new THREE.Sphere(new THREE.Vector3(c.x+c.s/2,c.y+c.s/2,c.z+c.s/2),c.s*.87+3*c.s/N);G.boundingBox=new THREE.Box3(new THREE.Vector3(c.x,c.y,c.z).subScalar(2*c.s/N),new THREE.Vector3(c.x+c.s,c.y+c.s,c.z+c.s).addScalar(2*c.s/N));
     const m=new THREE.Mesh(G,mat);m.matrixAutoUpdate=false;m.visible=false;m.userData.vxc=c;c.mesh=m;c.nt=r.nt;V.tri+=r.nt;V.g.add(m)}
-   V.dirty=true;pump()})}
- function pump(){let free=vxPoolFree();if(free<=0||V.dead)return;const L=[];for(const[k,w]of V.want){const c=V.ch.get(k);if(c&&c.st===0&&!c.req)L.push(c)}
-  if(L.length){L.sort((a,b)=>a.pr-b.pr);for(let i=0;i<L.length&&free>0;i++,free--)request(L[i])}}
+   V.dirty=true}
+ // priorité : la scène au premier plan (planète où l'on est, astéroïde proche) passe avant les maillages vus de loin
+ function pump(){if(V.dead)return;if(!V.fg){const nw=performance.now();for(const e of VXW.fg.values())if(e[0]>0&&nw-e[1]<1500)return}let free=vxPoolFree();const L=[];for(const[k,w]of V.want){const c=V.ch.get(k);if(c&&c.st===0&&!c.req)L.push(c)}
+  let i=0;if(L.length&&free>0){L.sort((a,b)=>a.pr-b.pr);for(;i<L.length&&free>0;i++,free--)request(L[i])}if(V.fg)VXW.fg.set(pid,[L.length-i,V.ut||0])}
  function drop(c){if(c.mesh){V.g.remove(c.mesh);c.mesh.geometry.dispose();V.tri-=c.nt||0;c.mesh=null}c.ver=(c.ver||0)+1;if(c.req){c.req=0}V.ch.delete(c.k)}
  const inside=(a,b)=>b.x>=a.x-1e-3&&b.y>=a.y-1e-3&&b.z>=a.z-1e-3&&b.x+b.s<=a.x+a.s+1e-3&&b.y+b.s<=a.y+a.s+1e-3&&b.z+b.s<=a.z+a.s+1e-3;
  // affichage : un morceau qui n'est plus voulu reste visible tant que ses remplaçants ne sont pas prêts (pas de trous pendant les transitions)
- function display(){let ready=true;for(const[k,w]of V.want){const c=V.ch.get(k);if(!c||c.st!==2)ready=false}V.ready=ready;
+ function display(){let ready=true;const sub=new Map();
+  for(const[k,w]of V.want){const c=V.ch.get(k),rd=!!c&&c.st===2;if(!rd)ready=false;
+   // pour chaque ancêtre : tous ses descendants voulus sont-ils prêts ?
+   for(let dd=w.d-1;dd>=0;dd--){const sh=w.d-dd,ak=dd+':'+(w.ix>>sh)+':'+(w.iy>>sh)+':'+(w.iz>>sh),e=sub.get(ak);if(e){if(!rd)e.ok=false}else sub.set(ak,{ok:rd})}}
+  V.ready=ready;
   for(const c of[...V.ch.values()]){if(V.want.has(c.k)){if(c.mesh)c.mesh.visible=c.st===2;continue}
-   if(c.st!==2||!c.mesh){if(!c.mesh||c.st!==2)drop(c);continue}
-   let rel=false,ok=true;for(const[k,w]of V.want){if(inside(c,w)||inside(w,c)){rel=true;const q=V.ch.get(k);if(!q||q.st!==2){ok=false;break}}}
+   if(c.st!==2||!c.mesh){drop(c);continue}
+   let rel=false,ok=true;const e=sub.get(c.k);if(e){rel=true;ok=e.ok}
+   else for(let dd=c.d-1;dd>=0;dd--){const sh=c.d-dd,ak=dd+':'+(c.ix>>sh)+':'+(c.iy>>sh)+':'+(c.iz>>sh);if(V.want.has(ak)){rel=true;const q=V.ch.get(ak);ok=!!q&&q.st===2;break}}
    if(!rel||ok)drop(c);else c.mesh.visible=true}}
- V.update=function(camLocal,dt){if(!V.emq){V.emq=1;emReq()}V.tw-=dt||0;const moved=camLocal.distanceTo(V.cam)>(V.space?1e9:leaf*.22);
+ V.bq=[];
+ V.update=function(camLocal,dt){V.ut=performance.now();if(!V.emq){V.emq=1;emReq()}
+  if(V.bq.length){const t0=performance.now(),bud=VXW.bud||2.5;let n=0;while(V.bq.length&&(n<1||performance.now()-t0<bud)){build(V.bq.shift());n++}}V.tw-=dt||0;const moved=camLocal.distanceTo(V.cam)>(V.space?W/40:leaf*.22);
   if(moved||V.tw<=0||V.dirty&&!V.want.size){if(!V.space){V.cam.copy(camLocal);const f=core.sdf(camLocal.x,camLocal.y,camLocal.z);V.under=-core.OUT.ds}
-   else V.cam.set(0,0,0);if(moved||V.tw<=0||!V.want.size){V.want=traverse();V.tw=.6;V.dirty=true}}
+   else V.cam.copy(camLocal);if(moved||(V.tw<=0&&!V.space)||!V.want.size){V.want=traverse();V.tw=.6;V.dirty=true}}
   for(const[k,w]of V.want){let c=V.ch.get(k);if(!c){c={k,...w,st:0,mesh:null};V.ch.set(k,c)}}
   // envois : les morceaux les plus grossiers puis les plus proches d'abord
   pump();
@@ -14583,7 +14622,7 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
  // distance signée exacte pour la physique (avec les trous creusés autour du point)
  V.near=function(x,y,z,rad){const L=[];for(const q of V.digs){const dx=x-q[0],dy=y-q[1],dz=z-q[2],m=rad+q[3];if(dx*dx+dy*dy+dz*dz<m*m)L.push(q[0],q[1],q[2],q[3])}core.dg=L.length?new Float32Array(L):null;core.setCav(V.cav,core.dg)};
  V.f=(x,y,z)=>core.sdf(x,y,z);
- V.dispose=function(){V.dead=true;for(const c of[...V.ch.values()])drop(c);mat.dispose()};
+ V.dispose=function(){V.dead=true;VXW.fg.delete(pid);for(const c of[...V.ch.values()])drop(c);mat.dispose()};
  return V}
 
 // ===== PLANÈTES VOXEL DANS LE JEU (voxp.js, après vox.js) =====
@@ -14611,44 +14650,53 @@ const VXINV=new THREE.MeshBasicMaterial({visible:false});
 
 // ----- vue de l'espace -----
 function vxSpaceApply(p,g){const ud=g&&g.userData;if(!ud||!ud.sph||ud.vx||p.ring)return;const P=vxP(p);
- const U=vxU(P);U.space.value=1;const V=vxPlanet(P,{space:true,N:DESK?36:26,U,cav:false,ew:DESK?1024:512});V.g.visible=false;ud.sph.add(V.g);
+ const U=vxU(P);U.space.value=1;const V=vxPlanet(P,{space:true,N:DESK?32:22,U,cav:false,ew:DESK?1024:512,K:DESK?.5:.4});V.g.visible=false;ud.sph.add(V.g);
  let sea=null;if(P.Rs>0&&!P.ice){sea=new THREE.Mesh(new THREE.SphereGeometry(1,DESK?128:80,DESK?64:40),vxSeaMat(U,vxSeaK(P)));sea.visible=false;sea.renderOrder=1;ud.sph.add(sea)}
  let atm=null;if(P.atm){atm=vxAtmo(P,U,P.R+P.eMax*.8+P.R*.035);atm.visible=false;g.add(atm)}
+ const cl=vxClouds(P,U,vxRc(P));if(cl){cl.visible=false;ud.sph.add(cl)}const ring=P.ring?vxRing(P,U):null;if(ring){ring.visible=false;ud.sph.add(ring)}
  const lt=lightFor(p.x,p.y,p.z);U.sunDir.value.copy(lt.dir);U.sunCol.value.copy(lt.col).multiplyScalar(lt.s?1.05:.92);U.pc.value.copy(g.position);
- ud.vx={P,U,V,sea,atm,on:false,hid:[],m0:null}}
+ ud.vx={P,U,V,sea,atm,cl,ring,on:false,hid:[],m0:null}}
+const vxRc=P=>P.R+P.eMax+Math.max(25,P.R*.04);
 function vxSpaceShow(g){const ud=g.userData,X=ud.vx;if(!X||X.on)return;X.on=true;X.m0=ud.sph.material;ud.sph.material=VXINV;
  for(const o of g.children)if(o!==ud.sph&&o!==X.atm&&o.isMesh&&o.geometry&&o.geometry.type=='SphereGeometry'&&o.geometry.parameters.radius>X.P.R*1.001&&o.visible){X.hid.push(o);o.visible=false}
- X.V.g.visible=true;if(X.sea)X.sea.visible=true;if(X.atm)X.atm.visible=true}
+ X.V.g.visible=true;for(const o of[X.sea,X.atm,X.cl,X.ring])if(o)o.visible=true}
 function vxSpaceRevert(g){const ud=g&&g.userData,X=ud&&ud.vx;if(!X)return;if(X.on){ud.sph.material=X.m0;for(const o of X.hid)o.visible=true}
- X.V.dispose();ud.sph.remove(X.V.g);if(X.sea){ud.sph.remove(X.sea);X.sea.geometry.dispose();X.sea.material.dispose()}if(X.atm){g.remove(X.atm);X.atm.geometry.dispose();X.atm.material.dispose()}ud.vx=null}
-{const _bgV=buildPlanetGPU;buildPlanetGPU=function(p){const g=_bgV.apply(this,arguments);try{if(vxEn()&&!p.ring){pl4Revert(g);vxSpaceApply(p,g)}}catch(e){console.warn('vox',e)}return g}}
-{const _bpV=buildPlanet;buildPlanet=function(p,tx){const g=_bpV.apply(this,arguments);try{if(vxEn()&&!p.ring){pl4Revert(g);vxSpaceApply(p,g)}}catch(e){console.warn('vox',e)}return g}}
+ X.V.dispose();ud.sph.remove(X.V.g);if(X.sea){ud.sph.remove(X.sea);X.sea.geometry.dispose();X.sea.material.dispose()}if(X.atm){g.remove(X.atm);X.atm.geometry.dispose();X.atm.material.dispose()}for(const o of[X.cl,X.ring])if(o){ud.sph.remove(o);o.geometry.dispose();o.material.dispose()}ud.vx=null}
+{const _bgV=buildPlanetGPU;buildPlanetGPU=function(p){const g=_bgV.apply(this,arguments);try{if(vxEn()&&!p.ring){pl4Revert(g);g.userData.vxp=p}}catch(e){console.warn('vox',e)}return g}}
+{const _bpV=buildPlanet;buildPlanet=function(p,tx){const g=_bpV.apply(this,arguments);try{if(vxEn()&&!p.ring){pl4Revert(g);g.userData.vxp=p}}catch(e){console.warn('vox',e)}return g}}
 // option à 4 états : Voxel → Mondes générés → Stylisées → Réalistes
 {const _wr=wg4Refresh;wg4Refresh=function(){for(const p of(typeof planets!='undefined'?planets:[]))if(p.mesh)try{vxSpaceRevert(p.mesh)}catch(e){console.warn(e)}_wr();
- if(vxEn())for(const p of planets)if(p.mesh&&!p.ring)try{pl4Revert(p.mesh);vxSpaceApply(p,p.mesh)}catch(e){console.warn(e)}}}
+ if(vxEn())for(const p of planets)if(p.mesh&&!p.ring)try{pl4Revert(p.mesh);p.mesh.userData.vxp=p}catch(e){console.warn(e)}}}
 pl4Toggle=function(){WG4.mode={vox:'world',world:'style',style:'real',real:'vox'}[WG4.mode]||'vox';PL4.on=WG4.mode!='real';try{localStorage.setItem('sf-pl4',WG4.mode)}catch(e){}wg4Refresh();pl4Btn();
  toast('🪐 Planètes : '+{vox:'voxel, entièrement visitables',world:'mondes générés',style:'stylisées',real:'réalistes'}[WG4.mode]+(mode=='vox'||mode=='surf'?' (au prochain atterrissage)':''))};
 pl4Btn=function(){const b=$('pl4b');if(b)b.textContent={vox:'Voxel (visitables)',world:'Mondes générés',style:'Stylisées',real:'Réalistes'}[WG4.mode]};
 {let lt=performance.now();TICK.push(()=>{const n=performance.now(),dt=Math.min(.1,(n-lt)/1000);lt=n;if(typeof planets=='undefined')return;
  // une seule planète calculée à la fois, la plus proche d'abord (la scène voxel passe avant)
- let best=null,bd=1e18;for(const p of planets){const g=p.mesh,X=g&&g.userData&&g.userData.vx;if(!X)continue;X.U.pc.value.copy(g.position);X.U.tm.value=t;if(X.V.ready&&!X.V.pend){if(!X.on)vxSpaceShow(g);continue}
-  if(X.V.pend){X.V.update(_vxA.set(0,0,0),dt);continue}const d=(p.x-camera.position.x)**2+(p.y-camera.position.y)**2+(p.z-camera.position.z)**2;if(d<bd){bd=d;best=X}}
- if(best&&!(VX.V&&VX.V.pend>0&&mode!='space'))best.V.update(_vxA.set(0,0,0),dt)})}
+ // la planète la plus proche suit la caméra (plus de détail en approche)
+ const upd=g=>{const ud=g.userData;ud.sph.updateMatrixWorld();_vxA.copy(camera.position);ud.sph.worldToLocal(_vxA);ud.vx.V.update(_vxA,dt)};
+ let best=null,bd=1e18,near=null,nd=1e18;for(const p of planets){const g=p.mesh;if(!g||!g.userData)continue;
+  // maillage voxel créé seulement quand la planète est assez proche (une à la fois)
+  if(!g.userData.vx&&g.userData.vxp&&vxEn()&&!VX.mk){const d0=Math.hypot(p.x-camera.position.x,p.y-camera.position.y,p.z-camera.position.z);if(d0<Math.max(9000,p.r*10)){VX.mk=1;try{vxSpaceApply(p,g)}catch(e){console.warn(e)}}}
+  const X=g.userData.vx;if(!X)continue;X.U.pc.value.copy(g.position);X.U.tm.value=t;
+  const d=(p.x-camera.position.x)**2+(p.y-camera.position.y)**2+(p.z-camera.position.z)**2;if(X.on&&d<nd){nd=d;near=g}if(X.V.ready&&!X.V.pend){if(!X.on)vxSpaceShow(g);continue}
+  if(X.V.pend){upd(g);continue}if(d<bd){bd=d;best=g}}
+ VX.mk=0;const busy=VX.V&&VX.V.pend>0&&mode!='space';
+ if(near&&mode=='space'&&nd<(near.userData.vx.P.R*7)**2)upd(near);if(best&&!busy)upd(best)})}
 
 // ----- repère de la planète (rotation de la sphère dans l'espace) -----
 function vxFrame(p){const sph=p&&p.mesh&&p.mesh.userData&&p.mesh.userData.sph;if(sph){p.mesh.updateMatrixWorld(true);sph.getWorldQuaternion(VX.Q);VX.C.copy(p.mesh.position)}else{VX.Q.identity();VX.C.set(p.x,p.y,p.z)}}
 const vxToLocal=(w,o)=>o.copy(w).sub(VX.C).applyQuaternion(_vxQ2.copy(VX.Q).invert());
 // prépare la scène voxel d'une planète (aussi en approche, pour que les morceaux soient prêts à l'arrivée)
 function vxPrep(p){if(VX.p===p&&VX.V)return;if(VX.on)return;vxFree();const P=vxP(p),U=vxU(P);
- const V=vxPlanet(P,{N:DESK?32:24,leaf:32,K:DESK?.72:.56,U,ew:DESK?2048:1024});VX.sc.add(V.g);
+ const V=vxPlanet(P,{N:DESK?32:20,leaf:32,K:DESK?.7:.48,U,ew:DESK?2048:1024,fg:true});V.K0=V.K;VX.sc.add(V.g);
  const dg=GX('vxd',{})[p.name];if(Array.isArray(dg))for(let i=0;i+3<dg.length;i+=4)V.digs.push([dg[i],dg[i+1],dg[i+2],dg[i+3]]);
  VX.sea=null;if(P.Rs>0&&!P.ice){VX.sea=new THREE.Mesh(new THREE.SphereGeometry(1,DESK?320:192,DESK?160:96),vxSeaMat(U,vxSeaK(P)));VX.sea.renderOrder=1;VX.sea.frustumCulled=false;VX.sc.add(VX.sea)}
  VX.atm=P.atm?vxAtmo(P,U,P.R+P.eMax*.8+P.R*.035):null;if(VX.atm)VX.sc.add(VX.atm);
- VX.sky=vxSkyDome(U);VX.sc.add(VX.sky);
+ VX.sky=vxSkyDome(U);VX.sc.add(VX.sky);VX.cl=vxClouds(P,U,vxRc(P));if(VX.cl){VX.cl.frustumCulled=false;VX.sc.add(VX.cl)}VX.ring=P.ring?vxRing(P,U):null;if(VX.ring)VX.sc.add(VX.ring);
  const lt=lightFor(p.x,p.y,p.z);VX.sunW.copy(lt.dir);U.sunCol.value.copy(lt.col).multiplyScalar(lt.s?1.05:.92);VX.dl.color.copy(U.sunCol.value);
  VX.hemi.color.setRGB(...P.col.atm).lerp(new THREE.Color(1,1,1),.4);VX.hemi.groundColor.setRGB(...P.col.rock2);
  VX.p=p;VX.P=P;VX.U=U;VX.V=V;VX.frag=null;vxFrame(p);vxSunUpd()}
-function vxFree(){if(VX.on||!VX.V)return;VX.V.dispose();VX.sc.remove(VX.V.g);for(const o of[VX.sea,VX.atm,VX.sky])if(o){VX.sc.remove(o);o.geometry.dispose();o.material.dispose()}
+function vxFree(){if(VX.on||!VX.V)return;VX.V.dispose();VX.sc.remove(VX.V.g);for(const o of[VX.sea,VX.atm,VX.sky,VX.cl,VX.ring])if(o){VX.sc.remove(o);o.geometry.dispose();o.material.dispose()}VX.cl=VX.ring=null;
  if(VX.frag){VX.sc.remove(VX.frag.m);VX.frag=null}VX.V=VX.sea=VX.atm=VX.sky=null;VX.p=null}
 function vxSunUpd(){if(!VX.U)return;VX.U.sunDir.value.copy(VX.sunW).applyQuaternion(_vxQ2.copy(VX.Q).invert()).normalize();
  // ciel de l'espace (panorama) vu à travers l'atmosphère, orienté comme dans l'espace
@@ -14768,7 +14816,9 @@ function vxUpdate(dt){if(!VX.V){mode='space';return}const p=VX.p,ud=p.mesh&&p.me
  if(VX.dirty&&(VX.saveT-=dt)<=0){VX.saveT=25;vxSaveDigs()}
  vxStory(dt);if(MINT&&t-MINT>.6&&Object.keys(MINQ).length)minToast();if(S.hp<=0)die()}
 // uniformes, lumières et niveau de détail (après le placement de la caméra)
-function vxView(dt){const U=VX.U,P=VX.P;if(!U)return;const cp=camera.position,r=cp.length(),up=_vxA.copy(cp).normalize();
+function vxView(dt){const U=VX.U,P=VX.P;if(!U)return;
+ // qualité adaptative : moins de détail si l'image ralentit (iPhone)
+ {const fps=typeof FX3!='undefined'&&FX3.fps||60;VX.qs=VX.qs||1;if(fps<38)VX.qs=Math.max(.55,VX.qs-dt*.08);else if(fps>54)VX.qs=Math.min(1,VX.qs+dt*.03);VX.V.K=(VX.V.K0||VX.V.K)*VX.qs}const cp=camera.position,r=cp.length(),up=_vxA.copy(cp).normalize();
  VX.V.update(cp,dt);U.tm.value=t;U.camUp.value.copy(up);const top=P.R+P.eMax*.8+P.R*.035,alt=r-P.R,a=clamp(alt/(top-P.R),0,1.5);
  U.dens.value=P.atm?clamp(1.08-a,0,1):0;U.dip.value=Math.sqrt(Math.max(0,1-(P.R/Math.max(P.R,r))**2));U.fogK.value=P.atm?.00055*U.dens.value*(P.ty=='Désertique'?1.6:1):0;
  const f=vxF(cp.x,cp.y,cp.z,2),depC=-VX.V.core.OUT.ds;U.caveK.value=clamp((depC-3)/9,0,1);
@@ -14845,7 +14895,7 @@ function vaCell(cx,cy,cz){const k=cx+','+cy+','+cz;if(VA.cells.has(k))return VA.
    if(c.pl&&Math.hypot(x-c.pl.x,y-c.pl.y,z-c.pl.z)<c.pl.r*1.6+900)continue;if(c.st&&Math.hypot(x-c.st.x,y-c.st.y,z-c.st.z)<1800)continue;
    o={id:'va'+k,x,y,z,R,seed:(seedOf(cx,cy,cz,4799)>>>0)||5,name:'Astéroïde '+['Kepler','Hadès','Ymir','Orcus','Talos','Nyx','Brontès','Pallas'][(h3(cx,cy,cz,4801)*8)|0]+'-'+((h3(cx,cy,cz,4802)*90+10)|0)};break}}}
  VA.cells.set(k,o);return o}
-function vaLoad(o){const P=vxPreset('Astéroïde',o.seed,o.R,null),U=vxU(P);U.space.value=1;const V=vxPlanet(P,{N:DESK?32:24,leaf:32,K:DESK?.8:.62,U,ew:64});
+function vaLoad(o){const P=vxPreset('Astéroïde',o.seed,o.R,null),U=vxU(P);U.space.value=1;const V=vxPlanet(P,{N:DESK?32:20,leaf:32,K:DESK?.75:.5,U,ew:64,fg:true});
  V.g.position.set(o.x,o.y,o.z);scene.add(V.g);const lt=lightFor(o.x,o.y,o.z);U.sunDir.value.copy(lt.dir);U.sunCol.value.copy(lt.col).multiplyScalar(lt.s?1.05:.92);U.pc.value.set(o.x,o.y,o.z);
  const dg=GX('vad',{})[o.id];if(Array.isArray(dg))for(let i=0;i+3<dg.length;i+=4)V.digs.push([dg[i],dg[i+1],dg[i+2],dg[i+3]]);
  const T={va:o,pos:new V3(o.x,o.y,o.z),r:4,max:1000,cone:.2,w:1.4,isAst:1,gone:1,label:o.name};T.hit=(d,p)=>vaHit(A,d,p);

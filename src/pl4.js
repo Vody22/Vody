@@ -53,10 +53,15 @@ void main(){vec3 N=normalize(vN),V=normalize(cameraPosition-vW),L=normalize(sunD
 // ----- cuisson du bruit -----
 function pl4Mat(P,seed,W){const r=rng(seed),U={NT:{value:P.n},FT:{value:P.ft},OCT:{value:P.o},LAC:{value:P.l},GAIN:{value:P.g},FQ:{value:P.f*P.sc},GAS:{value:P.gas?1:0},CF:{value:P.cl?1.7:0},NORM:{value:0},
  SEED:{value:new V3(r()*80,r()*80,r()*80)},SEED2:{value:new V3(r()*80,r()*80,r()*80)},MM:{value:new THREE.Vector4(0,1,0,1)}};return new THREE.ShaderMaterial({uniforms:U,vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:PL4BAKE_FS,depthTest:false,depthWrite:false})}
-function pl4Bake(P,seed,W,H){const m=pl4Mat(P,seed),q=new THREE.Mesh(new THREE.PlaneGeometry(2,2),m),sc=new THREE.Scene();sc.add(q);const cam=new THREE.Camera(),old=R3.getRenderTarget(),oac=R3.autoClear;R3.autoClear=true;
+// cache des textures cuites (les planètes sont reconstruites à chaque retour dans la zone : on évite de recuire)
+const PL4C=new Map(),PL4KEEP=new Set(),PL4MM=new Map();
+function pl4Bake(P,seed,W,H){const ck=JSON.stringify([P.r1||0,P.e1||0,P.t||0,seed,W,H,P.c?P.c.length:0,P.gas?1:0])+(P.nm||'')+(PL4P&&Object.keys(PL4P).find(k=>PL4P[k]===P)||'');const hit=PL4C.get(ck);if(hit){PL4C.delete(ck);PL4C.set(ck,hit);return hit}
+ const rt=pl4Bake0(P,seed,W,H);rt.texture.vxKeep=1;PL4C.set(ck,rt);PL4KEEP.add(rt);if(PL4C.size>10){const[k0,r0]=PL4C.entries().next().value;PL4C.delete(k0);PL4KEEP.delete(r0);r0.dispose()}return rt}
+function pl4Bake0(P,seed,W,H){const m=pl4Mat(P,seed),q=new THREE.Mesh(new THREE.PlaneGeometry(2,2),m),sc=new THREE.Scene();sc.add(q);const cam=new THREE.Camera(),old=R3.getRenderTarget(),oac=R3.autoClear;R3.autoClear=true;
  // 1) statistiques sur une petite image (Godot normalise la texture de bruit entre son minimum et son maximum)
- const sw=128,sh=64,st=new THREE.WebGLRenderTarget(sw,sh,{depthBuffer:false});R3.setRenderTarget(st);R3.render(sc,cam);const px=new Uint8Array(sw*sh*4);R3.readRenderTargetPixels(st,0,0,sw,sh,px);st.dispose();
- let a=1,b=0,c=1,d=0;for(let i=0;i<px.length;i+=4){const x=px[i]/255,y=px[i+1]/255;if(x<a)a=x;if(x>b)b=x;if(y<c)c=y;if(y>d)d=y}m.uniforms.MM.value.set(a,b,c,d);m.uniforms.NORM.value=1;
+ // (mesuré une seule fois par préréglage : la relecture des pixels bloque la carte graphique → à-coup)
+ let mm=PL4MM.get(P);if(!mm){const sw=128,sh=64,st=new THREE.WebGLRenderTarget(sw,sh,{depthBuffer:false});R3.setRenderTarget(st);R3.render(sc,cam);const px=new Uint8Array(sw*sh*4);R3.readRenderTargetPixels(st,0,0,sw,sh,px);st.dispose();
+ let a=1,b=0,c=1,d=0;for(let i=0;i<px.length;i+=4){const x=px[i]/255,y=px[i+1]/255;if(x<a)a=x;if(x>b)b=x;if(y<c)c=y;if(y>d)d=y}mm=[a,b,c,d];PL4MM.set(P,mm)}m.uniforms.MM.value.set(...mm);m.uniforms.NORM.value=1;
  // 2) texture finale
  const rt=new THREE.WebGLRenderTarget(W,H,{depthBuffer:false,wrapS:THREE.RepeatWrapping,minFilter:THREE.LinearMipmapLinearFilter,magFilter:THREE.LinearFilter,generateMipmaps:true});R3.setRenderTarget(rt);R3.render(sc,cam);
  R3.setRenderTarget(old);R3.autoClear=oac;q.geometry.dispose();m.dispose();rt.texture.anisotropy=DESK?8:2;return rt}
@@ -65,7 +70,7 @@ function pl4Pre(p){const ty=ptype(p);return ty=='Géante gazeuse'?'gaseous':ty==
 function pl4Cols(P,p,key){const r=rng((seedOf(p.x,p.y,p.z,41)>>>0)%2147483646+1),ty=ptype(p),cs=P.c.map(c=>c.clone());let dh=(r()-.5)*.06;
  if(key=='gaseous')dh=((p.hue-35)/360);if(ty=='Cristalline')dh=((p.hue-205)/360);const hsl={};for(const c of cs){c.getHSL(hsl);c.setHSL((hsl.h+dh+1)%1,Math.min(1,hsl.s*(ty=='Cristalline'?1.3:1)),hsl.l)}
  const t=P.t.slice();if(ty=='Océanique'){t[0]+=.08;t[1]+=.08;t[2]+=.06;t[3]+=.04}if(pvar(p)=='archipel'){t[0]+=.12;t[1]+=.1;t[2]+=.08}return{cs,t}}
-function pl4Apply(p,g){if(!g||!g.userData||g.userData.pl4)return;if(typeof wg4Is=='function'&&wg4Is(p))return;const ud=g.userData,U=ud.U||{},sph=ud.sph;if(!sph)return;const key=pl4Pre(p),P=PL4P[key],seed=(seedOf(p.x,p.y,p.z,17)>>>0)%2147483646+1;
+function pl4Apply(p,g){if(!g||!g.userData||g.userData.pl4)return;if(typeof wg4Is=='function'&&wg4Is(p))return;if(!p.ring&&typeof vxEn=='function'&&vxEn())return;const ud=g.userData,U=ud.U||{},sph=ud.sph;if(!sph)return;const key=pl4Pre(p),P=PL4P[key],seed=(seedOf(p.x,p.y,p.z,17)>>>0)%2147483646+1;
  const W=DESK?2048:1024,rt=pl4Bake(P,seed,W,W/2),{cs,t}=pl4Cols(P,p,key),sunDir=U.sunDir||{value:new V3(0,1,0)},sunCol=U.sunCol||{value:new THREE.Color(1,1,1)};
  const BU={tex:{value:rt.texture},c1:{value:cs[0]},c2:{value:cs[1]},c3:{value:cs[2]},c4:{value:cs[3]},c5:{value:cs[4]},th:{value:new THREE.Vector4(...t)},r1:{value:P.r1||0},e1:{value:P.e1||0},
   city:U.city||{value:0},sunDir,sunCol,hasR:{value:U.rN3?1:0},rN3:U.rN3||{value:new V3(0,1,0)},pc3:U.pc3||{value:g.position.clone()},rI3:U.rI3||{value:0},rO3:U.rO3||{value:0}};
@@ -83,7 +88,7 @@ function pl4Apply(p,g){if(!g||!g.userData||g.userData.pl4)return;if(typeof wg4Is
   moons.push({m,g0:m.geometry,m0:m.material,rt:mr});m.geometry=new THREE.SphereGeometry(R,32,16);m.material=mm}
  sph.material=mat;ud.pl4={S,add,rt,moons,mat};PL4.list.push(g)}
 function pl4Revert(g){const ud=g.userData,s=ud&&ud.pl4;if(!s)return;ud.sph.material=s.S.sph;for(const[o,v]of s.S.hide)o.visible=v;for(const o of s.add){g.remove(o);o.geometry.dispose();o.material.dispose()}
- for(const M of s.moons){M.m.geometry.dispose();M.m.material.dispose();M.m.geometry=M.g0;M.m.material=M.m0;M.rt.dispose()}s.mat.dispose();s.rt.dispose();ud.pl4=null;ud.pl4cl=null}
+ for(const M of s.moons){M.m.geometry.dispose();M.m.material.dispose();M.m.geometry=M.g0;M.m.material=M.m0;if(!PL4KEEP.has(M.rt))M.rt.dispose()}s.mat.dispose();if(!PL4KEEP.has(s.rt))s.rt.dispose();ud.pl4=null;ud.pl4cl=null}
 // ----- branchements : planètes vues de l'espace (PC : buildPlanetGPU, mobile : buildPlanet), menu d'accueil compris -----
 {const _bg4=buildPlanetGPU;buildPlanetGPU=function(p){const g=_bg4.apply(this,arguments);try{if(PL4.on)pl4Apply(p,g);g.userData.pl4p=p}catch(e){console.warn('pl4',e)}return g}}
 {const _bp4=buildPlanet;buildPlanet=function(p,tx){const g=_bp4.apply(this,arguments);try{if(PL4.on)pl4Apply(p,g);g.userData.pl4p=p}catch(e){console.warn('pl4',e)}return g}}
