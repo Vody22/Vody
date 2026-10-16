@@ -216,8 +216,8 @@ vec3 vxFog(vec3 c,vec3 W){if(space>.5)return c;vec3 D=W-cameraPosition;float d=l
  float k=fogK*(1.-caveK)+caveK*.012+waterK*.05;return mix(c,fc,1.-exp(-d*k));}
 float vxLamp(vec3 N,vec3 W){if(lampK<.01)return 0.;vec3 L=lampPos-W;float d=length(L);L/=d;return lampK*smoothstep(.72,.93,dot(-L,lampDir))*max(dot(N,L),0.)/(1.+d*d*.005);}`;
 // ----- matériau du terrain : couches selon l'altitude, la pente et la profondeur, triplanaire, grottes sombres, lampe frontale, brouillard -----
-const VX_TFS=VX_COMMON+`uniform vec3 cSand,cLow,cHigh,cRock,cRock2,cSnow,cDeep,cVein;uniform float amp,cR,snowL,hasSea,glow;varying vec3 vO,vNo,vW,vN;varying float vD;varying vec2 vM;varying vec4 vOr;
-void main(){float r=length(vO);vec3 up=vO/r;float alt=r-R,aS=r-Rs,dep=vD;vec3 no=normalize(vNo);float sl=dot(no,up);
+const VX_TFS=VX_COMMON+`uniform float vxFa;uniform vec3 cSand,cLow,cHigh,cRock,cRock2,cSnow,cDeep,cVein;uniform float amp,cR,snowL,hasSea,glow;varying vec3 vO,vNo,vW,vN;varying float vD;varying vec2 vM;varying vec4 vOr;
+void main(){if(vxFa<.999){float h=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(.06711056,.00583715))));if(vxFa>0.?h>vxFa:h< -vxFa)discard;}float r=length(vO);vec3 up=vO/r;float alt=r-R,aS=r-Rs,dep=vD;vec3 no=normalize(vNo);float sl=dot(no,up);
  vec3 bw=pow(abs(no),vec3(4.));bw/=dot(bw,vec3(1.));vec4 t1=tri(vO*.27,bw),t2=tri(vO*.031,bw),t3=tri(vO*.0043,bw),t0=tri(vO*1.3,bw);
  float n1=t1.r,n2=t2.g,n3=t3.g,hN=alt/amp+(n2-.5)*.25+(n3-.5)*.35,sw=1.-smoothstep(.5,3.5,dep);
  vec3 lo=mix(cLow,cLow*vec3(1.12,1.02,.72),smoothstep(.35,.7,n3)),cs=mix(lo,cHigh,smoothstep(.0,.7,hN+(n2-.5)*.3));
@@ -303,7 +303,8 @@ function vxSkyDome(U){const m=new THREE.Mesh(new THREE.SphereGeometry(30000,48,2
 let VXPID=0;
 function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup(P);vxPoolPlanet(pid,P);
  const N=o.N||32,leaf=o.leaf||32;let W=leaf;while(W<2*(P.Rx+48))W*=2;
- const U=o.U||vxU(P),mat=vxTerrainMat(U),g=new THREE.Group();g.name='vox-'+pid;
+ const U=o.U||vxU(P);if(!U.vxFa)U.vxFa={value:1};const mat=vxTerrainMat(U),g=new THREE.Group();
+ const faHook=function(){const f=this.userData.vxc.fv;if(f!==U.vxFa.value){U.vxFa.value=f;mat.uniformsNeedUpdate=true}};g.name='vox-'+pid;
  const emReq=()=>{const ew=o.ew||1024,eh=ew>>1;vxPoolJob(pid,{t:'e',w:ew,h:eh},D=>{if(!D)return;const t=new THREE.DataTexture(D,ew,eh,THREE.RGBAFormat);t.wrapS=THREE.RepeatWrapping;t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;U.em.value=t})};
  const V={pid,P,core,N,leaf,W,U,mat,g,ch:new Map(),want:new Map(),digs:[],K:o.K||.75,space:!!o.space,fg:!!o.fg,sLeaf:o.sLeaf||W/16,cam:new THREE.Vector3(1e9,0,0),under:0,tw:0,ready:false,tri:0,dirty:true,cav:o.cav!==false,maxCav:o.maxCav||2.01,pend:0};
  const dBox=(x,y,z,s,px,py,pz)=>{const dx=Math.max(x-px,0,px-x-s),dy=Math.max(y-py,0,py-y-s),dz=Math.max(z-pz,0,pz-z-s);return Math.sqrt(dx*dx+dy*dy+dz*dz)};
@@ -324,12 +325,12 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
   vxPoolJob(pid,{x:c.x,y:c.y,z:c.z,s:c.s,N,cav:c.cav,dg:c.cav?digsFor(c):null},r=>{V.pend--;if(V.dead||V.ch.get(c.k)!==c||c.ver!==ver)return;c.req=0;
    // construction différée : quelques maillages par image seulement (évite les à-coups)
    c.res=r;c.rv=ver;if(c.st===0)c.st=1;V.bq.push(c);pump()})}
- function build(c){const r=c.res;c.res=null;if(V.dead||V.ch.get(c.k)!==c||c.ver!==c.rv)return;c.st=2;
+ function build(c){const r=c.res;c.res=null;if(V.dead||V.ch.get(c.k)!==c||c.ver!==c.rv)return;c.st=2;const re=!!c.mesh;c.fa=re?1:Math.min(c.fa||0,0);c.fv=c.fa;
    if(c.mesh){V.g.remove(c.mesh);c.mesh.geometry.dispose();V.tri-=c.nt||0;c.mesh=null}c.nt=0;
    if(r){const G=new THREE.BufferGeometry();G.setAttribute('position',new THREE.BufferAttribute(r.pos,3));G.setAttribute('nrm',new THREE.BufferAttribute(r.nor,4,true));
     G.setAttribute('dp',new THREE.BufferAttribute(r.dep,1));G.setAttribute('mt',new THREE.BufferAttribute(r.mat,4,true));G.setAttribute('orw',new THREE.BufferAttribute(r.orw,4,true));G.setIndex(new THREE.BufferAttribute(r.idx,1));
     G.boundingSphere=new THREE.Sphere(new THREE.Vector3(c.x+c.s/2,c.y+c.s/2,c.z+c.s/2),c.s*.87+3*c.s/N);G.boundingBox=new THREE.Box3(new THREE.Vector3(c.x,c.y,c.z).subScalar(2*c.s/N),new THREE.Vector3(c.x+c.s,c.y+c.s,c.z+c.s).addScalar(2*c.s/N));
-    const m=new THREE.Mesh(G,mat);m.matrixAutoUpdate=false;m.visible=false;m.userData.vxc=c;c.mesh=m;c.nt=r.nt;V.tri+=r.nt;V.g.add(m)}
+    const m=new THREE.Mesh(G,mat);m.matrixAutoUpdate=false;m.visible=false;m.userData.vxc=c;m.onBeforeRender=faHook;c.mesh=m;c.nt=r.nt;V.tri+=r.nt;V.g.add(m)}
    V.dirty=true}
  // priorité : la scène au premier plan (planète où l'on est, astéroïde proche) passe avant les maillages vus de loin
  function pump(){if(V.dead)return;if(!V.fg){const nw=performance.now();for(const e of VXW.fg.values())if(e[0]>0&&nw-e[1]<1500)return}let free=vxPoolFree();const L=[];for(const[k,w]of V.want){const c=V.ch.get(k);if(c&&c.st===0&&!c.req)L.push(c)}
@@ -338,15 +339,16 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
  const inside=(a,b)=>b.x>=a.x-1e-3&&b.y>=a.y-1e-3&&b.z>=a.z-1e-3&&b.x+b.s<=a.x+a.s+1e-3&&b.y+b.s<=a.y+a.s+1e-3&&b.z+b.s<=a.z+a.s+1e-3;
  // affichage : un morceau qui n'est plus voulu reste visible tant que ses remplaçants ne sont pas prêts (pas de trous pendant les transitions)
  function display(){let ready=true;const sub=new Map();
-  for(const[k,w]of V.want){const c=V.ch.get(k),rd=!!c&&c.st===2;if(!rd)ready=false;
-   // pour chaque ancêtre : tous ses descendants voulus sont-ils prêts ?
-   for(let dd=w.d-1;dd>=0;dd--){const sh=w.d-dd,ak=dd+':'+(w.ix>>sh)+':'+(w.iy>>sh)+':'+(w.iz>>sh),e=sub.get(ak);if(e){if(!rd)e.ok=false}else sub.set(ak,{ok:rd})}}
-  V.ready=ready;
-  for(const c of[...V.ch.values()]){if(V.want.has(c.k)){if(c.mesh)c.mesh.visible=c.st===2;continue}
+  let fad=false;for(const[k,w]of V.want){const c=V.ch.get(k),rd=!!c&&c.st===2,fa=rd?(c.fa==null?1:c.fa):0;if(!rd)ready=false;else if(fa<1)fad=true;
+   // pour chaque ancêtre : tous ses descendants voulus sont-ils prêts ? (et où en est leur fondu)
+   for(let dd=w.d-1;dd>=0;dd--){const sh=w.d-dd,ak=dd+':'+(w.ix>>sh)+':'+(w.iy>>sh)+':'+(w.iz>>sh),e=sub.get(ak);if(e){if(!rd)e.ok=false;if(fa<e.mn)e.mn=fa}else sub.set(ak,{ok:rd,mn:fa})}}
+  V.ready=ready;V.fading=fad;
+  for(const c of[...V.ch.values()]){if(V.want.has(c.k)){if(c.mesh){c.mesh.visible=c.st===2;c.fv=c.fa==null?1:c.fa}continue}
    if(c.st!==2||!c.mesh){drop(c);continue}
-   let rel=false,ok=true;const e=sub.get(c.k);if(e){rel=true;ok=e.ok}
-   else for(let dd=c.d-1;dd>=0;dd--){const sh=c.d-dd,ak=dd+':'+(c.ix>>sh)+':'+(c.iy>>sh)+':'+(c.iz>>sh);if(V.want.has(ak)){rel=true;const q=V.ch.get(ak);ok=!!q&&q.st===2;break}}
-   if(!rel||ok)drop(c);else c.mesh.visible=true}}
+   let rel=false,ok=true,mn=1;const e=sub.get(c.k);if(e){rel=true;ok=e.ok;mn=e.mn}
+   else for(let dd=c.d-1;dd>=0;dd--){const sh=c.d-dd,ak=dd+':'+(c.ix>>sh)+':'+(c.iy>>sh)+':'+(c.iz>>sh);if(V.want.has(ak)){rel=true;const q=V.ch.get(ak);ok=!!q&&q.st===2;mn=ok?(q.fa==null?1:q.fa):0;break}}
+   // remplaçants prêts : l'ancien morceau s'efface avec la trame complémentaire, puis disparaît
+   if(!rel||ok&&mn>=1)drop(c);else{c.mesh.visible=true;c.fv=ok?-Math.max(.001,mn):1}}}
  V.bq=[];
  V.update=function(camLocal,dt){V.ut=performance.now();if(!V.emq){V.emq=1;emReq()}
   if(V.bq.length){const t0=performance.now(),bud=VXW.bud||2.5;let n=0;while(V.bq.length&&(n<1||performance.now()-t0<bud)){build(V.bq.shift());n++}}V.tw-=dt||0;const moved=camLocal.distanceTo(V.cam)>(V.space?W/40:leaf*.22);
@@ -355,6 +357,7 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
   for(const[k,w]of V.want){let c=V.ch.get(k);if(!c){c={k,...w,st:0,mesh:null};V.ch.set(k,c)}}
   // envois : les morceaux les plus grossiers puis les plus proches d'abord
   pump();
+  if(V.fading){const k=(dt||.016)/.45;for(const c of V.ch.values())if(c.st===2&&c.fa<1&&V.want.has(c.k))c.fa=Math.min(1,c.fa+k);V.dirty=true}
   if(V.dirty){V.dirty=false;display()}vxPoolTick()};
  V.dig=function(x,y,z,r){V.digs.push([x,y,z,r]);for(const c of V.ch.values()){if(!c.cav||c.st==0)continue;const m=r+3*c.s/N;
    if(x+m<c.x||x-m>c.x+c.s||y+m<c.y||y-m>c.y+c.s||z+m<c.z||z-m>c.z+c.s)continue;request(c)}};

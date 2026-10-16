@@ -98,3 +98,5 @@ function pl4Revert(g){const ud=g.userData,s=ud&&ud.pl4;if(!s)return;ud.sph.mater
 function pl4Toggle(){PL4.on=!PL4.on;try{localStorage.setItem('sf-pl4',PL4.on?'style':'real')}catch(e){}for(const p of(typeof planets!='undefined'?planets:[])){const g=p.mesh;if(!g)continue;try{if(PL4.on)pl4Apply(p,g);else pl4Revert(g)}catch(e){console.warn(e)}}pl4Btn();toast(PL4.on?'🪐 Planètes stylisées':'🪐 Planètes réalistes')}
 function pl4Btn(){const b=$('pl4b');if(b)b.textContent=PL4.on?'Stylisées':'Réalistes'}
 {const b=$('pl4b');if(b){b.onclick=pl4Toggle;pl4Btn()}}
+// mesure à l'avance (pendant le menu d'accueil) des min/max de chaque préréglage : plus de relecture de pixels en jeu
+setTimeout(()=>{const L=Object.values(PL4P).filter(P=>P&&P.c);let i=0;const st=()=>{if(i>=L.length)return;const P=L[i++];try{if(!PL4MM.has(P))pl4Bake0(P,7,64,32).dispose()}catch(e){}setTimeout(st,250)};st()},2500);

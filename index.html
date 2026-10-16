@@ -296,7 +296,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261016-192723"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261016-200401"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -14066,6 +14066,8 @@ function pl4Revert(g){const ud=g.userData,s=ud&&ud.pl4;if(!s)return;ud.sph.mater
 function pl4Toggle(){PL4.on=!PL4.on;try{localStorage.setItem('sf-pl4',PL4.on?'style':'real')}catch(e){}for(const p of(typeof planets!='undefined'?planets:[])){const g=p.mesh;if(!g)continue;try{if(PL4.on)pl4Apply(p,g);else pl4Revert(g)}catch(e){console.warn(e)}}pl4Btn();toast(PL4.on?'🪐 Planètes stylisées':'🪐 Planètes réalistes')}
 function pl4Btn(){const b=$('pl4b');if(b)b.textContent=PL4.on?'Stylisées':'Réalistes'}
 {const b=$('pl4b');if(b){b.onclick=pl4Toggle;pl4Btn()}}
+// mesure à l'avance (pendant le menu d'accueil) des min/max de chaque préréglage : plus de relecture de pixels en jeu
+setTimeout(()=>{const L=Object.values(PL4P).filter(P=>P&&P.c);let i=0;const st=()=>{if(i>=L.length)return;const P=L[i++];try{if(!PL4MM.has(P))pl4Bake0(P,7,64,32).dispose()}catch(e){}setTimeout(st,250)};st()},2500);
 
 // ===== MONDES GÉNÉRÉS (wg4.js, après pl4.js) — portage du « WorldGeneratorFinal » de jgallant (licence MIT) =====
 // Unity : cartes de relief / chaleur / humidité (bruit fractal sur la sphère), latitude → chaleur, relief → plus froid en altitude, eau → plus humide,
@@ -14488,8 +14490,8 @@ vec3 vxFog(vec3 c,vec3 W){if(space>.5)return c;vec3 D=W-cameraPosition;float d=l
  float k=fogK*(1.-caveK)+caveK*.012+waterK*.05;return mix(c,fc,1.-exp(-d*k));}
 float vxLamp(vec3 N,vec3 W){if(lampK<.01)return 0.;vec3 L=lampPos-W;float d=length(L);L/=d;return lampK*smoothstep(.72,.93,dot(-L,lampDir))*max(dot(N,L),0.)/(1.+d*d*.005);}`;
 // ----- matériau du terrain : couches selon l'altitude, la pente et la profondeur, triplanaire, grottes sombres, lampe frontale, brouillard -----
-const VX_TFS=VX_COMMON+`uniform vec3 cSand,cLow,cHigh,cRock,cRock2,cSnow,cDeep,cVein;uniform float amp,cR,snowL,hasSea,glow;varying vec3 vO,vNo,vW,vN;varying float vD;varying vec2 vM;varying vec4 vOr;
-void main(){float r=length(vO);vec3 up=vO/r;float alt=r-R,aS=r-Rs,dep=vD;vec3 no=normalize(vNo);float sl=dot(no,up);
+const VX_TFS=VX_COMMON+`uniform float vxFa;uniform vec3 cSand,cLow,cHigh,cRock,cRock2,cSnow,cDeep,cVein;uniform float amp,cR,snowL,hasSea,glow;varying vec3 vO,vNo,vW,vN;varying float vD;varying vec2 vM;varying vec4 vOr;
+void main(){if(vxFa<.999){float h=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(.06711056,.00583715))));if(vxFa>0.?h>vxFa:h< -vxFa)discard;}float r=length(vO);vec3 up=vO/r;float alt=r-R,aS=r-Rs,dep=vD;vec3 no=normalize(vNo);float sl=dot(no,up);
  vec3 bw=pow(abs(no),vec3(4.));bw/=dot(bw,vec3(1.));vec4 t1=tri(vO*.27,bw),t2=tri(vO*.031,bw),t3=tri(vO*.0043,bw),t0=tri(vO*1.3,bw);
  float n1=t1.r,n2=t2.g,n3=t3.g,hN=alt/amp+(n2-.5)*.25+(n3-.5)*.35,sw=1.-smoothstep(.5,3.5,dep);
  vec3 lo=mix(cLow,cLow*vec3(1.12,1.02,.72),smoothstep(.35,.7,n3)),cs=mix(lo,cHigh,smoothstep(.0,.7,hN+(n2-.5)*.3));
@@ -14575,7 +14577,8 @@ function vxSkyDome(U){const m=new THREE.Mesh(new THREE.SphereGeometry(30000,48,2
 let VXPID=0;
 function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup(P);vxPoolPlanet(pid,P);
  const N=o.N||32,leaf=o.leaf||32;let W=leaf;while(W<2*(P.Rx+48))W*=2;
- const U=o.U||vxU(P),mat=vxTerrainMat(U),g=new THREE.Group();g.name='vox-'+pid;
+ const U=o.U||vxU(P);if(!U.vxFa)U.vxFa={value:1};const mat=vxTerrainMat(U),g=new THREE.Group();
+ const faHook=function(){const f=this.userData.vxc.fv;if(f!==U.vxFa.value){U.vxFa.value=f;mat.uniformsNeedUpdate=true}};g.name='vox-'+pid;
  const emReq=()=>{const ew=o.ew||1024,eh=ew>>1;vxPoolJob(pid,{t:'e',w:ew,h:eh},D=>{if(!D)return;const t=new THREE.DataTexture(D,ew,eh,THREE.RGBAFormat);t.wrapS=THREE.RepeatWrapping;t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;U.em.value=t})};
  const V={pid,P,core,N,leaf,W,U,mat,g,ch:new Map(),want:new Map(),digs:[],K:o.K||.75,space:!!o.space,fg:!!o.fg,sLeaf:o.sLeaf||W/16,cam:new THREE.Vector3(1e9,0,0),under:0,tw:0,ready:false,tri:0,dirty:true,cav:o.cav!==false,maxCav:o.maxCav||2.01,pend:0};
  const dBox=(x,y,z,s,px,py,pz)=>{const dx=Math.max(x-px,0,px-x-s),dy=Math.max(y-py,0,py-y-s),dz=Math.max(z-pz,0,pz-z-s);return Math.sqrt(dx*dx+dy*dy+dz*dz)};
@@ -14596,12 +14599,12 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
   vxPoolJob(pid,{x:c.x,y:c.y,z:c.z,s:c.s,N,cav:c.cav,dg:c.cav?digsFor(c):null},r=>{V.pend--;if(V.dead||V.ch.get(c.k)!==c||c.ver!==ver)return;c.req=0;
    // construction différée : quelques maillages par image seulement (évite les à-coups)
    c.res=r;c.rv=ver;if(c.st===0)c.st=1;V.bq.push(c);pump()})}
- function build(c){const r=c.res;c.res=null;if(V.dead||V.ch.get(c.k)!==c||c.ver!==c.rv)return;c.st=2;
+ function build(c){const r=c.res;c.res=null;if(V.dead||V.ch.get(c.k)!==c||c.ver!==c.rv)return;c.st=2;const re=!!c.mesh;c.fa=re?1:Math.min(c.fa||0,0);c.fv=c.fa;
    if(c.mesh){V.g.remove(c.mesh);c.mesh.geometry.dispose();V.tri-=c.nt||0;c.mesh=null}c.nt=0;
    if(r){const G=new THREE.BufferGeometry();G.setAttribute('position',new THREE.BufferAttribute(r.pos,3));G.setAttribute('nrm',new THREE.BufferAttribute(r.nor,4,true));
     G.setAttribute('dp',new THREE.BufferAttribute(r.dep,1));G.setAttribute('mt',new THREE.BufferAttribute(r.mat,4,true));G.setAttribute('orw',new THREE.BufferAttribute(r.orw,4,true));G.setIndex(new THREE.BufferAttribute(r.idx,1));
     G.boundingSphere=new THREE.Sphere(new THREE.Vector3(c.x+c.s/2,c.y+c.s/2,c.z+c.s/2),c.s*.87+3*c.s/N);G.boundingBox=new THREE.Box3(new THREE.Vector3(c.x,c.y,c.z).subScalar(2*c.s/N),new THREE.Vector3(c.x+c.s,c.y+c.s,c.z+c.s).addScalar(2*c.s/N));
-    const m=new THREE.Mesh(G,mat);m.matrixAutoUpdate=false;m.visible=false;m.userData.vxc=c;c.mesh=m;c.nt=r.nt;V.tri+=r.nt;V.g.add(m)}
+    const m=new THREE.Mesh(G,mat);m.matrixAutoUpdate=false;m.visible=false;m.userData.vxc=c;m.onBeforeRender=faHook;c.mesh=m;c.nt=r.nt;V.tri+=r.nt;V.g.add(m)}
    V.dirty=true}
  // priorité : la scène au premier plan (planète où l'on est, astéroïde proche) passe avant les maillages vus de loin
  function pump(){if(V.dead)return;if(!V.fg){const nw=performance.now();for(const e of VXW.fg.values())if(e[0]>0&&nw-e[1]<1500)return}let free=vxPoolFree();const L=[];for(const[k,w]of V.want){const c=V.ch.get(k);if(c&&c.st===0&&!c.req)L.push(c)}
@@ -14610,15 +14613,16 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
  const inside=(a,b)=>b.x>=a.x-1e-3&&b.y>=a.y-1e-3&&b.z>=a.z-1e-3&&b.x+b.s<=a.x+a.s+1e-3&&b.y+b.s<=a.y+a.s+1e-3&&b.z+b.s<=a.z+a.s+1e-3;
  // affichage : un morceau qui n'est plus voulu reste visible tant que ses remplaçants ne sont pas prêts (pas de trous pendant les transitions)
  function display(){let ready=true;const sub=new Map();
-  for(const[k,w]of V.want){const c=V.ch.get(k),rd=!!c&&c.st===2;if(!rd)ready=false;
-   // pour chaque ancêtre : tous ses descendants voulus sont-ils prêts ?
-   for(let dd=w.d-1;dd>=0;dd--){const sh=w.d-dd,ak=dd+':'+(w.ix>>sh)+':'+(w.iy>>sh)+':'+(w.iz>>sh),e=sub.get(ak);if(e){if(!rd)e.ok=false}else sub.set(ak,{ok:rd})}}
-  V.ready=ready;
-  for(const c of[...V.ch.values()]){if(V.want.has(c.k)){if(c.mesh)c.mesh.visible=c.st===2;continue}
+  let fad=false;for(const[k,w]of V.want){const c=V.ch.get(k),rd=!!c&&c.st===2,fa=rd?(c.fa==null?1:c.fa):0;if(!rd)ready=false;else if(fa<1)fad=true;
+   // pour chaque ancêtre : tous ses descendants voulus sont-ils prêts ? (et où en est leur fondu)
+   for(let dd=w.d-1;dd>=0;dd--){const sh=w.d-dd,ak=dd+':'+(w.ix>>sh)+':'+(w.iy>>sh)+':'+(w.iz>>sh),e=sub.get(ak);if(e){if(!rd)e.ok=false;if(fa<e.mn)e.mn=fa}else sub.set(ak,{ok:rd,mn:fa})}}
+  V.ready=ready;V.fading=fad;
+  for(const c of[...V.ch.values()]){if(V.want.has(c.k)){if(c.mesh){c.mesh.visible=c.st===2;c.fv=c.fa==null?1:c.fa}continue}
    if(c.st!==2||!c.mesh){drop(c);continue}
-   let rel=false,ok=true;const e=sub.get(c.k);if(e){rel=true;ok=e.ok}
-   else for(let dd=c.d-1;dd>=0;dd--){const sh=c.d-dd,ak=dd+':'+(c.ix>>sh)+':'+(c.iy>>sh)+':'+(c.iz>>sh);if(V.want.has(ak)){rel=true;const q=V.ch.get(ak);ok=!!q&&q.st===2;break}}
-   if(!rel||ok)drop(c);else c.mesh.visible=true}}
+   let rel=false,ok=true,mn=1;const e=sub.get(c.k);if(e){rel=true;ok=e.ok;mn=e.mn}
+   else for(let dd=c.d-1;dd>=0;dd--){const sh=c.d-dd,ak=dd+':'+(c.ix>>sh)+':'+(c.iy>>sh)+':'+(c.iz>>sh);if(V.want.has(ak)){rel=true;const q=V.ch.get(ak);ok=!!q&&q.st===2;mn=ok?(q.fa==null?1:q.fa):0;break}}
+   // remplaçants prêts : l'ancien morceau s'efface avec la trame complémentaire, puis disparaît
+   if(!rel||ok&&mn>=1)drop(c);else{c.mesh.visible=true;c.fv=ok?-Math.max(.001,mn):1}}}
  V.bq=[];
  V.update=function(camLocal,dt){V.ut=performance.now();if(!V.emq){V.emq=1;emReq()}
   if(V.bq.length){const t0=performance.now(),bud=VXW.bud||2.5;let n=0;while(V.bq.length&&(n<1||performance.now()-t0<bud)){build(V.bq.shift());n++}}V.tw-=dt||0;const moved=camLocal.distanceTo(V.cam)>(V.space?W/40:leaf*.22);
@@ -14627,6 +14631,7 @@ function vxPlanet(P,o){o=o||{};const pid='vx'+(++VXPID),core=vxCore();core.setup
   for(const[k,w]of V.want){let c=V.ch.get(k);if(!c){c={k,...w,st:0,mesh:null};V.ch.set(k,c)}}
   // envois : les morceaux les plus grossiers puis les plus proches d'abord
   pump();
+  if(V.fading){const k=(dt||.016)/.45;for(const c of V.ch.values())if(c.st===2&&c.fa<1&&V.want.has(c.k))c.fa=Math.min(1,c.fa+k);V.dirty=true}
   if(V.dirty){V.dirty=false;display()}vxPoolTick()};
  V.dig=function(x,y,z,r){V.digs.push([x,y,z,r]);for(const c of V.ch.values()){if(!c.cav||c.st==0)continue;const m=r+3*c.s/N;
    if(x+m<c.x||x-m>c.x+c.s||y+m<c.y||y-m>c.y+c.s||z+m<c.z||z-m>c.z+c.s)continue;request(c)}};
