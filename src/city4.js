@@ -61,13 +61,39 @@ function ct4Build(F,sc,c,cfg,D,R){const h=F.h,r=cfg.r,ca=Math.cos(cfg.rot),sa=Ma
  drape(D.w,0,.65,new THREE.MeshStandardMaterial({color:0x2a5a7a,roughness:.15,metalness:.4,emissive:0x0a1a28,polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3}));
  CT4.grid=G;CT4.bm=bm;CT4.on=true;CT4.c=new V3(c.x,0,c.z);CT4.R=R;CT4.maxTop=maxTop;return P.length/9}
 // ----- branchement : remplace les tours de surf3 -----
-{const _cb=ct3Build;ct3Build=function(F,sc){ct4Clear();const n0=sc.children.length,c0=GR&&GR.col?GR.col.length:0;_cb.apply(this,arguments);if(!CT3.on||window.CT4OFF||!CT4.idx)return;
+{const _cb=ct3Build;ct3Build=function(F,sc){ct4Clear();const n0=sc.children.length,c0=GR&&GR.col?GR.col.length:0;_cb.apply(this,arguments);if(CT3.on&&ct4Place(F,sc,n0)===false)return;if(!CT3.on||window.CT4OFF||!CT4.idx)return;
  // on retire les tours, les dômes et les antennes de l'ancienne ville (on garde circulation et lueur)
  const added=sc.children.slice(n0);for(const o of added){if(o===CT3.flm||o===CT3.fll||o===CT3.glow)continue;if(o.isInstancedMesh||o===CT3.ant){o.visible=false;if(o!==CT3.ant)sc.remove(o)}}if(GR&&GR.col)GR.col.length=c0;
  const p=F.p,cfg=ct4Cfg(p,F);if(!cfg)return;const c=CT3.c.clone(),dOp=F.op?Math.hypot(c.x-F.op.x,c.z-F.op.z):1e9,R=Math.max(180,Math.min(DESK?470:330,dOp-140));const tok=++CT4.tok;
- const go=D=>{if(tok!==CT4.tok||mode!='surf'||!GR||GR.F!==F&&U3.F!==F)return;try{const nt=ct4Build(F,sc,c,cfg,D,R);CT4.name=cfg.name;setTimeout(()=>{try{toast('🏙️ '+cfg.name+' — plan d\'après '+cfg.src+' (© contributeurs OpenStreetMap)')}catch(e){}},4500);if(typeof pf3Compile=='function')try{pf3Compile(sc)}catch(e){}}catch(e){console.warn('ct4',e)}};
+ const go=D=>{if(tok!==CT4.tok||mode!='surf'||!GR||GR.F!==F&&U3.F!==F)return;try{const nt=ct4Build(F,sc,c,cfg,D,R);try{cfg.name=ct4Loc(p).name}catch(e){}CT4.name=cfg.name;setTimeout(()=>{try{toast('🏙️ '+cfg.name+' — plan d\'après '+cfg.src+' (© contributeurs OpenStreetMap)')}catch(e){}},4500);if(typeof pf3Compile=='function')try{pf3Compile(sc)}catch(e){}}catch(e){console.warn('ct4',e)}};
  const D=CT4.cache.get(cfg.id);if(D)go(D);else fetch('cities/'+cfg.id+'.json').then(r=>r.json()).then(j=>{CT4.cache.set(cfg.id,j);go(j)}).catch(e=>console.warn('ct4',e))}}
 // ----- chaque image : fenêtres et réverbères la nuit, le vaisseau ne traverse pas les immeubles -----
 TICK.push(()=>{if(!CT4.on||mode!='surf')return;const night=typeof DN!='undefined'?DN.night:0;if(CT4.bm)CT4.bm.emissiveIntensity=.12+night*1.5;if(CT4.lights)CT4.lights.material.opacity=Math.min(1,night*1.4);if(CT4.ant)CT4.ant.material.opacity=Math.sin(t*3)>0?1:.15;
  const G=CT4.grid;if(!G||typeof FOOT!='undefined'&&FOOT.on)return;const gx=Math.floor((S.pos.x-G.x0)/G.cs),gz=Math.floor((S.pos.z-G.z0)/G.cs);if(gx<0||gz<0||gx>=G.n||gz>=G.n)return;const top=G.top[gz*G.n+gx];
  if(top>0&&S.pos.y<top+4){S.pos.y=top+4;if(S.vel&&S.vel.y<0)S.vel.y=0}});
+// ===== emplacement de la ville sur la planète : nom visible depuis l'espace, la ville n'apparaît que si l'on se pose près d'elle =====
+// Point fixe sur la sphère (u,v) tiré de la graine (sur la terre ferme des mondes générés), affiché en surimpression dans l'espace.
+// Au sol : si l'arrivée est à moins de CT4ANG de la ville, elle est construite dans la bonne direction (plus près si l'on s'est posé dessus) ; sinon pas de ville.
+const CT4ANG=.38,_ct4a=new V3(),_ct4b=new V3();
+function ct4UVdir(u,v,out){const ph=u*TAU,th=(1-v)*Math.PI;return out.set(-Math.cos(ph)*Math.sin(th),Math.cos(th),Math.sin(ph)*Math.sin(th))}
+function ct4Loc(p){if(p._ct4L)return p._ct4L;const r=rng((seedOf(p.x,p.y,p.z,131)>>>0)%2147483646+1),cfg=(()=>{try{return ct4Cfg(p,{hu:p.wg0!=null?p.wg0:p.hue})}catch(e){return null}})();let u=r(),v=.28+r()*.44;
+ try{if(typeof wg4Is=='function'&&wg4Is(p)){const G=wg4Gen(p);for(let k=0;k<400;k++){const uu=r(),vv=.2+r()*.6,B=wg4At(G,uu,vv);if(!B.water&&B.bio!==0&&!B.river){u=uu;v=vv;break}}}}catch(e){}
+ const L={u,v,dir:ct4UVdir(u,v,new V3()),name:cfg?cfg.name:'Cité'};if(cfg)p._ct4L=L;return L}
+function ct4LandDir(p){const L=GX('wgL',{})[p.name];return L?ct4UVdir(L.u,L.v,new V3()):null}
+// mémorise le point d'arrivée pour toutes les planètes (wg4 ne le fait que pour les mondes générés)
+{const _st4=startEntry;startEntry=function(p){try{if(p&&!S.entry&&mode=='space'){const sph=p.mesh&&p.mesh.userData&&p.mesh.userData.sph;_ct4a.copy(S.pos);if(sph){sph.updateMatrixWorld(true);sph.worldToLocal(_ct4a)}else _ct4a.sub(_ct4b.set(p.x,p.y,p.z));_ct4a.normalize();
+  const th=Math.acos(clamp(_ct4a.y,-1,1)),ph=Math.atan2(_ct4a.z,-_ct4a.x);GX('wgL',{})[p.name]={u:((ph/TAU)%1+1)%1,v:1-th/Math.PI}}}catch(e){}return _st4.apply(this,arguments)}}
+// au sol : ville seulement près de son emplacement, placée dans la bonne direction
+function ct4Place(F,sc,n0){if(!CT3.on)return true;try{const p=F.p,Lc=ct4Loc(p),Ld=ct4LandDir(p);if(!Ld)return true;const ang=Math.acos(clamp(Ld.dot(Lc.dir),-1,1));
+ if(ang>CT4ANG){CT4.tok++;CT3.on=false;for(const o of sc.children.slice(n0))o.visible=false;CT4.on=false;const km=Math.round(ang*(p.r||300)*.06*10)/10;setTimeout(()=>{try{if(mode=='surf')toast('🏙️ '+Lc.name+' est loin d\'ici — son nom est indiqué sur la planète depuis l\'espace')}catch(e){}},5000);return false}
+ // direction vers la ville dans le plan local (est = x, sud = z)
+ const up=Ld,east=_ct4a.set(0,1,0).cross(up);if(east.lengthSq()<1e-6)east.set(1,0,0);east.normalize();const north=_ct4b.copy(up).cross(east).normalize(),dv=Lc.dir.clone().sub(up.clone().multiplyScalar(Lc.dir.dot(up))),de=dv.dot(east),dn=dv.dot(north),bl=Math.hypot(de,dn)||1;
+ const dist=lerp(650,1250,clamp(ang/CT4ANG,0,1)),tx=de/bl*dist,tz=-dn/bl*dist,h=F.h;let best=null;
+ for(let k=0;k<40;k++){const a=k/40*TAU,rr=k?60+(k%5)*40:0,x=clamp(tx+Math.cos(a)*rr,-1300,1300),z=clamp(tz+Math.sin(a)*rr,-1300,1300),y=h(x,z);if(y<8)continue;if(F.op&&Math.hypot(x-F.op.x,z-F.op.z)<380)continue;let sl=0;for(const[dx,dz]of[[60,0],[-60,0],[0,60],[0,-60]])sl=Math.max(sl,Math.abs(h(x+dx,z+dz)-y));if(!best||sl<best.sl)best={x,z,y,sl}}
+ if(!best)return true;const dy=best.y-CT3.c.y;CT3.c.set(best.x,best.y,best.z);if(CT3.glow)CT3.glow.position.set(best.x,best.y+60,best.z);for(const f of CT3.fl||[])f.y+=dy}catch(e){console.warn('ct4 place',e)}return true}
+// le nom de la ville sur la planète, vu de l'espace
+{const _ov4=overlay;overlay=function(){_ov4();if(mode!='space'||S.dead||S.docked||typeof planets=='undefined')return;try{const cp=camera.position;for(const p of planets){const g=p.mesh,sph=g&&g.userData&&g.userData.sph;if(!sph||!ct3Inhab(p))continue;const D=Math.hypot(cp.x-p.x,cp.y-p.y,cp.z-p.z);if(D>p.r*14)continue;
+ const L=ct4Loc(p);sph.updateMatrixWorld(true);const w=_ct4a.copy(L.dir).multiplyScalar(p.r*1.01).applyMatrix4(sph.matrixWorld),n=_ct4b.set(w.x-p.x,w.y-p.y,w.z-p.z).normalize();if(n.dot(_ct4b.clone().set(cp.x-w.x,cp.y-w.y,cp.z-w.z).normalize())<.08)continue;
+ const s=proj(w);if(!s.front||s.y<(DESK?40:70))continue;const a=clamp((p.r*14-D)/(p.r*4),0,1);OX.save();OX.globalAlpha=a;OX.fillStyle='#ffd38a';OX.strokeStyle='rgba(0,0,0,.6)';OX.lineWidth=3;
+ OX.beginPath();OX.arc(s.x,s.y,4,0,TAU);OX.fill();OX.beginPath();OX.moveTo(s.x,s.y-5);OX.lineTo(s.x,s.y-18);OX.strokeStyle='#ffd38a';OX.lineWidth=1.5;OX.stroke();
+ OX.font="600 13px 'Chakra Petch',system-ui";OX.textAlign='center';OX.lineWidth=3;OX.strokeStyle='rgba(0,0,0,.65)';const tx=L.name;OX.strokeText(tx,s.x,s.y-22);OX.fillStyle='#ffe2b0';OX.fillText(tx,s.x,s.y-22);OX.restore()}}catch(e){}}}
