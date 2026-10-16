@@ -5,8 +5,8 @@
 const FLY={ready:false,L:19,geo:null,mat:null,noz:null,gun:null};
 function flyLoad(){if(FLY.loading||/[?&]noflyer\b/.test(location.search))return;FLY.loading=1;let L;try{L=new THREE.GLTFLoader()}catch(e){return}
  L.load('models/flyer.glb',g=>{let m=null;g.scene.traverse(q=>{if(q.isMesh&&!m)m=q});if(!m)return;const geo=m.geometry;if(!geo.attributes.normal)geo.computeVertexNormals();
-  const tex=new THREE.TextureLoader().load('models/flyer'+(DESK?'2k':'1k')+'.jpg',()=>{FLY.ready=true;flyRefresh()});tex.encoding=THREE.sRGBEncoding;tex.anisotropy=DESK?8:4;
-  FLY.mat=new THREE.MeshStandardMaterial({map:tex,roughness:.38,metalness:.35,envMapIntensity:1.2,emissive:0xffffff,emissiveMap:tex,emissiveIntensity:.14});FLY.mat.name='flyer';
+  const tex=new THREE.TextureLoader().load('models/flyer'+(DESK?'2k':'1k')+'.jpg',()=>{FLY.ready=true;flyRefresh()});tex.anisotropy=DESK?8:4;
+  FLY.mat=new THREE.MeshStandardMaterial({map:tex,roughness:.38,metalness:.35,envMapIntensity:1.2,emissive:0xffffff,emissiveMap:tex,emissiveIntensity:.06});FLY.mat.name='flyer';
   // repère du jeu
   const M4=new THREE.Matrix4().makeBasis(new V3(0,0,1),new V3(1,0,0),new V3(0,1,0));geo.applyMatrix4(M4);geo.computeBoundingBox();const b=geo.boundingBox,sz=b.getSize(new V3()),s=FLY.L/sz.z,c=b.getCenter(new V3());
   geo.translate(-c.x,-c.y,-c.z);geo.scale(s,s,s);geo.computeBoundingBox();geo.computeBoundingSphere();FLY.geo=geo;

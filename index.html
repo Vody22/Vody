@@ -296,7 +296,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261016-055054"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261016-061917"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -13808,7 +13808,7 @@ function glBake(srcL,clip,dstL){const S=glRest(srcL),D=glRest(dstL),SB=glBones(S
  return new THREE.AnimationClip(clip.name,clip.duration,tr)}
 // ----- chargement (en arrière-plan, après le démarrage) -----
 function glLoad(){if(GLC.loading)return;GLC.loading=1;let L;try{L=new THREE.GLTFLoader()}catch(e){return}const keys=Object.keys(GLM).filter(k=>k!='michelle'||window.GLCIV);let left=keys.length;
- for(const k of keys)L.load(GLM[k].url,g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=DESK;o.frustumCulled=false;if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){if(m.map)m.map.anisotropy=4;m.envMapIntensity=.6}}}});if(k=='xbot')g.scene.traverse(o=>{if(o.isMesh){const j=/joint/i.test(o.material.name);o.material=new THREE.MeshStandardMaterial({color:j?0x1c2026:0xc8ced6,metalness:j?.6:.75,roughness:j?.45:.28,skinning:true,envMapIntensity:.8})}});GLC.lib[k]=g;if(--left==0)glPrep()},null,e=>{GLC.err++;console.warn('glchar',k,e);if(--left==0)glPrep()})}
+ for(const k of keys)L.load(GLM[k].url,g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=DESK;o.frustumCulled=false;if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){for(const k of['map','emissiveMap'])if(m[k]){m[k].encoding=THREE.LinearEncoding;m[k].needsUpdate=true}if(m.map)m.map.anisotropy=4;m.envMapIntensity=.6;m.needsUpdate=true}}}});if(k=='xbot')g.scene.traverse(o=>{if(o.isMesh){const j=/joint/i.test(o.material.name);o.material=new THREE.MeshStandardMaterial({color:j?0x1c2026:0xc8ced6,metalness:j?.6:.75,roughness:j?.45:.28,skinning:true,envMapIntensity:.8})}});GLC.lib[k]=g;if(--left==0)glPrep()},null,e=>{GLC.err++;console.warn('glchar',k,e);if(--left==0)glPrep()})}
 function glPrep(){try{const X=GLC.lib.xbot,Sd=GLC.lib.soldier;if(!X)return;const pick=(L,n)=>L&&L.animations.find(a=>a.name.toLowerCase()==n);
  GLC.src={idle:pick(X,'idle'),walk:pick(X,'walk'),run:pick(X,'run'),agree:pick(X,'agree'),shake:pick(X,'headshake'),sad:pick(X,'sad_pose')};
  for(const k in GLC.lib){const L=GLC.lib[k];L.clips={};for(const c in GLC.src){if(!GLC.src[c])continue;L.clips[c]=k=='xbot'?GLC.src[c]:null}
@@ -13867,8 +13867,8 @@ setTimeout(()=>{if(!/[?&]nogl\b/.test(location.search))glLoad()},1500);
 const FLY={ready:false,L:19,geo:null,mat:null,noz:null,gun:null};
 function flyLoad(){if(FLY.loading||/[?&]noflyer\b/.test(location.search))return;FLY.loading=1;let L;try{L=new THREE.GLTFLoader()}catch(e){return}
  L.load('models/flyer.glb',g=>{let m=null;g.scene.traverse(q=>{if(q.isMesh&&!m)m=q});if(!m)return;const geo=m.geometry;if(!geo.attributes.normal)geo.computeVertexNormals();
-  const tex=new THREE.TextureLoader().load('models/flyer'+(DESK?'2k':'1k')+'.jpg',()=>{FLY.ready=true;flyRefresh()});tex.encoding=THREE.sRGBEncoding;tex.anisotropy=DESK?8:4;
-  FLY.mat=new THREE.MeshStandardMaterial({map:tex,roughness:.38,metalness:.35,envMapIntensity:1.2,emissive:0xffffff,emissiveMap:tex,emissiveIntensity:.14});FLY.mat.name='flyer';
+  const tex=new THREE.TextureLoader().load('models/flyer'+(DESK?'2k':'1k')+'.jpg',()=>{FLY.ready=true;flyRefresh()});tex.anisotropy=DESK?8:4;
+  FLY.mat=new THREE.MeshStandardMaterial({map:tex,roughness:.38,metalness:.35,envMapIntensity:1.2,emissive:0xffffff,emissiveMap:tex,emissiveIntensity:.06});FLY.mat.name='flyer';
   // repère du jeu
   const M4=new THREE.Matrix4().makeBasis(new V3(0,0,1),new V3(1,0,0),new V3(0,1,0));geo.applyMatrix4(M4);geo.computeBoundingBox();const b=geo.boundingBox,sz=b.getSize(new V3()),s=FLY.L/sz.z,c=b.getCenter(new V3());
   geo.translate(-c.x,-c.y,-c.z);geo.scale(s,s,s);geo.computeBoundingBox();geo.computeBoundingSphere();FLY.geo=geo;
@@ -13893,13 +13893,13 @@ setTimeout(flyLoad,600);
 // ===== VAISSEAUX DES PNJ ET DES ENNEMIS EN VRAIS MODÈLES 3D (mdl4.js, après ship4.js) =====
 // Modèles fournis par William, simplifiés et convertis (voir CLAUDE.md) : glider (chasseurs pirates), statek (vaisseaux lourds + courriers/patrouilles du trafic), dread (boss, dreadnought mondial).
 // Chaque fichier est ramené au repère du jeu (nez -z, dessus +y) et à une longueur de 1 ; mdlSwap(groupe, clé) masque les pièces calculées (on garde flammes et halos additifs) et pose le modèle à la même taille.
-const MDL={lib:{},defs:{glider:{url:'models/glider.glb',tex:'glider',ry:Math.PI,emi:.12},statek:{url:'models/statek.glb',tex:'statek',em:'statek_em',ry:0,emi:1.4},dread:{url:'models/dread.glb',tex:'dread',em:'dread_em',ry:Math.PI,emi:1.6}}};
+const MDL={lib:{},defs:{glider:{url:'models/glider.glb',tex:'glider',ry:Math.PI,emi:.06},statek:{url:'models/statek.glb',tex:'statek',em:'statek_em',ry:0,emi:1},dread:{url:'models/dread.glb',tex:'dread',em:'dread_em',ry:Math.PI,emi:1.1}}};
 function mdlLoad(){if(MDL.loading||/[?&]nomdl\b/.test(location.search))return;MDL.loading=1;let L;try{L=new THREE.GLTFLoader()}catch(e){return}const TL=new THREE.TextureLoader(),res=DESK?'2k':'1k';
  for(const k in MDL.defs){const D=MDL.defs[k];L.load(D.url,g=>{let m=null;g.scene.traverse(q=>{if(q.isMesh&&!m)m=q});if(!m)return;const geo=m.geometry;if(!geo.attributes.normal)geo.computeVertexNormals();
   if(D.ry)geo.rotateY(D.ry);geo.computeBoundingBox();const b=geo.boundingBox,c=b.getCenter(new V3()),sz=b.getSize(new V3());geo.translate(-c.x,-c.y,-c.z);const s=1/sz.z;geo.scale(s,s,s);geo.computeBoundingBox();geo.computeBoundingSphere();
-  const map=TL.load('models/'+D.tex+res+'.jpg');map.encoding=THREE.sRGBEncoding;map.anisotropy=DESK?8:4;
+  const map=TL.load('models/'+D.tex+res+'.jpg');map.anisotropy=DESK?8:4;
   const mat=new THREE.MeshStandardMaterial({map,roughness:.45,metalness:.4,envMapIntensity:1.1,emissive:0xffffff,emissiveIntensity:D.emi});
-  if(D.em){const em=TL.load('models/'+D.em+'.jpg');em.encoding=THREE.sRGBEncoding;mat.emissiveMap=em}else mat.emissiveMap=map;
+  if(D.em){const em=TL.load('models/'+D.em+'.jpg');mat.emissiveMap=em}else mat.emissiveMap=map;
   MDL.lib[k]={geo,mat,ratio:sz.x/sz.z};mdlReady(k)},null,e=>console.warn('mdl',k,e))}}
 function mdlOk(k){return !!MDL.lib[k]&&!window.MDLOFF}
 // remplace le visuel d'un vaisseau (groupe avec userData.body) par le modèle k, à la même longueur (× f)
@@ -13929,8 +13929,8 @@ const STN4={R:108,geo:null,mat:null,hub:new V3(0,322.8,102.3),fr:631.5};
 function stn4Load(){if(STN4.loading||/[?&]nomdl\b/.test(location.search))return;STN4.loading=1;let L;try{L=new THREE.GLTFLoader()}catch(e){return}const TL=new THREE.TextureLoader(),res=DESK?'2k':'1k';
  L.load('models/station.glb',g=>{let m=null;g.scene.traverse(q=>{if(q.isMesh&&!m)m=q});if(!m)return;const geo=m.geometry;if(!geo.attributes.normal)geo.computeVertexNormals();const s=STN4.R/STN4.fr;
   geo.translate(-STN4.hub.x,-STN4.hub.y,-STN4.hub.z);geo.scale(s,s,s);geo.computeBoundingBox();geo.computeBoundingSphere();
-  const map=TL.load('models/station'+res+'.jpg');map.encoding=THREE.sRGBEncoding;map.anisotropy=DESK?8:4;const em=TL.load('models/station_em.jpg');em.encoding=THREE.sRGBEncoding;
-  STN4.mat=new THREE.MeshStandardMaterial({map,color:new THREE.Color(1.5,1.5,1.55),roughness:.45,metalness:.3,envMapIntensity:1.3,emissive:0xffffff,emissiveMap:em,emissiveIntensity:2.6});STN4.geo=geo;
+  const map=TL.load('models/station'+res+'.jpg');map.anisotropy=DESK?8:4;const em=TL.load('models/station_em.jpg');
+  STN4.mat=new THREE.MeshStandardMaterial({map,color:new THREE.Color(1.1,1.1,1.12),roughness:.45,metalness:.3,envMapIntensity:1.2,emissive:0xffffff,emissiveMap:em,emissiveIntensity:1.6});STN4.geo=geo;
   try{for(const st of stations)if(st.mesh&&!st.ground)stn4Swap(st.mesh)}catch(e){console.warn(e)}},null,e=>console.warn('station',e))}
 function stn4Hide(o){o.traverse(q=>{if(!q.isMesh||q.userData.stn4)return;const ms=Array.isArray(q.material)?q.material:[q.material];if(ms.some(m=>m&&m.blending===THREE.AdditiveBlending))return;q.visible=false})}
 function stn4Swap(g){if(!STN4.geo||!g||window.MDLOFF)return g;const u=g.userData||(g.userData={});if(u.stn4)return g;
@@ -13941,6 +13941,19 @@ if(typeof styApply=='function'){const _sa=styApply;styApply=function(st){const r
 {let lt=performance.now();TICK.push(()=>{const n=performance.now(),dt=Math.min(.1,(n-lt)/1000);lt=n;if(typeof stations=='undefined'||mode!='space')return;for(const st of stations){const u=st.mesh&&st.mesh.userData;if(u&&u.stn4)u.stn4.rotation.y+=dt*.03}})}
 setTimeout(stn4Load,1200);
 {const _ls4=loadSmall;loadSmall=function(c){_ls4.apply(this,arguments);try{const g=c.st&&c.st.mesh,u=g&&g.userData;if(u&&u.stn4)for(const ch of g.children)if(ch!==u.stn4)stn4Hide(ch)}catch(e){}}}
+
+// ===== CIEL DE L'ESPACE : PANORAMA DE WILLIAM (sky4.js, après mdl4.js) =====
+// public/models/sky4k.jpg (PC) / sky2k.jpg (mobile), tirés de space_nebula_6k.jpg (équirectangulaire) → carte de la sphère NEB (gfx.js) à la place de la nébuleuse calculée,
+// puis reflets d'environnement (scene.environment) recalculés à partir du nouveau ciel. Le rendu du jeu est en espace linéaire (pas d'outputEncoding) : texture laissée en LinearEncoding.
+const SKY4={tex:null,env:null,t:0};
+function sky4Env(){try{const pm=new THREE.PMREMGenerator(R3),es=new THREE.Scene();es.add(new THREE.Mesh(new THREE.SphereGeometry(40,32,16),new THREE.MeshBasicMaterial({map:SKY4.tex,side:THREE.BackSide})));
+ const k1=new THREE.Mesh(new THREE.SphereGeometry(5,16,8),new THREE.MeshBasicMaterial({color:0xfff2dd}));k1.position.set(20,22,10);es.add(k1);const env=pm.fromScene(es,.03).texture;pm.dispose();
+ if(SKY4.env&&SKY4.env!==env)try{SKY4.env.dispose()}catch(e){}SKY4.env=env;scene.environment=env;if(typeof SURF!='undefined'&&SURF.scene&&DESK)SURF.scene.environment=env}catch(e){console.warn('sky4 env',e)}}
+function sky4Apply(){if(!SKY4.tex||typeof NEB=='undefined'||!NEB||window.SKYOFF)return;if(NEB.material.map!==SKY4.tex){NEB.material.map=SKY4.tex;NEB.material.needsUpdate=true;sky4Env()}}
+function sky4Load(){if(/[?&]nosky\b/.test(location.search))return;new THREE.TextureLoader().load('models/sky'+(DESK?'4k':'2k')+'.jpg',tx=>{tx.anisotropy=4;tx.generateMipmaps=true;tx.minFilter=THREE.LinearMipmapLinearFilter;SKY4.tex=tx;sky4Apply()},null,e=>console.warn('sky4',e))}
+// la nébuleuse calculée au démarrage (PC) peut arriver après : on réapplique pendant les premières secondes
+{let lt=performance.now();TICK.push(()=>{const n=performance.now();if(n-lt<1000)return;lt=n;SKY4.t++;if(SKY4.t<30)sky4Apply()})}
+setTimeout(sky4Load,300);
 
 // ===== MODE PHOTO : pause, caméra libre autour du vaisseau, filtres, flou, cadres, enregistrement de l'image =====
 const PH={on:false,yaw:0,pitch:.2,dist:30,fov:60,roll:0,anc:new V3(),f:'none',b:'none',fr:'none',hide:false,drag:null,pinch:null,shots:0};

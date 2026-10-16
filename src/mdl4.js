@@ -1,13 +1,13 @@
 // ===== VAISSEAUX DES PNJ ET DES ENNEMIS EN VRAIS MODÈLES 3D (mdl4.js, après ship4.js) =====
 // Modèles fournis par William, simplifiés et convertis (voir CLAUDE.md) : glider (chasseurs pirates), statek (vaisseaux lourds + courriers/patrouilles du trafic), dread (boss, dreadnought mondial).
 // Chaque fichier est ramené au repère du jeu (nez -z, dessus +y) et à une longueur de 1 ; mdlSwap(groupe, clé) masque les pièces calculées (on garde flammes et halos additifs) et pose le modèle à la même taille.
-const MDL={lib:{},defs:{glider:{url:'models/glider.glb',tex:'glider',ry:Math.PI,emi:.12},statek:{url:'models/statek.glb',tex:'statek',em:'statek_em',ry:0,emi:1.4},dread:{url:'models/dread.glb',tex:'dread',em:'dread_em',ry:Math.PI,emi:1.6}}};
+const MDL={lib:{},defs:{glider:{url:'models/glider.glb',tex:'glider',ry:Math.PI,emi:.06},statek:{url:'models/statek.glb',tex:'statek',em:'statek_em',ry:0,emi:1},dread:{url:'models/dread.glb',tex:'dread',em:'dread_em',ry:Math.PI,emi:1.1}}};
 function mdlLoad(){if(MDL.loading||/[?&]nomdl\b/.test(location.search))return;MDL.loading=1;let L;try{L=new THREE.GLTFLoader()}catch(e){return}const TL=new THREE.TextureLoader(),res=DESK?'2k':'1k';
  for(const k in MDL.defs){const D=MDL.defs[k];L.load(D.url,g=>{let m=null;g.scene.traverse(q=>{if(q.isMesh&&!m)m=q});if(!m)return;const geo=m.geometry;if(!geo.attributes.normal)geo.computeVertexNormals();
   if(D.ry)geo.rotateY(D.ry);geo.computeBoundingBox();const b=geo.boundingBox,c=b.getCenter(new V3()),sz=b.getSize(new V3());geo.translate(-c.x,-c.y,-c.z);const s=1/sz.z;geo.scale(s,s,s);geo.computeBoundingBox();geo.computeBoundingSphere();
-  const map=TL.load('models/'+D.tex+res+'.jpg');map.encoding=THREE.sRGBEncoding;map.anisotropy=DESK?8:4;
+  const map=TL.load('models/'+D.tex+res+'.jpg');map.anisotropy=DESK?8:4;
   const mat=new THREE.MeshStandardMaterial({map,roughness:.45,metalness:.4,envMapIntensity:1.1,emissive:0xffffff,emissiveIntensity:D.emi});
-  if(D.em){const em=TL.load('models/'+D.em+'.jpg');em.encoding=THREE.sRGBEncoding;mat.emissiveMap=em}else mat.emissiveMap=map;
+  if(D.em){const em=TL.load('models/'+D.em+'.jpg');mat.emissiveMap=em}else mat.emissiveMap=map;
   MDL.lib[k]={geo,mat,ratio:sz.x/sz.z};mdlReady(k)},null,e=>console.warn('mdl',k,e))}}
 function mdlOk(k){return !!MDL.lib[k]&&!window.MDLOFF}
 // remplace le visuel d'un vaisseau (groupe avec userData.body) par le modèle k, à la même longueur (× f)
@@ -37,8 +37,8 @@ const STN4={R:108,geo:null,mat:null,hub:new V3(0,322.8,102.3),fr:631.5};
 function stn4Load(){if(STN4.loading||/[?&]nomdl\b/.test(location.search))return;STN4.loading=1;let L;try{L=new THREE.GLTFLoader()}catch(e){return}const TL=new THREE.TextureLoader(),res=DESK?'2k':'1k';
  L.load('models/station.glb',g=>{let m=null;g.scene.traverse(q=>{if(q.isMesh&&!m)m=q});if(!m)return;const geo=m.geometry;if(!geo.attributes.normal)geo.computeVertexNormals();const s=STN4.R/STN4.fr;
   geo.translate(-STN4.hub.x,-STN4.hub.y,-STN4.hub.z);geo.scale(s,s,s);geo.computeBoundingBox();geo.computeBoundingSphere();
-  const map=TL.load('models/station'+res+'.jpg');map.encoding=THREE.sRGBEncoding;map.anisotropy=DESK?8:4;const em=TL.load('models/station_em.jpg');em.encoding=THREE.sRGBEncoding;
-  STN4.mat=new THREE.MeshStandardMaterial({map,color:new THREE.Color(1.5,1.5,1.55),roughness:.45,metalness:.3,envMapIntensity:1.3,emissive:0xffffff,emissiveMap:em,emissiveIntensity:2.6});STN4.geo=geo;
+  const map=TL.load('models/station'+res+'.jpg');map.anisotropy=DESK?8:4;const em=TL.load('models/station_em.jpg');
+  STN4.mat=new THREE.MeshStandardMaterial({map,color:new THREE.Color(1.1,1.1,1.12),roughness:.45,metalness:.3,envMapIntensity:1.2,emissive:0xffffff,emissiveMap:em,emissiveIntensity:1.6});STN4.geo=geo;
   try{for(const st of stations)if(st.mesh&&!st.ground)stn4Swap(st.mesh)}catch(e){console.warn(e)}},null,e=>console.warn('station',e))}
 function stn4Hide(o){o.traverse(q=>{if(!q.isMesh||q.userData.stn4)return;const ms=Array.isArray(q.material)?q.material:[q.material];if(ms.some(m=>m&&m.blending===THREE.AdditiveBlending))return;q.visible=false})}
 function stn4Swap(g){if(!STN4.geo||!g||window.MDLOFF)return g;const u=g.userData||(g.userData={});if(u.stn4)return g;
