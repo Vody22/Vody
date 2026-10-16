@@ -41,7 +41,11 @@ if '--portal' in a:
         if kind == 'crazygames':
             head += ('<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>'
                      '<script>(function(){var st=0,ok=0;function S(){return window.CrazyGames&&CrazyGames.SDK&&CrazyGames.SDK.game}'
-                     'window.addEventListener("load",function(){try{CrazyGames.SDK.init().then(function(){ok=1}).catch(function(){})}catch(e){}});'
+                     'var K="starfarer3d-v1",T="sf-cg-t";function D(){return CrazyGames.SDK.data}'
+                     'function push(){try{var v=localStorage.getItem(K);if(!v||v===window.__cgLast)return;window.__cgLast=v;var n=String(Date.now());D().setItem(K,v);D().setItem(T,n);localStorage.setItem(T,n)}catch(e){}}'
+                     'function pull(){try{var r=D().getItem(K),rt=+D().getItem(T)||0,lt=+localStorage.getItem(T)||0;window.__cgLast=localStorage.getItem(K);'
+                     'if(r&&rt>lt&&r!==localStorage.getItem(K)&&!sessionStorage.getItem("sf-cg-r")){sessionStorage.setItem("sf-cg-r","1");localStorage.setItem(K,r);localStorage.setItem(T,String(rt));var si=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k===K||k===T)return;return si.call(this,k,v)};location.reload();return 1}}catch(e){}}'
+                     'window.addEventListener("load",function(){try{CrazyGames.SDK.init().then(function(){ok=1;if(!pull()){setInterval(push,10000);addEventListener("pagehide",push);document.addEventListener("visibilitychange",function(){if(document.hidden)push()})}}).catch(function(){})}catch(e){}});'
                      'setInterval(function(){if(!ok||!S())return;var on=!(window.MENU3&&MENU3.on)&&!document.hidden;if(on&&!st){st=1;try{S().gameplayStart()}catch(e){}}else if(!on&&st){st=0;try{S().gameplayStop()}catch(e){}}},1000)})()</script>')
         pjp = ('<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>\n'
                '<script>window.Peer||document.write(\'<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\\/script>\')</script>')
