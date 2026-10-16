@@ -82,6 +82,7 @@ for(let i=0;i<14;i++){const s=sprite(0xbfe4ff,.35,1);s.material=s.material.clone
 const pts=[[[-14,-12],[14,-12],[14,14],[-14,14]],[[-22,8],[-10,20],[-22,26]],[[16,-22],[24,-6],[18,8]]];
 const hsh=m=>{m.userData.noAO=1;if(DESK)m.traverse(o=>{if(o.isMesh){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();o.castShadow=o.geometry.boundingSphere.radius>.11}})};
 for(let i=0;i<(DESK?2:1);i++){const m=buildHuman({role:'mechanic',helmet:i!=1,suit:[0xe8ecf0,0xf0b040,0x6f8fb0][i]});hsh(m);const P=pts[i],p=new V3(P[0][0],0,P[0][1]);m.position.copy(p);sc.add(m);H3.npc.push({m,P,i:1,ph:r()*6,wait:r()*2,pos:p})}
+if(typeof GLC!='undefined'&&GLC.ready&&GLC.lib.xbot){const m=buildHuman({role:'robot',seed:7});hsh(m);const P=pts[2],p=new V3(P[0][0],0,P[0][1]);m.position.copy(p);sc.add(m);H3.npc.push({m,P,i:1,ph:0,wait:1,pos:p,bot:1})}
 {const m=buildHuman({role:'mechanic',helmet:false,suit:0xd8dde4});m.position.set(-6,0,-30);m.rotation.y=Math.PI*.15;hsh(m);sc.add(m);H3.npc.push({m,fixed:1,ph:0});
 cast(add(RB3(2.4,1.2,1),M.dark,-6,1.1,-31.4));add(new THREE.PlaneGeometry(2,.9),new THREE.MeshBasicMaterial({map:h3Screen(st,k,S0.acc)}),-6,1.95,-30.8,-.6,0,0)}
 // le vaisseau du joueur, posé sur l'aire (verrière ouverte si disponible)
