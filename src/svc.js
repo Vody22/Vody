@@ -28,7 +28,7 @@ TICK.push(updBanner);
 // données des nouveaux modules dans la sauvegarde (G.x)
 const GX=(k,def)=>{if(G.x[k]==null||typeof G.x[k]!=typeof def)G.x[k]=def;return G.x[k]};
 // accès aux fonctions en ligne (Netlify) : désactivé hors du site, sauf ?api pour les tests
-const API_OK=!!window.SF_PORTAL||(location.protocol.startsWith('http')&&!/claude|localhost|127\.0\.0\.1/.test(location.hostname))||/[?&]api\b/.test(location.search);
+const API_OK=!window.SF_OFFLINE&&(!!window.SF_PORTAL||(location.protocol.startsWith('http')&&!/claude|localhost|127\.0\.0\.1/.test(location.hostname))||/[?&]api\b/.test(location.search));
 async function api(path,body){const r=await fetch(path,body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
 // pièces et vaisseaux uniques (récompenses) : invisibles à la boutique tant qu'on ne les possède pas
 {const _sv=shopView;shopView=function(){if(TAB=='atelier'){const hid=[];for(const s in PARTS)for(const id in PARTS[s].o){const o=PARTS[s].o[id];if(o.uniq&&!G.pown.includes(s+':'+id)){hid.push([s,id,o]);delete PARTS[s].o[id]}}try{return _sv()}finally{for(const[s,id,o]of hid)PARTS[s].o[id]=o}}

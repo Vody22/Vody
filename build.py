@@ -8,7 +8,7 @@
 import os, sys, time
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 S = D + 'src/'
-MODS = ['core','audio','gfx','models','world','game','surface','fx','ultra','detail','content','lasers','parts','cockpit','speed','sounds','visuals','chars','ground','story','explore','prog','planet2','daynight','gfxplus','weather2','base','netroom','mp','mpplus','hud','ui','options','svc','codex','law','wing','tools','anomaly','war','fmiss','race','derelict','board','combat','foes','talents','econ2','stations2','space2','jump','fx2','caves','gfx3','worlds3','space3','galmap','surf3','ship3','render3','hud3','model3','ground3','hangar3','anim3','ai3','custom3','dmg3','nat3','mega3','event3','walk3','perf3','snd3','diff3','mmo','mmo3','w1','w2','w4','w5','w6','w7','w7m','ui4','w8','w9','chars4','chars5','glchar','ship4','mdl4','sky4','pl4','wg4','city4','vox','voxp','vxast','saga','traf','fin5','photo','menu','polish-v2','ui-modern','journey-v23','mobile-v24']
+MODS = ['core','audio','gfx','models','world','game','surface','fx','ultra','detail','content','lasers','parts','cockpit','speed','sounds','visuals','chars','ground','story','explore','prog','planet2','daynight','gfxplus','weather2','base','netroom','mp','mpplus','hud','ui','options','svc','codex','law','wing','tools','anomaly','war','fmiss','race','derelict','board','combat','foes','talents','econ2','stations2','space2','jump','fx2','caves','gfx3','worlds3','space3','galmap','surf3','ship3','render3','hud3','model3','ground3','hangar3','anim3','ai3','custom3','dmg3','nat3','mega3','event3','walk3','perf3','snd3','diff3','mmo','mmo3','w1','w2','w4','w5','w6','w7','w7m','ui4','w8','w9','chars4','chars5','glchar','ship4','mdl4','sky4','pl4','wg4','city4','vox','voxp','vxast','saga','traf','fin5','photo','menu','polish-v2','ui-modern','journey-v23','mobile-v24','crazygames']
 EXS = ['CopyShader','LuminosityHighPassShader','EffectComposer','RenderPass','ShaderPass','UnrealBloomPass','SSAOShader','BokehShader','BokehPass','GLTFLoader','SkeletonUtils']
 import base64
 FONTS = ''.join("@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:%d;font-display:swap;src:url(data:font/woff;base64,%s) format('woff')}" % (w, base64.b64encode(open(S+'fonts/cp-'+n+'.woff','rb').read()).decode()) for n,w in [('Medium',500),('SemiBold',600),('Bold',700)])
@@ -41,14 +41,9 @@ if '--portal' in a:
                 'if(navigator.sendBeacon){var sb=navigator.sendBeacon.bind(navigator);navigator.sendBeacon=function(u,d){if(typeof u=="string"&&u.indexOf("/api/")==0)u=B+u;return sb(u,d)}}})()</script>'
                 '<style>body{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}</style>') % (kind, API)
         if kind == 'crazygames':
-            head += ('<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>'
-                     '<script>(function(){var st=0,ok=0;function S(){return window.CrazyGames&&CrazyGames.SDK&&CrazyGames.SDK.game}'
-                     'var K="starfarer3d-v1",T="sf-cg-t";function D(){return CrazyGames.SDK.data}'
-                     'function push(){try{var v=localStorage.getItem(K);if(!v||v===window.__cgLast)return;window.__cgLast=v;var n=String(Date.now());D().setItem(K,v);D().setItem(T,n);localStorage.setItem(T,n)}catch(e){}}'
-                     'function pull(){try{var r=D().getItem(K),rt=+D().getItem(T)||0,lt=+localStorage.getItem(T)||0;window.__cgLast=localStorage.getItem(K);'
-                     'if(r&&rt>lt&&r!==localStorage.getItem(K)&&!sessionStorage.getItem("sf-cg-r")){sessionStorage.setItem("sf-cg-r","1");localStorage.setItem(K,r);localStorage.setItem(T,String(rt));var si=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k===K||k===T)return;return si.call(this,k,v)};location.reload();return 1}}catch(e){}}'
-                     'window.addEventListener("load",function(){try{CrazyGames.SDK.init().then(function(){ok=1;if(!pull()){setInterval(push,10000);addEventListener("pagehide",push);document.addEventListener("visibilitychange",function(){if(document.hidden)push()})}}).catch(function(){})}catch(e){}});'
-                     'setInterval(function(){if(!ok||!S())return;var on=!(window.MENU3&&MENU3.on)&&!document.hidden;if(on&&!st){st=1;try{S().gameplayStart()}catch(e){}}else if(!on&&st){st=0;try{S().gameplayStop()}catch(e){}}},1000)})()</script>')
+            from portal_build import build_crazygames
+            build_crazygames(sh, game, EX, chk, D)
+            continue
         pjp = ('<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>\n'
                '<script>window.Peer||document.write(\'<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\\/script>\')</script>')
         html = sh.replace('%%THREE%%', head + '<script>window.SF_STANDALONE=1</script>' + pjp + '<script src="three.min.js"></script>' + chk + EX).replace('%%GAME%%', game)
