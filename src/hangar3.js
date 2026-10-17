@@ -90,7 +90,7 @@ try{const s=buildShip();s.position.set(0,2.2,0);s.rotation.y=0;s.traverse(o=>{if
 // petites lumières de position au sol autour de l'aire
 for(let i=0;i<12;i++){const a=i/12*TAU,L=sprite(S0.acc,.9,.9);L.material=L.material.clone();(H3.mats||(H3.mats=[])).push(L.material);L.position.set(Math.cos(a)*13.6,.25,Math.sin(a)*13.6);sc.add(L);H3.scr.push(L)}
 H3.a0=Math.random()*TAU}
-function h3Free(){const sc=H3.sc;if(!sc)return;const keep=new Set(Object.values(RB3C));sc.traverse(o=>{if(o.geometry&&!keep.has(o.geometry))o.geometry.dispose()});for(const t2 of H3.tex||[])t2.dispose();H3.tex=[];for(const m of H3.mats||[])m.dispose();H3.mats=[];H3.sc=null;H3.ship=null;H3.npc=[];H3.spk=[];H3.scr=[]}
+function h3Free(){const sc=H3.sc;if(!sc)return;const keep=new Set(Object.values(RB3C));sc.traverse(o=>{if(o.geometry&&!o.userData.fleet29&&!keep.has(o.geometry))o.geometry.dispose()});for(const t2 of H3.tex||[])t2.dispose();H3.tex=[];for(const m of H3.mats||[])m.dispose();H3.mats=[];H3.sc=null;H3.ship=null;H3.npc=[];H3.spk=[];H3.scr=[]}
 function h3Want(){try{return mode=='space'&&!!S.docked&&!S.docked.ground&&!DKA.on&&!S.dead&&!atelierOn()&&!ckActive()&&!MAP.open&&!(typeof PH!='undefined'&&PH.on)&&!(typeof MENU3!='undefined'&&MENU3.on)&&!(typeof RC!='undefined'&&RC.on)&&!(typeof JMP!='undefined'&&JMP.on)}catch(e){return false}}
 function h3Anim(dt){const t3=(H3.t+=dt),cam=H3.cam,por=innerWidth<innerHeight;
 // caméra : lent travelling autour du vaisseau

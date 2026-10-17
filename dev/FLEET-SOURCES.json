@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-17",
+  "originalPack": "https://quaternius.com/packs/ultimatespaceships.html",
+  "conversionMirror": "https://github.com/Malcolmnixon/Quaternius-Ultimate-Spaceships-Pack",
+  "license": "CC0-1.0",
+  "files": {
+    "Bob.blend": "585306dbc663b20b180b24bfe0117c4340cdaae20b395227bdb2e8011c79a322",
+    "Bob.png": "b570a1b436d13efcdff31dd14c970f1857bcf1ecf58491e48faf43c63fd4f4c2",
+    "Challenger.blend": "d1ddfaff4457d3c7951896d761ccca2326922ad9e27dcf0d0afa1a6a37aa9311",
+    "Challenger.png": "774c507448a51864525d43600bbec28ab2e38673a4ca34a32b7425738b3c4906",
+    "Dispatcher.blend": "2f07246a6d290310faade5dd6e0dc354eebf866e9aee0f20960879e94546b20e",
+    "Dispatcher.png": "52710365d069b317650dd80e6c1f0022d8e4ccc8b1f7dbf3fb0efcec78cb1efa",
+    "Executioner.blend": "372e312c08c8c2bc75656438ee0fbb9d8a354262c4b61625c1cb6323ccba9065",
+    "Executioner.png": "abd0011470e8fd9c8e64ca085b244c4b38f117611b60230ec4b9d0fc34d79b4c",
+    "Imperial.blend": "47cfa5032e3eb6dd679c65a8157ec783ae94a0c45bbd45f7e3a90d6f6ae68fcc",
+    "Imperial.png": "0038383aff25a56437e7c8c39cd1f32d9e915723992a12772a7a5c86b4903a19",
+    "Insurgent.blend": "d192622eb71e25cf039031500e944988677fe8b2c365d91905980708ad1d6eb9",
+    "Insurgent.png": "b2ee5dc67529ef613a24273eb53eba79f3e20437becacc1852d1c3c9c3c7fd9c",
+    "Omen.blend": "0b6423cdd50e934e7d3eff169510398e4e687f9efa79deaa2ee4b88cb2c9985d",
+    "Omen.png": "3e9c904bd18b231fb63684ef2636c10c8c397ea8178fb27a473e70c61210601d",
+    "Pancake.blend": "47b5faab38cdd8ea897a3837431d2826fbbea20e028bf51bb07888c23846b6a6",
+    "Pancake.png": "c401ce586860cadfaa5a1a8df454c502364f0523ad38a5de69fc6b42f66135df",
+    "Spitfire.blend": "4ee476e06586754fbb9057f00072fef26cf7c3a1040bc3ec3e57b3d856302d4b",
+    "Spitfire.png": "59965e110e6ebe0a3f62120a42099b5d6107a9d1ad124afa1189b9bc1954f08d",
+    "Striker.blend": "cc43254e4bb45657173b2f25ef2e99413217561b85b274e6616ddf10f1b16941",
+    "Striker.png": "38b2477b43a1253a15a3bdf4eec3473d334f9c281049b6cb7daeea265a955435",
+    "Zenith.blend": "039f1aefc21f833a093c02b7d1378836984868d4b988033bf76c97672a51b63f",
+    "Zenith.png": "7d6d2bd79849ee4489d25043d212d05049442385e5928badacc8c755b77b28c6"
+  }
+}

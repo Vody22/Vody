@@ -2,7 +2,7 @@
 // Modèles fournis par William, simplifiés et convertis (voir CLAUDE.md) : glider (chasseurs pirates), statek (vaisseaux lourds + courriers/patrouilles du trafic), dread (boss, dreadnought mondial).
 // Chaque fichier est ramené au repère du jeu (nez -z, dessus +y) et à une longueur de 1 ; mdlSwap(groupe, clé) masque les pièces calculées (on garde flammes et halos additifs) et pose le modèle à la même taille.
 const MDL={lib:{},defs:{glider:{url:'models/glider.glb',tex:'glider',ry:Math.PI,emi:.06},statek:{url:'models/statek.glb',tex:'statek',em:'statek_em',ry:0,emi:1},dread:{url:'models/dread.glb',tex:'dread',em:'dread_em',ry:Math.PI,emi:1.1}}};
-function mdlLoad(){if(MDL.loading||/[?&]nomdl\b/.test(location.search))return;MDL.loading=1;let L;try{L=new THREE.GLTFLoader()}catch(e){return}const TL=new THREE.TextureLoader(),res=DESK?'2k':'1k';
+function mdlLoad(){if(window.SF_FLEET29)return;if(MDL.loading||/[?&]nomdl\b/.test(location.search))return;MDL.loading=1;let L;try{L=new THREE.GLTFLoader()}catch(e){return}const TL=new THREE.TextureLoader(),res=DESK?'2k':'1k';
  for(const k in MDL.defs){const D=MDL.defs[k];L.load(D.url,g=>{let m=null;g.scene.traverse(q=>{if(q.isMesh&&!m)m=q});if(!m)return;const geo=m.geometry;if(!geo.attributes.normal)geo.computeVertexNormals();
   if(D.ry)geo.rotateY(D.ry);geo.computeBoundingBox();const b=geo.boundingBox,c=b.getCenter(new V3()),sz=b.getSize(new V3());geo.translate(-c.x,-c.y,-c.z);const s=1/sz.z;geo.scale(s,s,s);geo.computeBoundingBox();geo.computeBoundingSphere();
   const map=TL.load('models/'+D.tex+res+'.jpg');map.anisotropy=DESK?8:4;

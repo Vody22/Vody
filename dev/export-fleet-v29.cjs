@@ -1,0 +1,22 @@
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto');
+const root=path.resolve(__dirname,'..'),c={console,atob:s=>Buffer.from(s,'base64').toString('binary')};vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(__dirname,'three.min.js'),'utf8'),c);
+c.THREE.TextureLoader.prototype.load=function(url){const t=new c.THREE.Texture();t.userData={source29:url};return t;};
+for(const file of ['fleet-data-v29','fleet-v29'])vm.runInContext(fs.readFileSync(path.join(root,'src',file+'.js'),'utf8'),c);
+const out=path.join(root,'public/models/starfarer29');fs.mkdirSync(out,{recursive:true});
+function exportGLB(group){
+ const doc={asset:{version:'2.0',generator:'Starfarer fleet 2.9',copyright:'Quaternius / Kenney, CC0; Starfarer equipment adaptations'},scene:0,scenes:[{nodes:[0]}],nodes:[{name:group.name,mesh:0}],meshes:[{name:group.name,primitives:[]}],materials:[],accessors:[],bufferViews:[],buffers:[]},chunks=[];let length=0;
+ function data(bytes,target){const view=doc.bufferViews.length;doc.bufferViews.push({buffer:0,byteOffset:length,byteLength:bytes.length,...(target?{target}:{})});chunks.push(bytes);length+=bytes.length;const padding=(4-length%4)%4;if(padding){chunks.push(Buffer.alloc(padding));length+=padding;}return view;}
+ function attr(array,count,type,componentType=5126,normalised=false){const view=data(Buffer.from(array.buffer,array.byteOffset,array.byteLength),34962),a={bufferView:view,componentType,count,type,...(normalised?{normalized:true}:{})};doc.accessors.push(a);return doc.accessors.length-1;}
+ group.updateMatrixWorld(true);
+ for(const mesh of group.children){const g=mesh.geometry.clone();g.applyMatrix4(mesh.matrixWorld);const m=mesh.material,p=g.attributes.position,normal=g.attributes.normal;const position=attr(p.array,p.count,'VEC3');g.computeBoundingBox();doc.accessors[position].min=g.boundingBox.min.toArray();doc.accessors[position].max=g.boundingBox.max.toArray();
+  const attributes={POSITION:position,NORMAL:attr(normal.array,normal.count,'VEC3')};
+  if(g.attributes.uv){const uv=g.attributes.uv,values=Float32Array.from(uv.array);for(let i=1;i<values.length;i+=2)values[i]=1-values[i];attributes.TEXCOORD_0=attr(values,uv.count,'VEC2');}
+  if(g.attributes.color){const color=g.attributes.color;attributes.COLOR_0=attr(color.array,color.count,'VEC3',5121,true);}
+  const material={name:m.name||'equipment',pbrMetallicRoughness:{baseColorFactor:[m.color.r,m.color.g,m.color.b,1],metallicFactor:m.metalness,roughnessFactor:m.roughness},emissiveFactor:[m.emissive.r,m.emissive.g,m.emissive.b]};
+  if(m.map){const bytes=Buffer.from(m.map.userData.source29.split(',')[1],'base64');doc.images=[{mimeType:'image/jpeg',bufferView:data(bytes)}];doc.textures=[{source:0}];material.pbrMetallicRoughness.baseColorTexture={index:0};}
+  doc.materials.push(material);doc.meshes[0].primitives.push({attributes,material:doc.materials.length-1,mode:4});g.dispose();
+ }
+ doc.buffers.push({byteLength:length});let j=Buffer.from(JSON.stringify(doc));j=Buffer.concat([j,Buffer.alloc((4-j.length%4)%4,32)]);const bin=Buffer.concat(chunks),h=Buffer.alloc(12),jh=Buffer.alloc(8),bh=Buffer.alloc(8);h.writeUInt32LE(0x46546c67);h.writeUInt32LE(2,4);h.writeUInt32LE(28+j.length+bin.length,8);jh.writeUInt32LE(j.length);jh.writeUInt32LE(0x4e4f534a,4);bh.writeUInt32LE(bin.length);bh.writeUInt32LE(0x004e4942,4);return Buffer.concat([h,jh,j,bh,bin]);
+}
+const models=[];for(const key of c.SFFleet29.keys){const model=c.SFFleet29.create(key),d=c.SFFleet29.definitions[key],glb=exportGLB(model);fs.writeFileSync(path.join(out,key+'.glb'),glb);models.push({id:key,name:d[1],category:d[2],base:d[0],form:d[3],radius:d[5],triangles:model.children.reduce((n,m)=>n+m.geometry.attributes.position.count/3,0),drawCalls:model.children.length,bytes:glb.length,sha256:crypto.createHash('sha256').update(glb).digest('hex'),author:d[0]==='organic'?'Starfarer original':c.SF_FLEET29_DATA[d[0]].author});}
+fs.writeFileSync(path.join(out,'manifest.json'),JSON.stringify({version:'2.9',front:'-Z',up:'+Y',license:'CC0-1.0 source assets; original Starfarer adaptations',sources:['https://quaternius.com/packs/ultimatespaceships.html','https://kenney.nl/assets/space-kit'],models},null,2)+'\n');console.log(JSON.stringify({models:models.length,totalBytes:models.reduce((n,m)=>n+m.bytes,0),maxTriangles:Math.max(...models.map(m=>m.triangles))}));

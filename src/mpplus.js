@@ -11,7 +11,7 @@ for(const s of[-1,1]){add(new THREE.BoxGeometry(80,5,46),H,s*62,-2,30,0,0,s*.06)
 const eng=[];for(const[x,y]of[[-26,-6],[26,-6],[-13,12],[13,12],[0,-14]]){add(new THREE.CylinderGeometry(9,11,20,14).rotateX(Math.PI/2),D,x,y,138);const s=sprite(0xff5030,70);s.position.set(x,y,152);g.add(s);eng.push(s)}
 for(let i=0;i<22;i++){const s=sprite(i%3?0xffb060:0xff3030,9);s.position.set(rv(55),rv(18)+6,rv(240));g.add(s)}const core=sprite(0xff3020,90,.8);core.position.set(0,-10,20);g.add(core);g.scale.setScalar(1.4);g.userData={eng,core};return g}
 function wbSpawn(k){WB.k=k;WB.myD=0;WB.others.clear();WB.dead=false;WB.done=false;WB.mesh=wbMesh();scene.add(WB.mesh);WB.tgt={pos:WB.pos,r:110,foe:1,max:2600,cone:.4,w:.5,boss:1,hit:(d,p)=>{if(WB.dead)return;WB.myD+=d;WB.hitT=t;boom3(p,8,0xffaa66,40);SFX.tick()}}}
-function wbClear(){if(WB.mesh){scene.remove(WB.mesh);WB.mesh.traverse(o=>{if(o.geometry)o.geometry.dispose()})}WB.mesh=null;WB.tgt=null}
+function wbClear(){if(WB.mesh){scene.remove(WB.mesh);WB.mesh.traverse(o=>{if(o.geometry&&!o.userData.fleet29)o.geometry.dispose()})}WB.mesh=null;WB.tgt=null}
 const wbTotal=()=>{let s=WB.myD;for(const d of WB.others.values())s+=d;return s};
 const wbHP=()=>Math.max(0,WB_HP-wbTotal());
 function updWB(dt){const sl=wbSlot();if(sl.k!==WB.k){wbClear();WB.k=sl.k;WB.myD=0;WB.others.clear();WB.dead=false;WB.done=false}
