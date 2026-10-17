@@ -47,3 +47,4 @@ body.sf-mobile #sf2-alert{top:calc(env(safe-area-inset-top,0px) + 224px);bottom:
 @media(orientation:landscape){body.sf-mobile #sf2-alert{top:calc(env(safe-area-inset-top,0px) + 92px);bottom:auto}}
 body.sf-mobile.atelier #m24-menu{top:auto;bottom:calc(var(--m24-bottom) + 14px)}body.sf-mobile.atelier #land{left:12px;transform:none;max-width:calc(100vw - 120px)}@media(max-width:340px){body.sf-mobile #flare{right:calc(var(--m24-right) + 140px)}}
 body.sf-mobile.m24-menu-open #sf3-toolbar button.ic::after{display:block}
+body.sf-mobile #hud{padding-left:calc(var(--m24-left) + 10px);padding-right:calc(var(--m24-right) + 10px)}body.sf-mobile :is(#opts,#prof,#cxpanel,#talpanel,#mppanel,#qf9,#bugpanel,#mkpanel,#bpanel,#trpanel,#cus3){left:calc(var(--m24-left) + 12px);right:calc(var(--m24-right) + 12px)}body.sf-mobile #mapbtns{left:calc(var(--m24-left) + 12px);right:calc(var(--m24-right) + 12px)}
