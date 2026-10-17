@@ -119,10 +119,10 @@ const STARFARER_UI = (() => {
 
   const menu=$('menu3');if(menu){
     const eyebrow=document.createElement('div');eyebrow.className='sf3-eyebrow';eyebrow.innerHTML=icon('planet')+'<span>UN UNIVERS À EXPLORER</span>';menu.querySelector('.m3top').prepend(eyebrow);
-    const start=$('m3play'),label=start.textContent.toLowerCase().includes('continuer')?'Continuer l’aventure':'Commencer l’aventure';start.innerHTML='<span>'+label+'</span>'+icon('arrow');
+    const start=$('m3play'),label=/continuer|continue/i.test(start.textContent)?'Continuer l’aventure':'Commencer l’aventure';start.innerHTML='<span>'+label+'</span>'+icon('arrow');
     const progress=$('sf2-menu-progress');if(progress)progress.innerHTML=icon('chart')+'<span>Mon parcours</span>';
     $('m3opt').innerHTML=icon('gear')+'<span>Options</span>';$('m3ph').innerHTML=icon('cam')+'<span>Mode photo</span>';
-    const version=menu.querySelector('.m3ver');if(version)version.textContent='STARFARER 3D · VERSION 2.5';
+    const version=menu.querySelector('.m3ver');if(version)version.textContent='STARFARER 3D · VERSION 2.6';
   }
-  return Object.freeze({version:'2.5',toolbar:dock,originalButtons:originalButtons.length,settingsTabs:sections.length});
+  return Object.freeze({version:'2.6',toolbar:dock,originalButtons:originalButtons.length,settingsTabs:sections.length});
 })();

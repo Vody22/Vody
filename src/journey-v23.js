@@ -80,5 +80,5 @@ const STARFARER_JOURNEY=(()=>{
     pending.push(s);pending.sort((a,b)=>priority(b)-priority(a));if(pending.length>5)pending.length=5;if(!TOQ.busy)next();
   };
   let elapsed=0;TICK.push(dt=>{elapsed+=dt;if(elapsed<.25)return;elapsed=0;panel.hidden=!MAP.open||mode==='surf';});
-  return Object.freeze({version:'2.5',compare,goal,priority,history,updateObjective,updateMap});
+  return Object.freeze({version:'2.6',compare,goal,priority,history,updateObjective,updateMap});
 })();

@@ -26,6 +26,10 @@ window.SF_CG_READY = (async function() {
     },
     removeItem:key=>sdk.data.removeItem(key)
   };
+  let locale='en';
+  try{locale=sdk.user.systemInfo?.locale||'en';}catch(_){}
+  const requested=new URLSearchParams(location.search).get('lang');
+  window.SF_LANG=/^fr/i.test(requested||sdk.data.getItem('sf-language')||locale)?'fr':'en';
   window.SF_CG_MUTE=!!sdk.game.settings?.muteAudio;
   sdk.game.loadingStart();
   return sdk;

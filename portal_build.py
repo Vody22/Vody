@@ -4,7 +4,7 @@ import shutil
 import zipfile
 
 
-def build_crazygames(shell, game, examples, check, directory):
+def build_crazygames(shell, game, examples, check, directory, dictionary):
     root = Path(directory).resolve()
     out = root / 'dist' / 'crazygames'
     assert out.resolve().parent == root / 'dist'
@@ -12,7 +12,7 @@ def build_crazygames(shell, game, examples, check, directory):
         shutil.rmtree(out)
     out.mkdir(parents=True)
     boot = (root / 'src' / 'crazygames-boot.js').read_text(encoding='utf-8')
-    head = ('<script>window.SF_PORTAL="crazygames";window.SF_OFFLINE=true;</script>'
+    head = (dictionary+'<script>window.SF_PORTAL="crazygames";window.SF_OFFLINE=true;</script>'
             '<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>'
             '<script>' + boot + '</script><script src="three.min.js"></script>' + check + examples)
     start = ('window.SF_CG_READY.then(()=>{const script=document.createElement("script");'

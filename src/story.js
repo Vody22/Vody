@@ -3,7 +3,7 @@ const _s1=new V3(),_s2=new V3();
 // ----- dialogues -----
 const CHAR={iris:{n:'Commandante Iris Valen',ic:'👩‍✈️',c:'#6cf'},tess:{n:'Dr Orun Tess',ic:'🧑‍🔬',c:'#9f8'},corbeau:{n:'Kael « Corbeau »',ic:'🏴‍☠️',c:'#f77'},echo:{n:'L\'Écho',ic:'📡',c:'#c9f'},ia:{n:'Ordinateur de bord',ic:'🤖',c:'#cde'}};
 const DLG={open:false,q:[],cur:null,shown:0,done:null};
-function say(lines,done){DLG.q.push(...lines.map(l=>({who:l[0],txt:l[1]})));if(done)DLG.q.push({fn:done});if(!DLG.open)nextLine()}
+function say(lines,done){lines=lines.map(line=>[line[0],SFL10N.text(line[1])]);DLG.q.push(...lines.map(l=>({who:l[0],txt:l[1]})));if(done)DLG.q.push({fn:done});if(!DLG.open)nextLine()}
 function nextLine(){const l=DLG.q.shift();if(!l){DLG.open=false;$('dlg').style.display='none';return}if(l.fn){l.fn();nextLine();return}DLG.open=true;DLG.cur=l;DLG.shown=0;const C=CHAR[l.who];
 $('dlg').style.display='flex';$('dlgI').textContent=C.ic;$('dlgN').textContent=C.n;$('dlgN').style.color=C.c;$('dlgT').textContent='';SFX.tick()}
 function dlgTap(){if(!DLG.open)return;if(DLG.shown<DLG.cur.txt.length){DLG.shown=DLG.cur.txt.length;$('dlgT').textContent=DLG.cur.txt;return}nextLine()}

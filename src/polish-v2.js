@@ -3,7 +3,7 @@
  */
 const STARFARER_POLISH = (() => {
   'use strict';
-  const VERSION = '2.5';
+  const VERSION = '2.6';
   const defaults = {
     compact: true,
     calm: matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -118,7 +118,7 @@ const STARFARER_POLISH = (() => {
   }
 
   function text(id, value) {
-    const e = $(id); if (e && e.textContent !== String(value)) e.textContent = value;
+    const e = $(id); if (e && e.textContent !== SFL10N.text(String(value))) e.textContent = value;
   }
   function syncControls() {
     for (const k of ['compact','calm','contrast','telemetry','effects']) {

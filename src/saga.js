@@ -170,7 +170,7 @@ STICK.push(dt=>{A2.t+=dt;const s=a2S();if(s.ch>=1||s.ends.length){const R=a2Pos(
   if(!A2.porte&&(s.ch>=5||s.ends.length)&&S.pos.distanceTo(Pp)<30000){A2.porte=a2Porte();a2PorteLook()}if(A2.porte){A2.porte.visible=S.pos.distanceTo(Pp)<30000;A2.pmat.uniforms.tm.value=A2.t;A2.porte.rotation.z+=dt*.02}}
  if(!S.dead)a2Tick(dt)});
 {const _sb=storyBossDone;storyBossDone=function(){if(A2.boss){a2BossDone();return}_sb()}}
-{const _bb=bossBar;bossBar=function(){_bb();if(BOSS&&BOSS.opts&&BOSS.opts.nm){const el=$('bossN');if(el&&el.innerHTML.includes('CROISEUR NÉMÉSIS'))el.innerHTML=el.innerHTML.replace('CROISEUR NÉMÉSIS',BOSS.opts.nm)}}}
+{const _bb=bossBar;bossBar=function(){_bb();if(BOSS&&BOSS.opts&&BOSS.opts.nm){const el=$('bossN');if(el)el.innerHTML=BOSS.opts.nm}}}
 {const _pm=PM;PM=function(k){let v=_pm(k);const c=G.x&&G.x.a2&&G.x.a2.c2;if(c=='tess'&&k=='hp')v*=1.1;else if(c=='iris'&&k=='dmg')v*=1.08;return v}}
 {const _ci=contentInfo;contentInfo=function(){let r=_ci();const s=a2S();if(s.ch>=1&&s.ch<8){const x=a2Txt();if(x)r+=(r?'<br>':'')+`<span style="color:#ffb84d">✦ ${x}</span>`}return r}}
 {const _co=contentOverlay;contentOverlay=function(){_co();if(mode!='space'||S.dead)return;const s=a2S();if(s.ch>=1&&s.ch<8){const tg=a2Tg();if(tg&&!(BOSS&&A2.boss))edgeMarker(tg,'#ffb84d','','✦')}}}
