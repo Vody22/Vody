@@ -79,7 +79,7 @@ if(e.flee){tg=_w.copy(e.pos).addScaledVector(_v,-700).addScaledVector(PU,150);sp
 else if(e.lead){const ld=e.lead;_e1.crossVectors(ld.dir,PU).normalize();tg=_w.copy(ld.pos).addScaledVector(_e1,45*e.side).addScaledVector(ld.dir,-25).addScaledVector(PU,8);spd=Math.max(30,ld.vel.length()*1.05+e.pos.distanceTo(tg)*1.2)}
 else{if(e.run<=-7-Math.random()*5&&e.ty!='lourd'&&!e.boss&&d<1400)e.run=2+Math.random();
 if(e.run>0){tg=_w.copy(S.pos).addScaledVector(S.vel,.5).addScaledVector(PR,Math.cos(e.ph*3)*35).addScaledVector(PU,Math.sin(e.ph*3)*25);spd=e.sp*1.25+S.spd*.7;if(d<90)e.run=0}
-else{const rad=e.ty=='chasseur'?150:e.ty=='lourd'?70:110,ahead=(e.ty=='lourd'?420:e.boss?360:280)+Math.sin(e.ph*.7)*60;tg=_w.copy(S.pos).addScaledVector(PF,ahead).addScaledVector(PR,Math.cos(e.ph)*rad).addScaledVector(PU,Math.sin(e.ph)*rad*.6)}}
+else{const rad=e.ty=='chasseur'?240:e.ty=='lourd'?70:110,ahead=(e.tactic27==='support'?640:e.ty=='lourd'?520:e.boss?360:280)+Math.sin(e.ph*.7)*60;tg=_w.copy(S.pos).addScaledVector(PF,ahead).addScaledVector(PR,Math.cos(e.ph)*rad).addScaledVector(PU,Math.sin(e.ph)*rad*.6)}}
 if(e.jk>0){tg.addScaledVector(e.jd,260);spd*=1.3;tr*=1.6}
 if(S.docked)tg.copy(e.pos).addScaledVector(_v,-400);
 const toT=tg.sub(e.pos),dT=toT.length();toT.divideScalar(dT||1);_e2.copy(e.dir);e.dir.lerp(toT,damp(tr,dt)).normalize();if(!e.flee&&!e.lead&&e.run<=0)spd=Math.min(spd,Math.max(30,dT*1.6));
@@ -94,8 +94,9 @@ const bar=e.mesh.userData.bar;if(e.boss||e.ty=='lourd')bar.visible=true;bar.scal
 // tirs : rafales pour les chasseurs, salves pour les lourds, tir anticipé
 e.cd-=dt;const facing=-_e3.set(0,0,-1).applyQuaternion(e.mesh.quaternion).dot(_v)<-.55||e.boss||e.ty=='lourd';
 const shot=()=>{const tt=d/e.bs,sp2=Math.max(.012,.045-z*.007),aimP=S.pos.clone().addScaledVector(S.vel,tt*(.85+z*.04)).add(new V3(rv(1),rv(1),rv(1)).multiplyScalar(d*sp2)).sub(e.pos).normalize();for(let k=-(e.n-1)/2;k<=(e.n-1)/2;k++){const dir=aimP.clone().applyAxisAngle(AY,k*e.spr);const m=mkEB(e.bc);m.position.copy(e.pos);EB.push({m,v:dir.multiplyScalar(e.bs),l:2.4,dmg:e.dmg})}if(d<900)SFX.eshoot()};
-if(e.burst>0){e.bT-=dt;if(e.bT<=0){e.burst--;e.bT=.11;shot()}}
-else if(d<e.rng&&e.cd<=0&&!S.docked&&!S.dead&&!e.flee&&facing){e.cd=e.rate*(.8+Math.random()*.4);if(e.ty=='chasseur'){e.burst=2;e.bT=.11}shot()}
+if(e.burst>0){e.bT-=dt;if(e.bT<=0){e.burst--;e.bT=.11;if(!S.docked&&!S.dead&&!e.flee)shot()}}
+else if(d<e.rng&&e.cd<=0&&!S.docked&&!S.dead&&!e.flee&&facing){if(typeof encounter27Ready!=='function'||encounter27Ready(e,dt)){e.cd=e.rate*(.8+Math.random()*.4);if(e.ty=='chasseur'){e.burst=2;e.bT=.11}shot()}}
+else e.charge27=0;
 // missile à tête chercheuse des croiseurs lourds
 if(e.ty=='lourd'&&!S.docked&&!S.dead&&d<900){e.mc=(e.mc==null?3+Math.random()*3:e.mc)-dt;if(e.mc<=0){e.mc=6+Math.random()*4;const m=mkEB(0xff8a30);m.scale.setScalar(1.5);m.position.copy(e.pos);EB.push({m,v:_v.clone().multiplyScalar(170).addScaledVector(PU,60),l:7,dmg:14,home:1});SFX.missile();toast('⚠ Missile en approche — esquive !')}}
 if(d>3500&&!e.boss){e.dead=1;e.mesh.parent&&e.mesh.parent.remove(e.mesh)}}en=en.filter(e=>!e.dead)}

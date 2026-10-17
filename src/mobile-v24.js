@@ -1,7 +1,7 @@
 /* Mobile cockpit: two-thumb controls and an expandable shortcut menu. */
 const STARFARER_MOBILE=(()=>{
   'use strict';
-  if(DESK)return Object.freeze({enabled:false,version:'2.6'});
+  if(DESK)return Object.freeze({enabled:false,version:'2.7'});
   const body=document.body;body.classList.add('sf-mobile');
   const note=document.querySelector('.sf2-key-note');if(note)note.textContent='Joystick à gauche · Actions à droite · Menu : carte, activités et options';
   const joystick=document.createElement('div');joystick.id='m24-stick';joystick.setAttribute('aria-label','Joystick de déplacement');
@@ -43,5 +43,5 @@ const STARFARER_MOBILE=(()=>{
     for(const id of ['dodge','flare'])$(id).setAttribute('aria-label',id==='dodge'?'Esquive'+(CBT.rollCd>0?' en recharge':''):'Leurres'+(CBT.flCd>0?' en recharge':''));
   }
   let elapsed=0;TICK.push(dt=>{elapsed+=dt;if(elapsed>=.08){elapsed=0;sync();}});sync();
-  return Object.freeze({enabled:true,version:'2.6',toggle,sync,release});
+  return Object.freeze({enabled:true,version:'2.7',toggle,sync,release});
 })();
