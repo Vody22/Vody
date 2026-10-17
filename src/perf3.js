@@ -33,10 +33,25 @@ TICK.push(pf3Tick);
 // en quittant une planète, rien ne reste masqué par erreur
 {const _sx=SURF.exit;SURF.exit=function(dead){try{for(const o of SURF.scene.children)if(o.userData.pf3c){o.userData.pf3c=0;o.visible=true}}catch(e){}return _sx(dead)}}
 // ----- précompilation des shaders aux transitions (plus de saccade quand un objet apparaît pour la première fois) -----
-function pf3Compile(sc,cam){try{const t0=performance.now();R3.compile(sc,cam||camera);PF3.lastC=performance.now()-t0}catch(e){console.warn(e)}}
+const PF3_COMPILE=[];
+function pf3Compile(sc,cam){if(!sc)return;try{const t0=performance.now(),scope=new THREE.Scene(),lights=[],objects=[],seen=new Set();scope.environment=sc.environment;scope.fog=sc.fog;
+sc.traverseVisible(o=>{if(o.isLight)lights.push(o);if(!o.material||!o.geometry)return;const m=Array.isArray(o.material)?o.material:[o.material],key=m.map(x=>x.uuid).join(',')+'|'+o.type+'|'+Object.keys(o.geometry.attributes||{}).join(',')+'|'+Object.keys(o.geometry.morphAttributes||{}).join(',');if(seen.has(key))return;seen.add(key);objects.push(o)});
+for(const light of lights){const copy=new light.constructor();if(copy.color&&light.color)copy.color.copy(light.color);if(copy.groundColor&&light.groundColor)copy.groundColor.copy(light.groundColor);for(const k of['intensity','distance','decay','angle','penumbra','width','height','castShadow'])if(light[k]!=null)copy[k]=light[k];copy.layers.mask=light.layers.mask;scope.add(copy)}if(objects.length)PF3_COMPILE.push({scene:sc,scope,cam:cam||camera,objects});PF3.lastC=performance.now()-t0}catch(e){console.warn(e)}}
+function pf3WarmTick(){if(!PF3_COMPILE.length||document.hidden)return;const batch=PF3_COMPILE[0];if(batch.scene!==scene&&!(mode==='surf'&&batch.scene===SURF.scene)&&!(typeof H3!=='undefined'&&H3.on&&batch.scene===H3.sc)){PF3_COMPILE.shift();return}if(!batch.objects.length){PF3_COMPILE.shift();return}const original=batch.objects.shift();if(!original.parent)return;
+let copy;try{
+// Object3D.clone serializes userData, which contains circular gameplay references.
+// Warm the shared geometry/material with a fresh render object instead.
+if(original.isInstancedMesh){copy=new THREE.InstancedMesh(original.geometry,original.material,0);copy.instanceMatrix=original.instanceMatrix;copy.instanceColor=original.instanceColor;copy.count=original.count}
+else if(original.isSprite)copy=new THREE.Sprite(original.material);
+else copy=new original.constructor(original.geometry,original.material);
+if(original.isSkinnedMesh){copy.skeleton=original.skeleton;copy.bindMode=original.bindMode;copy.bindMatrix.copy(original.bindMatrix);copy.bindMatrixInverse.copy(original.bindMatrixInverse)}
+copy.receiveShadow=original.receiveShadow;copy.castShadow=original.castShadow;copy.layers.mask=original.layers.mask;batch.scope.add(copy);const t0=performance.now();R3.compile(batch.scope,batch.cam);PF3.lastShader=performance.now()-t0;}catch(e){console.warn(e)}finally{if(copy)batch.scope.remove(copy)}}
+TICK.push(pf3WarmTick);
+// Prepare the nearby world while the title screen is visible, without advancing gameplay.
+TICK.push(()=>{if(mode==='space'&&!S.dead&&typeof MENU3!=='undefined'&&MENU3.on){streamWorld();runJobs(2);if(!WORLD_STREAM.queue.length&&!PF3.menuC){PF3.menuC=1;pf3Compile(scene)}}});
 {const _se=SURF.enter;SURF.enter=function(p,entry){_se(p,entry);setTimeout(()=>{if(mode=='surf')pf3Compile(SURF.scene)},50)}}
 // espace : une seule fois, quand le menu d'accueil est fermé (pendant le fondu)
-TICK.push(()=>{if(PF3.spaceC||mode!='space'||performance.now()<2500||(typeof MENU3!='undefined'&&MENU3.on))return;PF3.spaceC=1;pf3Compile(scene)});
+TICK.push(()=>{if(PF3.spaceC||mode!='space'||performance.now()<2500||(typeof MENU3!='undefined'&&MENU3.on))return;PF3.spaceC=1;if(!PF3.menuC)pf3Compile(scene)});
 if(typeof h3Build=='function'){const _hb=h3Build;h3Build=function(st){_hb(st);if(H3.sc)pf3Compile(H3.sc,H3.cam)}}
 // ----- iPhone : la génération progressive (textures de planètes…) prend moins de temps par image quand le jeu rame -----
 {const _rj=runJobs;runJobs=function(ms){const f=typeof FX3!='undefined'?FX3.fps:0;return _rj(!DESK&&f&&f<45?Math.min(ms,3):ms)}}

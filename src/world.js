@@ -25,9 +25,17 @@ for(const a of c.ast){if(dead.has(a.id))continue;const m=new THREE.Mesh(AGEO[a.v
 scene.add(m);const A={...a,mesh:m,hp:a.r/6,ck:c.k,pos:m.position};asts.push(A);list.push(A)}
 if(c.st&&!c.st.mesh){c.st.mesh=buildStation();c.st.mesh.position.set(c.st.x,c.st.y,c.st.z);c.st.mesh.lookAt(0,c.st.y,0);scene.add(c.st.mesh);stations.push(c.st)}SMALL.set(c.k,{c,list})}
 function unloadSmall(k){const e=SMALL.get(k);for(const A of e.list){if(A.mesh.parent)scene.remove(A.mesh);const i=asts.indexOf(A);if(i>=0)asts.splice(i,1)}if(e.c.st&&e.c.st.mesh){scene.remove(e.c.st.mesh);e.c.st.mesh=null;stations.splice(stations.indexOf(e.c.st),1)}SMALL.delete(k)}
-let lastCK='';function streamWorld(){const cx=cof(S.pos.x),cy=cof(S.pos.y),cz=cof(S.pos.z),k=cx+','+cy+','+cz;if(k==lastCK)return;lastCK=k;
-const want=new Set();for(let i=-3;i<=3;i++)for(let j=-1;j<=1;j++)for(let l=-3;l<=3;l++){const yy=cy+j;if(Math.abs(yy)>1)continue;const c=cdata(cx+i,yy,cz+l);if(Math.abs(i)==3||Math.abs(l)==3){if(!c.sun)continue}want.add(c.k);if(!LOADED.has(c.k))loadBig(c)}
-for(const[k2,c]of LOADED)if(!want.has(k2))unloadBig(c);
-const ws=new Set();for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)for(let l=-1;l<=1;l++){const c=cdata(cx+i,cy+j,cz+l);ws.add(c.k);if(!SMALL.has(c.k))loadSmall(c)}
-for(const k2 of[...SMALL.keys()])if(!ws.has(k2))unloadSmall(k2)}
+const WORLD_STREAM={queue:[],want:new Set(),small:new Set(),budget:DESK?4:2.5,loaded:0};
+let lastCK='';function streamWorld(){const cx=cof(S.pos.x),cy=cof(S.pos.y),cz=cof(S.pos.z),k=cx+','+cy+','+cz;
+if(k!==lastCK){lastCK=k;const want=new Set(),ws=new Set(),jobs=[];
+const priority=(c,small)=>{const p=c.pl||c.sun||c.st||{x:(c.cx+.5)*CS,y:(c.cy+.5)*CS,z:(c.cz+.5)*CS};return Math.hypot(p.x-S.pos.x,p.y-S.pos.y,p.z-S.pos.z)-(small?CS:0)};
+for(let i=-3;i<=3;i++)for(let j=-1;j<=1;j++)for(let l=-3;l<=3;l++){const yy=cy+j;if(Math.abs(yy)>1)continue;const c=cdata(cx+i,yy,cz+l);if((Math.abs(i)==3||Math.abs(l)==3)&&!c.sun)continue;want.add(c.k);if(!LOADED.has(c.k)){if(!c.pl&&!c.sun)loadBig(c);else jobs.push({c,small:false,priority:priority(c,false)})}}
+for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)for(let l=-1;l<=1;l++){const c=cdata(cx+i,cy+j,cz+l);ws.add(c.k);if(!SMALL.has(c.k))jobs.push({c,small:true,priority:priority(c,true)})}
+WORLD_STREAM.want=want;WORLD_STREAM.small=ws;WORLD_STREAM.queue=jobs.sort((a,b)=>a.priority-b.priority);
+for(const[k2,c]of LOADED)if(!want.has(k2))unloadBig(c);for(const k2 of[...SMALL.keys()])if(!ws.has(k2))unloadSmall(k2);}
+// Near objects become available first; an obsolete queue is discarded on every sector change.
+const start=performance.now();let n=0;while(WORLD_STREAM.queue.length&&n<3&&(n===0||performance.now()-start<WORLD_STREAM.budget)){const j=WORLD_STREAM.queue.shift(),c=j.c;
+if(j.small){if(WORLD_STREAM.small.has(c.k)&&!SMALL.has(c.k)){loadSmall(c);n++;WORLD_STREAM.loaded++}}
+else if(WORLD_STREAM.want.has(c.k)&&!LOADED.has(c.k)){loadBig(c);n++;WORLD_STREAM.loaded++}}
+}
 function killAst(A){scene.remove(A.mesh);asts.splice(asts.indexOf(A),1);const d=DEAD.get(A.ck);d&&d.add(A.id)}

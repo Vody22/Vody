@@ -542,7 +542,7 @@ body.sf-mobile #hud{padding-left:calc(var(--m24-left) + 10px);padding-right:calc
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261017-133545"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261017-135053"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -6538,11 +6538,19 @@ for(const a of c.ast){if(dead.has(a.id))continue;const m=new THREE.Mesh(AGEO[a.v
 scene.add(m);const A={...a,mesh:m,hp:a.r/6,ck:c.k,pos:m.position};asts.push(A);list.push(A)}
 if(c.st&&!c.st.mesh){c.st.mesh=buildStation();c.st.mesh.position.set(c.st.x,c.st.y,c.st.z);c.st.mesh.lookAt(0,c.st.y,0);scene.add(c.st.mesh);stations.push(c.st)}SMALL.set(c.k,{c,list})}
 function unloadSmall(k){const e=SMALL.get(k);for(const A of e.list){if(A.mesh.parent)scene.remove(A.mesh);const i=asts.indexOf(A);if(i>=0)asts.splice(i,1)}if(e.c.st&&e.c.st.mesh){scene.remove(e.c.st.mesh);e.c.st.mesh=null;stations.splice(stations.indexOf(e.c.st),1)}SMALL.delete(k)}
-let lastCK='';function streamWorld(){const cx=cof(S.pos.x),cy=cof(S.pos.y),cz=cof(S.pos.z),k=cx+','+cy+','+cz;if(k==lastCK)return;lastCK=k;
-const want=new Set();for(let i=-3;i<=3;i++)for(let j=-1;j<=1;j++)for(let l=-3;l<=3;l++){const yy=cy+j;if(Math.abs(yy)>1)continue;const c=cdata(cx+i,yy,cz+l);if(Math.abs(i)==3||Math.abs(l)==3){if(!c.sun)continue}want.add(c.k);if(!LOADED.has(c.k))loadBig(c)}
-for(const[k2,c]of LOADED)if(!want.has(k2))unloadBig(c);
-const ws=new Set();for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)for(let l=-1;l<=1;l++){const c=cdata(cx+i,cy+j,cz+l);ws.add(c.k);if(!SMALL.has(c.k))loadSmall(c)}
-for(const k2 of[...SMALL.keys()])if(!ws.has(k2))unloadSmall(k2)}
+const WORLD_STREAM={queue:[],want:new Set(),small:new Set(),budget:DESK?4:2.5,loaded:0};
+let lastCK='';function streamWorld(){const cx=cof(S.pos.x),cy=cof(S.pos.y),cz=cof(S.pos.z),k=cx+','+cy+','+cz;
+if(k!==lastCK){lastCK=k;const want=new Set(),ws=new Set(),jobs=[];
+const priority=(c,small)=>{const p=c.pl||c.sun||c.st||{x:(c.cx+.5)*CS,y:(c.cy+.5)*CS,z:(c.cz+.5)*CS};return Math.hypot(p.x-S.pos.x,p.y-S.pos.y,p.z-S.pos.z)-(small?CS:0)};
+for(let i=-3;i<=3;i++)for(let j=-1;j<=1;j++)for(let l=-3;l<=3;l++){const yy=cy+j;if(Math.abs(yy)>1)continue;const c=cdata(cx+i,yy,cz+l);if((Math.abs(i)==3||Math.abs(l)==3)&&!c.sun)continue;want.add(c.k);if(!LOADED.has(c.k)){if(!c.pl&&!c.sun)loadBig(c);else jobs.push({c,small:false,priority:priority(c,false)})}}
+for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)for(let l=-1;l<=1;l++){const c=cdata(cx+i,cy+j,cz+l);ws.add(c.k);if(!SMALL.has(c.k))jobs.push({c,small:true,priority:priority(c,true)})}
+WORLD_STREAM.want=want;WORLD_STREAM.small=ws;WORLD_STREAM.queue=jobs.sort((a,b)=>a.priority-b.priority);
+for(const[k2,c]of LOADED)if(!want.has(k2))unloadBig(c);for(const k2 of[...SMALL.keys()])if(!ws.has(k2))unloadSmall(k2);}
+// Near objects become available first; an obsolete queue is discarded on every sector change.
+const start=performance.now();let n=0;while(WORLD_STREAM.queue.length&&n<3&&(n===0||performance.now()-start<WORLD_STREAM.budget)){const j=WORLD_STREAM.queue.shift(),c=j.c;
+if(j.small){if(WORLD_STREAM.small.has(c.k)&&!SMALL.has(c.k)){loadSmall(c);n++;WORLD_STREAM.loaded++}}
+else if(WORLD_STREAM.want.has(c.k)&&!LOADED.has(c.k)){loadBig(c);n++;WORLD_STREAM.loaded++}}
+}
 function killAst(A){scene.remove(A.mesh);asts.splice(asts.indexOf(A),1);const d=DEAD.get(A.ck);d&&d.add(A.id)}
 
 // ===== JEU (espace) =====
@@ -12295,10 +12303,25 @@ TICK.push(pf3Tick);
 // en quittant une planète, rien ne reste masqué par erreur
 {const _sx=SURF.exit;SURF.exit=function(dead){try{for(const o of SURF.scene.children)if(o.userData.pf3c){o.userData.pf3c=0;o.visible=true}}catch(e){}return _sx(dead)}}
 // ----- précompilation des shaders aux transitions (plus de saccade quand un objet apparaît pour la première fois) -----
-function pf3Compile(sc,cam){try{const t0=performance.now();R3.compile(sc,cam||camera);PF3.lastC=performance.now()-t0}catch(e){console.warn(e)}}
+const PF3_COMPILE=[];
+function pf3Compile(sc,cam){if(!sc)return;try{const t0=performance.now(),scope=new THREE.Scene(),lights=[],objects=[],seen=new Set();scope.environment=sc.environment;scope.fog=sc.fog;
+sc.traverseVisible(o=>{if(o.isLight)lights.push(o);if(!o.material||!o.geometry)return;const m=Array.isArray(o.material)?o.material:[o.material],key=m.map(x=>x.uuid).join(',')+'|'+o.type+'|'+Object.keys(o.geometry.attributes||{}).join(',')+'|'+Object.keys(o.geometry.morphAttributes||{}).join(',');if(seen.has(key))return;seen.add(key);objects.push(o)});
+for(const light of lights){const copy=new light.constructor();if(copy.color&&light.color)copy.color.copy(light.color);if(copy.groundColor&&light.groundColor)copy.groundColor.copy(light.groundColor);for(const k of['intensity','distance','decay','angle','penumbra','width','height','castShadow'])if(light[k]!=null)copy[k]=light[k];copy.layers.mask=light.layers.mask;scope.add(copy)}if(objects.length)PF3_COMPILE.push({scene:sc,scope,cam:cam||camera,objects});PF3.lastC=performance.now()-t0}catch(e){console.warn(e)}}
+function pf3WarmTick(){if(!PF3_COMPILE.length||document.hidden)return;const batch=PF3_COMPILE[0];if(batch.scene!==scene&&!(mode==='surf'&&batch.scene===SURF.scene)&&!(typeof H3!=='undefined'&&H3.on&&batch.scene===H3.sc)){PF3_COMPILE.shift();return}if(!batch.objects.length){PF3_COMPILE.shift();return}const original=batch.objects.shift();if(!original.parent)return;
+let copy;try{
+// Object3D.clone serializes userData, which contains circular gameplay references.
+// Warm the shared geometry/material with a fresh render object instead.
+if(original.isInstancedMesh){copy=new THREE.InstancedMesh(original.geometry,original.material,0);copy.instanceMatrix=original.instanceMatrix;copy.instanceColor=original.instanceColor;copy.count=original.count}
+else if(original.isSprite)copy=new THREE.Sprite(original.material);
+else copy=new original.constructor(original.geometry,original.material);
+if(original.isSkinnedMesh){copy.skeleton=original.skeleton;copy.bindMode=original.bindMode;copy.bindMatrix.copy(original.bindMatrix);copy.bindMatrixInverse.copy(original.bindMatrixInverse)}
+copy.receiveShadow=original.receiveShadow;copy.castShadow=original.castShadow;copy.layers.mask=original.layers.mask;batch.scope.add(copy);const t0=performance.now();R3.compile(batch.scope,batch.cam);PF3.lastShader=performance.now()-t0;}catch(e){console.warn(e)}finally{if(copy)batch.scope.remove(copy)}}
+TICK.push(pf3WarmTick);
+// Prepare the nearby world while the title screen is visible, without advancing gameplay.
+TICK.push(()=>{if(mode==='space'&&!S.dead&&typeof MENU3!=='undefined'&&MENU3.on){streamWorld();runJobs(2);if(!WORLD_STREAM.queue.length&&!PF3.menuC){PF3.menuC=1;pf3Compile(scene)}}});
 {const _se=SURF.enter;SURF.enter=function(p,entry){_se(p,entry);setTimeout(()=>{if(mode=='surf')pf3Compile(SURF.scene)},50)}}
 // espace : une seule fois, quand le menu d'accueil est fermé (pendant le fondu)
-TICK.push(()=>{if(PF3.spaceC||mode!='space'||performance.now()<2500||(typeof MENU3!='undefined'&&MENU3.on))return;PF3.spaceC=1;pf3Compile(scene)});
+TICK.push(()=>{if(PF3.spaceC||mode!='space'||performance.now()<2500||(typeof MENU3!='undefined'&&MENU3.on))return;PF3.spaceC=1;if(!PF3.menuC)pf3Compile(scene)});
 if(typeof h3Build=='function'){const _hb=h3Build;h3Build=function(st){_hb(st);if(H3.sc)pf3Compile(H3.sc,H3.cam)}}
 // ----- iPhone : la génération progressive (textures de planètes…) prend moins de temps par image quand le jeu rame -----
 {const _rj=runJobs;runJobs=function(ms){const f=typeof FX3!='undefined'?FX3.fps:0;return _rj(!DESK&&f&&f<45?Math.min(ms,3):ms)}}
@@ -15608,7 +15631,7 @@ if(!menu3Skip())menu3Open();else setTimeout(news13,7000);
  */
 const STARFARER_POLISH = (() => {
   'use strict';
-  const VERSION = '2.4';
+  const VERSION = '2.5';
   const defaults = {
     compact: true,
     calm: matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -16020,9 +16043,9 @@ const STARFARER_UI = (() => {
     const start=$('m3play'),label=start.textContent.toLowerCase().includes('continuer')?'Continuer l’aventure':'Commencer l’aventure';start.innerHTML='<span>'+label+'</span>'+icon('arrow');
     const progress=$('sf2-menu-progress');if(progress)progress.innerHTML=icon('chart')+'<span>Mon parcours</span>';
     $('m3opt').innerHTML=icon('gear')+'<span>Options</span>';$('m3ph').innerHTML=icon('cam')+'<span>Mode photo</span>';
-    const version=menu.querySelector('.m3ver');if(version)version.textContent='STARFARER 3D · VERSION 2.4';
+    const version=menu.querySelector('.m3ver');if(version)version.textContent='STARFARER 3D · VERSION 2.5';
   }
-  return Object.freeze({version:'2.4',toolbar:dock,originalButtons:originalButtons.length,settingsTabs:sections.length});
+  return Object.freeze({version:'2.5',toolbar:dock,originalButtons:originalButtons.length,settingsTabs:sections.length});
 })();
 
 /* Navigation, equipment comparisons and notification priorities. */
@@ -16107,13 +16130,13 @@ const STARFARER_JOURNEY=(()=>{
     pending.push(s);pending.sort((a,b)=>priority(b)-priority(a));if(pending.length>5)pending.length=5;if(!TOQ.busy)next();
   };
   let elapsed=0;TICK.push(dt=>{elapsed+=dt;if(elapsed<.25)return;elapsed=0;panel.hidden=!MAP.open||mode==='surf';});
-  return Object.freeze({version:'2.4',compare,goal,priority,history,updateObjective,updateMap});
+  return Object.freeze({version:'2.5',compare,goal,priority,history,updateObjective,updateMap});
 })();
 
 /* Mobile cockpit: two-thumb controls and an expandable shortcut menu. */
 const STARFARER_MOBILE=(()=>{
   'use strict';
-  if(DESK)return Object.freeze({enabled:false,version:'2.4'});
+  if(DESK)return Object.freeze({enabled:false,version:'2.5'});
   const body=document.body;body.classList.add('sf-mobile');
   const note=document.querySelector('.sf2-key-note');if(note)note.textContent='Joystick à gauche · Actions à droite · Menu : carte, activités et options';
   const joystick=document.createElement('div');joystick.id='m24-stick';joystick.setAttribute('aria-label','Joystick de déplacement');
@@ -16155,7 +16178,7 @@ const STARFARER_MOBILE=(()=>{
     for(const id of ['dodge','flare'])$(id).setAttribute('aria-label',id==='dodge'?'Esquive'+(CBT.rollCd>0?' en recharge':''):'Leurres'+(CBT.flCd>0?' en recharge':''));
   }
   let elapsed=0;TICK.push(dt=>{elapsed+=dt;if(elapsed>=.08){elapsed=0;sync();}});sync();
-  return Object.freeze({enabled:true,version:'2.4',toggle,sync,release});
+  return Object.freeze({enabled:true,version:'2.5',toggle,sync,release});
 })();
 
 
