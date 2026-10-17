@@ -224,5 +224,13 @@
   "interceptor": "interceptor",
   "raider": "raider",
   "support": "support",
-  "STARFARER 3D · VERSION 2.7": "STARFARER 3D · VERSION 2.7"
+  "STARFARER 3D · VERSION 2.7": "STARFARER 3D · VERSION 2.7",
+  "STARFARER 3D · VERSION 2.8": "STARFARER 3D · VERSION 2.8",
+  "-Z": "-Z",
+  "Unknown ship model:": "Unknown ship model:",
+  "Unknown ship model: __SF_SLOT_0__": "Unknown ship model: __SF_SLOT_0__",
+  "canopy": "canopy",
+  "emitters": "emitters",
+  "frame": "frame",
+  "markings": "markings"
 }
