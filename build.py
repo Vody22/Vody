@@ -32,6 +32,7 @@ pj = ('<meta name="sf-build" content="'+time.strftime('%Y%m%d-%H%M%S')+'">'
 OUT = sh.replace('%%THREE%%', dictionary+web_language+pj+cdn+chk+EX).replace('%%GAME%%', game)
 open(D+'index.html','w').write(OUT)
 os.makedirs(D+'public', exist_ok=True)
+open(D+'public/THIRD_PARTY_NOTICES.txt','w',encoding='utf-8').write(open(D+'dev/THIRD_PARTY_NOTICES.txt',encoding='utf-8').read())
 open(D+'public/index.html','w').write(OUT)
 a = sys.argv[1:]
 if '--claude' in a: open(a[a.index('--claude')+1],'w').write(sh.replace('%%THREE%%', dictionary+web_language+cdn+chk+EX).replace('%%GAME%%', game))

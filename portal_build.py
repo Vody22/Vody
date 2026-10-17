@@ -24,6 +24,7 @@ def build_crazygames(shell, game, examples, check, directory, dictionary):
     # another account's local save into an authenticated user's SDK save.
     (out / 'game.js').write_text(game.replace('localStorage', 'SFStorage'), encoding='utf-8')
     shutil.copy(root / 'dev' / 'three.min.js', out / 'three.min.js')
+    shutil.copy(root / 'dev' / 'THIRD_PARTY_NOTICES.txt', out / 'THIRD_PARTY_NOTICES.txt')
     for sub in ['models', 'cities']:
         shutil.copytree(root / 'public' / sub, out / sub)
     archive = root / 'dist' / 'crazygames.zip'
