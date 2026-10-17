@@ -31,3 +31,21 @@ test('visual swaps preserve gameplay roots, effects, late boss weak points and h
  const weakPoint=new T.Mesh(new T.SphereGeometry(),new T.MeshBasicMaterial());r.add(weakPoint);vm.runInContext("fleet29Attach(testRoot29,'enemy_kraken',{radius:25})",c);assert.equal(weakPoint.visible,true);assert.equal(weakPoint.parent,r);assert.equal(r.userData.fleetKey29,'enemy_kraken');
  const box=new T.Box3().setFromObject(r.userData.body);assert.ok(box.getSize(new T.Vector3()).length()<90);
 });
+
+test('flight camera and weapon offsets use hull dimensions, independent of imported mesh scale',()=>{
+ const T=c.THREE;
+ const game=fs.readFileSync(path.join(root,'src/game.js'),'utf8');
+ vm.runInContext(`var V3=THREE.Vector3,QT=THREE.Quaternion,ship,mode='space',FOOT={on:false},S={pos:new V3(),q:new QT(),spd:0,docked:false},window={SF2Motion:0},innerWidth=1280,innerHeight=720,DESK=true,shake=0;
+ var camera=new THREE.PerspectiveCamera(60,1280/720,.1,100000),sky=new THREE.Group();
+ function derCam(){}function footCam(){}function atelierOn(){return false}function ckActive(){return false}function isBoost(){return false}function cruise(){return 100}function clamp(x,a,b){return Math.max(a,Math.min(b,x))}function lerp(a,b,k){return a+(b-a)*k}function damp(k,dt){return 1-Math.exp(-k*dt)}function rv(){return 0}
+ const _f=new V3(),_u=new V3(),_r=new V3(),_v=new V3(),_w=new V3();function fwd(q=S.q,o=_f){return o.set(0,0,-1).applyQuaternion(q)}
+ `+game.slice(game.indexOf('function shipHullScale'),game.indexOf('function rebuildShip'))+game.slice(game.indexOf('const camUp='),game.indexOf('function placeShip')),c);
+ for(const key of c.SFFleet29.keys.filter(k=>k.startsWith('player_'))){
+  const r=new T.Group();r.userData={body:new T.Group()};r.add(r.userData.body);c.G.ship=key.slice(7);c.testRoot29=r;vm.runInContext('fleet29Player(testRoot29,{})',c);c.ship=r;
+  for(const portrait of [false,true]){c.innerWidth=portrait?390:1280;c.innerHeight=portrait?844:720;c.camera.aspect=c.innerWidth/c.innerHeight;vm.runInContext('updCam(1/60)',c);
+   const distance=c.camera.position.length(),radius=c.SFFleet29.definitions[key][5];assert.ok(distance/radius>3&&distance/radius<4,key+' consistent close framing');assert.ok(c.camera.fov===(portrait?74:60));
+   const before=c.camera.position.clone();r.userData.body.scale.multiplyScalar(7);vm.runInContext('updCam(1/60)',c);assert.ok(before.distanceTo(c.camera.position)<1e-8,key+' normalization cannot change camera');
+  }
+  assert.equal(r.userData.hullScale29.z,c.SFFleet29.definitions[key][5]/12);
+ }
+});

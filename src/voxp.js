@@ -86,7 +86,7 @@ function vxEnter(p){if(mode!='space'||S.dead||S.entry||!p||p.ring)return;vxPrep(
  const qi=_vxQ2.copy(VX.Q).invert();S.pos.sub(VX.C).applyQuaternion(qi);S.q.premultiply(qi).normalize();S.vel.applyQuaternion(qi);
  clearWeapons();for(const b of PB)rmPB(b);PB=[];for(const b of EB)b.m.parent&&b.m.parent.remove(b.m);EB=[];for(const d of DROPS)d.m.parent&&d.m.parent.remove(d.m);DROPS=[];for(const e of en)e.mesh.parent&&e.mesh.parent.remove(e.mesh);en=[];lock=null;
  VX.sc.add(ship,SPK.pts,FIRE.pts);SPK.clear();FIRE.clear();mode='vox';VX.on=true;VX.foot=false;VX.asc=null;VX.park=0;VX.dead=0;S.docked=null;S.heat=0;landP=null;camInit=true;
- VX.shipR=3.4*Math.max(1,(ship.userData.body&&ship.userData.body.scale.z)||1);
+ VX.shipR=3.4*Math.max(1,shipHullScale().z);
  const ty=vxTy(p);SFX.disc();toast('🪐 '+p.name+' — '+ty.toLowerCase()+' · planète voxel');
  if(!VX.told.in){VX.told.in=1;setTimeout(()=>{if(mode=='vox')toast('🚶 Pose-toi doucement puis appuie sur SORTIR'+(DESK?' (F)':'')+' : à pied, maintiens le tir pour creuser')},2600)}}
 function vxExit(dead){if(mode!='vox')return;if(VX.foot)vxFootLeave(true);vxSaveDigs();const p=VX.p;vxFrame(p);

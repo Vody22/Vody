@@ -18,6 +18,7 @@ function fleet29Attach(root,key,options={}){
 }
 function fleet29Player(root,P){
   const key='player_'+(G.ship||'eclaireur');if(!SFFleet29.definitions[key])return root;const style=key+'|'+JSON.stringify(P);if(root.userData.fleetStyle29===style)return root;fleet29Attach(root,key);const u=root.userData,model=u.body;u.fleetStyle29=style;
+  u.hullScale29=new THREE.Vector3().setScalar(SFFleet29.definitions[key][5]/12);
   const paint=PARTS.paint.o[P.paint]||PARTS.paint.o.std,materials=[];
   for(const mesh of model.children){mesh.material=mesh.material.clone();materials.push(mesh.material);mesh.userData.fleetOwnedMaterial29=true;
     if(paint.c)mesh.material.color.setHex(paint.c[mesh.name==='hull'?0:1]);

@@ -47,7 +47,7 @@ function laserHide(){for(const B of LZBEAMS)hideBeam(B);lzSound(0)}
 function laserTick(dt,TG){const fp=partOf('focus'),col=fp.lc,nb=PM('twin')>0?2:1;
 if(LZCOL!==col){for(const B of LZBEAMS)rmBeam(B);LZBEAMS.length=0;LZCOL=col}while(LZBEAMS.length<nb)LZBEAMS.push(mkBeam(col));while(LZBEAMS.length>nb)rmBeam(LZBEAMS.pop());
 if(!LZ.on||S.dead){laserHide();return}
-fwd();const ud=ship.userData,sc=ud.body.scale,E=ud.lasers&&ud.lasers.length?ud.lasers:[[0,-1.15,-8.6]],range=780*PM('lrange'),per=7*dmgMul()*PM('ldmg')/nb,hot=LZ.heat>.82?(LZ.heat-.82)*5.5:0;
+fwd();const ud=ship.userData,sc=shipHullScale(),E=ud.lasers&&ud.lasers.length?ud.lasers:[[0,-1.15,-8.6]],range=780*PM('lrange'),per=7*dmgMul()*PM('ldmg')/nb,hot=LZ.heat>.82?(LZ.heat-.82)*5.5:0;
 for(let i=0;i<nb;i++){const B=LZBEAMS[i],e=E[i%E.length],o=_lz1.set(e[0]*sc.x,e[1]*sc.y,e[2]*sc.z).applyQuaternion(S.q).add(S.pos).clone();
 let dir=_f.clone();if(lock&&lock.pos.distanceTo(S.pos)<range)dir=_lz2.copy(lock.pos).sub(o).normalize().clone();let best=null,bt=range;
 for(const T of TG){if(T.dead||T.gone)continue;_lz3.copy(T.pos).sub(o);const tt=_lz3.dot(dir);if(tt<0||tt>bt)continue;const perp=_lz3.addScaledVector(dir,-tt).length();if(perp<(T.r||6)){bt=tt;best=T}}

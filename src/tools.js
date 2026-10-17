@@ -25,7 +25,7 @@ else if(h=='sentinelle'){for(const s of[-1,1]){add(new THREE.BoxGeometry(3.2,.18
 const TS={drillB:null,trB:null,acc:0,chg:0,cd:0,pulse:null,reveal:0,revR:0,prb:[],snd:0};let DRILLING=false;
 {const _fw=fireW;fireW=function(dt,TG){const w=curW(),f=TOOLF[w];if(!f){toolOff();return _fw(dt,TG)}LZ.on=0;fcd-=dt;if(w!='drill'&&TS.drillB)hideBeam(TS.drillB);if(w!='tractor'&&TS.trB)hideBeam(TS.trB);f(dt,TG,isFire()&&!S.docked&&!S.entry&&!S.ascent&&!S.dead)}}
 function toolOff(){if(TS.drillB)hideBeam(TS.drillB);if(TS.trB)hideBeam(TS.trB);TS.chg=0}
-const nosePt=()=>{const sc=ship.userData.body.scale;return _c1.set(0,-1.1*sc.y,-9*sc.z).applyQuaternion(S.q).add(S.pos)};
+const nosePt=()=>{const sc=shipHullScale();return _c1.set(0,-1.1*sc.y,-9*sc.z).applyQuaternion(S.q).add(S.pos)};
 function rayPick(o,dir,R,TG,filter){let best=null,bt=R;for(const T of TG){if(T.dead||T.gone||(filter&&!filter(T)))continue;const r=(T.r||8)*1.05;_c2.copy(T.pos).sub(o);const tc=_c2.dot(dir);if(tc<0||tc>R+r)continue;const d2=_c2.lengthSq()-tc*tc;if(d2>r*r)continue;const th=tc-Math.sqrt(Math.max(0,r*r-d2));if(th<bt){bt=th;best=T}}return best?{T:best,d:Math.max(0,bt)}:null}
 const TOOLF={
 drill(dt,TG,on){if(!on){if(TS.drillB)hideBeam(TS.drillB);return}const o=nosePt().clone(),R=950;fwd();let dir=_f.clone();if(lock&&lock.pos.distanceTo(S.pos)<R){const ld=lock.pos.clone().sub(o).normalize();if(ld.dot(dir)>.9)dir=ld}

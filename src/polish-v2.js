@@ -3,7 +3,7 @@
  */
 const STARFARER_POLISH = (() => {
   'use strict';
-  const VERSION = '2.9';
+  const VERSION = '2.9.1';
   const defaults = {
     compact: true,
     calm: matchMedia('(prefers-reduced-motion: reduce)').matches,

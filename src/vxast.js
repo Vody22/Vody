@@ -40,7 +40,7 @@ STICK.push(dt=>{VA.t-=dt;if(VA.t<=0){VA.t=.5;const cx=cof(S.pos.x),cy=cof(S.pos.
   const T=A.T,o=_vaB.copy(S.pos).sub(A.pos);let tt=0,hit=false;if(d<A.P.Rx+1000){for(let i=0;i<70&&tt<1000;i++){const x=o.x+_f.x*tt,y=o.y+_f.y*tt,z=o.z+_f.z*tt,f=vaF(A,x,y,z,2);if(f<.4){hit=true;break}tt+=Math.max(.6,f*.9)}}
   if(hit){T.pos.copy(S.pos).addScaledVector(_f,tt);T.gone=0}else{T.gone=1;T.pos.copy(A.pos).addScaledVector(_f,-1e6)}
   // collisions
-  if(d<A.P.Rx+12&&!S.dead){const r=3.4*Math.max(1,(ship.userData.body&&ship.userData.body.scale.z)||1),l=_vaA.copy(S.pos).sub(A.pos);for(let it=0;it<2;it++){const f=vaF(A,l.x,l.y,l.z,r+6);if(f>r+.5)break;
+  if(d<A.P.Rx+12&&!S.dead){const r=3.4*Math.max(1,shipHullScale().z),l=_vaA.copy(S.pos).sub(A.pos);for(let it=0;it<2;it++){const f=vaF(A,l.x,l.y,l.z,r+6);if(f>r+.5)break;
    const g=A.V.core.grad(l.x,l.y,l.z,f,.3),n=_vaN.set(A.V.core.GN[0],A.V.core.GN[1],A.V.core.GN[2]),dd=f/Math.max(1,g);if(dd>=r)break;l.addScaledVector(n,r-dd);S.pos.copy(l).add(A.pos);
    const vn=S.vel.dot(n);if(vn<0){if(vn<-55&&it==0){damage(Math.min(30,(-vn-55)*.35),'col');boom3(S.pos,10,0x9a8a78,40);shake=Math.min(1.2,shake+.5)}S.vel.addScaledVector(n,-vn*1.2);S.spd=Math.min(S.spd,S.vel.length())}}}
   if(A.dirty&&(A.st=(A.st||20)-dt)<=0){A.st=20;vaSave(A)}}});

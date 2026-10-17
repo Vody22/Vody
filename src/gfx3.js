@@ -121,7 +121,7 @@ function bl3Place(m,x,y,z,sx,sz,yaw,op){const sc=SURF.scene;if(m.parent!==sc)sc.
 const hx=SURF.height(x+2.5,z)-SURF.height(x-2.5,z),hz=SURF.height(x,z+2.5)-SURF.height(x,z-2.5),n=wet?G3.a.set(0,1,0):G3.a.set(-hx/5,1,-hz/5).normalize();m.quaternion.setFromUnitVectors(G3.up,n);G3.q.setFromAxisAngle(G3.up,yaw);m.quaternion.multiply(G3.q);
 m.position.set(x,gy+.35,z);const k=1+a/60;m.scale.set(sx*k,1,sz*k);m.material.opacity=op*f*(wet?.5:1)}
 function bl3Tick(){if(DESK)return;if(mode!='surf'){if(BL3.ship){BL3.ship.visible=BL3.foot.visible=false}return}if(!BL3.ship)bl3Init();
-const e=G3.b.set(0,0,-1).applyQuaternion(ship.quaternion),yaw=Math.atan2(-e.x,-e.z),bs=ship.userData.body?ship.userData.body.scale.z||1:1;bl3Place(BL3.ship,ship.position.x,ship.position.y-2,ship.position.z,19*bs,17*bs,yaw,.62);
+const e=G3.b.set(0,0,-1).applyQuaternion(ship.quaternion),yaw=Math.atan2(-e.x,-e.z),bs=shipHullScale().z;bl3Place(BL3.ship,ship.position.x,ship.position.y-2,ship.position.z,19*bs,17*bs,yaw,.62);
 if(FOOT.on){const p=FOOT.model?FOOT.model.position:FOOT.pos;bl3Place(BL3.foot,p.x,p.y,p.z,2.4,2.4,0,.55)}else BL3.foot.visible=false}
 
 // ---------- TRAÎNÉES DES RÉACTEURS (couleur selon le réacteur installé) ----------

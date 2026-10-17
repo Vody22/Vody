@@ -56,7 +56,7 @@ TICK.push(()=>{const T=V1.tow;if(T&&S.docked&&!S.docked.ground){const D=T.o,pay=
 function v1TurToggle(){if(V1.tur){V1.tur=null;document.body.classList.remove('v1tur');camInit=true;return}if(!v1Big()){toast('La tourelle existe seulement sur les gros vaisseaux (Cargo, Faucon, Sentinelle, Mastodonte)');return}if(!v1Sp())return;
 V1.tur={yaw:0,pitch:.12,cd:0,in:[0,0],side:1};document.body.classList.add('v1tur');toast('🎯 Tourelle : le joystick vise, le vaisseau garde son cap')}
 function v1TurDir(out){const T=V1.tur;_v1e.set(T.pitch,T.yaw,0,'YXZ');_v1q.setFromEuler(_v1e);return out.set(0,0,-1).applyQuaternion(_v1q).applyQuaternion(S.q)}
-function v1TurBase(out){const sc=(ship.userData.body&&ship.userData.body.scale.z)||1;return out.set(0,5.5*sc+2,1.5*sc).applyQuaternion(S.q).add(S.pos)}
+function v1TurBase(out){const sc=shipHullScale().z;return out.set(0,5.5*sc+2,1.5*sc).applyQuaternion(S.q).add(S.pos)}
 function v1TurTick(dt){const T=V1.tur;if(!T)return;if(!v1Sp()||!v1Big()){V1.tur=null;document.body.classList.remove('v1tur');return}T.yaw+=T.in[0]*dt*1.7;T.pitch=clamp(T.pitch+T.in[1]*dt*1.3,-.35,1.25);T.cd-=dt;
 for(const b of V1.tb){b.pos.addScaledVector(b.v,dt);b.l-=dt;for(const X of V1.tg){if(!X||X.dead||X.gone||!X.pos)continue;if(X.pos.distanceTo(b.pos)<(X.r||6)+3){try{X.hit(1.15*dmgMul(),b.pos.clone())}catch(e){}b.l=0;break}}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}V1.tb=V1.tb.filter(b=>b.l>0)}
 function v1TurFire(dt){const T=V1.tur;if(!isFire()||T.cd>0||S.dead)return;T.cd=.11;T.side=-T.side;const dir=v1TurDir(new V3()),p=v1TurBase(new V3()).addScaledVector(dir,7).add(_v1c.set(T.side*1.2,0,0).applyQuaternion(S.q));

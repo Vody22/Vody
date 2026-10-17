@@ -2,6 +2,8 @@
 const _f=new V3(),_u=new V3(),_r=new V3(),_v=new V3(),_w=new V3(),_q=new QT(),AX=new V3(1,0,0),AY=new V3(0,1,0),AZ=new V3(0,0,1);
 const curScene=()=>mode=='surf'?SURF.scene:mode=='int'?DER.scene:mode=='vox'?window.VXSC:scene;
 let ship=buildShip();scene.add(ship);
+// Gameplay dimensions are independent of imported mesh normalization.
+function shipHullScale(){return ship.userData.hullScale29||ship.userData.body.scale}
 function rebuildShip(){const p=ship.parent;p.remove(ship);ship=buildShip();p.add(ship)}
 const fwd=(q=S.q,o=_f)=>o.set(0,0,-1).applyQuaternion(q);
 // ----- pilotage -----
@@ -14,10 +16,10 @@ fwd();S.vel.lerp(_v.copy(_f).multiplyScalar(S.spd),damp(3.2,dt));S.pos.addScaled
 S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.52,damp(5,dt))}
 // ----- caméra -----
 const camUp=new V3(0,1,0),camLook=new V3();let camInit=true,fovK=0;const CAMQ=new QT(),CAMS={y:0,p:0,a:0,ls:0};
-function updCam(dt){if(mode=='int'){derCam(dt);return}if(FOOT.on&&mode=='surf'){footCam(dt);return}if(atelierOn()){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
+function updCam(dt){if(mode=='int'){derCam(dt);return}if(FOOT.on&&mode=='surf'){footCam(dt);return}if(atelierOn()){const R=30*Math.max(1,shipHullScale().z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
 if(ckActive()){ckCam(dt);return}
 // 3e personne : caméra plus éloignée, rotation amortie (elle balance dans les virages), recul à l'accélération, vibrations au boost
-const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(2.4,dt));const sk=Math.max(1,ship.userData.body.scale.z),spK=clamp(S.spd/Math.max(1,cruise()),0,2.8),srf=mode=='surf'?.84:1;
+const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(2.4,dt));const sk=Math.max(1,shipHullScale().z),spK=clamp(S.spd/Math.max(1,cruise()),0,2.8),srf=mode=='surf'?.84:1;
 if(camInit){CAMQ.copy(S.q);CAMS.ls=S.spd;camInit=false}else CAMQ.slerp(S.q,damp(5,dt));
 CAMS.y=lerp(CAMS.y,S.yawV||0,damp(3.5,dt));CAMS.p=lerp(CAMS.p,S.pitchV||0,damp(3.5,dt));const acc=dt>0?(S.spd-CAMS.ls)/dt:0;CAMS.ls=S.spd;CAMS.a=lerp(CAMS.a,clamp(acc*.025,-4,6),damp(2.5,dt));
 const back=(39+spK*2+fovK*6+CAMS.a*.45)*sk*srf,up=(10+fovK*.7)*sk*srf;
@@ -38,7 +40,7 @@ function rmPB(b){b.m.parent&&b.m.parent.remove(b.m);(pbPool[b.c]||(pbPool[b.c]=[
 function mkEB(c){const m=boltMesh(c,1);curScene().add(m);return m}
 function findLock(cands){fwd();let best=null,bs=1e9;for(const c of cands){_v.copy(c.pos).sub(S.pos);const d=_v.length();if(d>c.max*PM('lock')||d<4)continue;const ang=Math.acos(clamp(_v.dot(_f)/d,-1,1));if(ang>c.cone*PM('cone'))continue;const sc=ang*c.w+d/8000;if(sc<bs){bs=sc;best=c}}return best}
 // points de sortie des tirs (bouches des canons visibles sur le vaisseau)
-function muzzlePts(n){const ud=ship.userData,M=ud.muzzles&&ud.muzzles.length?ud.muzzles:[[-4.6,-.3,-6],[4.6,-.3,-6]],sc=ud.body.scale,L=[];
+function muzzlePts(n){const ud=ship.userData,M=ud.muzzles&&ud.muzzles.length?ud.muzzles:[[-4.6,-.3,-6],[4.6,-.3,-6]],sc=shipHullScale(),L=[];
 if(n==1){FALT=(FALT+1)%M.length;L.push(M[FALT])}else{for(let i=0;i<Math.min(n,M.length);i++)L.push(M[i]);const X=[[0,-.7,-8.5],[0,.9,-6]];let k=0;while(L.length<n)L.push(X[k++%2])}
 return L.map(m=>({l:m,w:new V3(m[0]*sc.x,m[1]*sc.y,m[2]*sc.z).applyQuaternion(S.q).add(S.pos)}))}
 function fire(dt){fcd-=dt;if(!isFire()||fcd>0||S.docked||S.entry||S.ascent)return;fcd=(.27-.022*G.u[0])/PM('rate');const n=(G.u[0]>=4?2:1)+PM('shots'),bs=950,dmg=G.u[0]*HS().dmg*PM('dmg')*PM('cdmg'),gp=partOf('guns'),col=gp.bc;fwd();
