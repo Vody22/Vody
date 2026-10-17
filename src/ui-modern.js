@@ -122,7 +122,7 @@ const STARFARER_UI = (() => {
     const start=$('m3play'),label=start.textContent.toLowerCase().includes('continuer')?'Continuer l’aventure':'Commencer l’aventure';start.innerHTML='<span>'+label+'</span>'+icon('arrow');
     const progress=$('sf2-menu-progress');if(progress)progress.innerHTML=icon('chart')+'<span>Mon parcours</span>';
     $('m3opt').innerHTML=icon('gear')+'<span>Options</span>';$('m3ph').innerHTML=icon('cam')+'<span>Mode photo</span>';
-    const version=menu.querySelector('.m3ver');if(version)version.textContent='STARFARER 3D · VERSION 2.3';
+    const version=menu.querySelector('.m3ver');if(version)version.textContent='STARFARER 3D · VERSION 2.4';
   }
-  return Object.freeze({version:'2.3',toolbar:dock,originalButtons:originalButtons.length,settingsTabs:sections.length});
+  return Object.freeze({version:'2.4',toolbar:dock,originalButtons:originalButtons.length,settingsTabs:sections.length});
 })();

@@ -56,7 +56,7 @@ const STARFARER_JOURNEY=(()=>{
     let action='Suis le marqueur';
     if(g.kind==='chasse')action=Math.min(G.m.n,Math.max(0,G.kills-G.m.k0))+' / '+G.m.n+' pirates · Verrouille une cible puis tire';
     else if(Number.isFinite(g.x)){const d=distance(g);action=meters(d)+' · '+(g.kind==='liv'?'Rejoins la station et amarre-toi':g.kind==='exp'?'Approche la planète pour la découvrir':d<700?'Ralentis et utilise l’action proposée à l’écran':'Aligne ton vaisseau sur le marqueur');}
-    $('sf2-objective-detail').textContent=action+' · C : carte';
+    $('sf2-objective-detail').textContent=action+(DESK?' · C : carte':' · Menu → Carte');
   }
   // Keep every message in the journal; only urgent messages interrupt a toast.
   const history=[],pending=TOQ.q;
@@ -80,5 +80,5 @@ const STARFARER_JOURNEY=(()=>{
     pending.push(s);pending.sort((a,b)=>priority(b)-priority(a));if(pending.length>5)pending.length=5;if(!TOQ.busy)next();
   };
   let elapsed=0;TICK.push(dt=>{elapsed+=dt;if(elapsed<.25)return;elapsed=0;panel.hidden=!MAP.open||mode==='surf';});
-  return Object.freeze({version:'2.3',compare,goal,priority,history,updateObjective,updateMap});
+  return Object.freeze({version:'2.4',compare,goal,priority,history,updateObjective,updateMap});
 })();

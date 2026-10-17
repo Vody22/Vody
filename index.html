@@ -446,6 +446,56 @@ body.sf2-contrast #sf3-toolbar,body.sf2-contrast #sf2-objective,body.sf2-contras
 #j23-map{position:absolute;top:90px;right:24px;width:280px;max-height:calc(100dvh - 180px);overflow:auto;padding:18px;background:rgba(9,24,37,.96);border:1px solid #72f2d238;border-radius:18px;color:#dceef4;box-shadow:0 18px 60px #0006;z-index:3;pointer-events:auto}#j23-map[hidden]{display:none}#j23-map>small{display:block;color:#83dccc;font-size:10px;letter-spacing:1.4px}#j23-map>b{display:block;font-size:17px;margin:10px 0}#j23-map p{line-height:1.55;font-size:12px;color:#b6cbd8}#j23-map .j23-legend{font-size:10px;letter-spacing:0;line-height:1.5;color:#91aab9;margin-top:14px}.j23-actions{display:flex;flex-wrap:wrap;gap:7px}.j23-actions button{padding:9px 12px;border-radius:10px;font-size:11px}#j23-set-course{background:#72f2d2;color:#07251f}#j23-map button:disabled{opacity:.4;cursor:default}#j23-journal{margin-top:18px;border-top:1px solid #ffffff18;padding-top:14px}#j23-journal summary{cursor:pointer;color:#a5eee0;font-size:13px}#j23-notice-count{float:right;color:#91aab9}#j23-notice-list{padding-left:18px;max-height:230px;overflow:auto;font-size:12px}#j23-notice-list li{margin:10px 0;line-height:1.5;color:#bacbd6}#j23-notice-list .priority-2{color:#ffbaab}#toast[data-priority="0"]{font-size:12px;max-width:340px}#toast[data-priority="2"]{border-color:#ff9b7b;color:#ffe0d3}
 @media(max-width:650px){#j23-map{top:auto;bottom:80px;right:12px;left:12px;width:auto;padding:12px;max-height:32dvh;border-radius:14px}#j23-map>b{font-size:14px;margin:5px 0}#j23-map p{margin:5px 0;font-size:11px}#j23-map .j23-legend{display:none}.j23-actions button{padding:8px;font-size:10px}.j23-compare{gap:5px 10px}.j23-compare span{font-size:10px}}
 @media(max-width:700px){body.desk #shop,body.desk.atelier #shop,body.atelier #shop{left:12px;right:12px;top:auto;bottom:90px;transform:none;width:auto;max-width:calc(100vw - 24px);max-height:70dvh}body.desk.atelier #tabX,body.atelier #tabX{max-height:42dvh}.arow>div:first-child{min-width:0;flex:1}.arow .j23-compare{min-width:0;flex-basis:100%}.j23-compare span{flex-shrink:1;flex-wrap:wrap}body.atelier #sf3-toolbar{left:50%;right:auto;top:auto;bottom:12px;transform:translateX(-50%);flex-direction:row;max-width:95vw;gap:3px}body.atelier .sf3-tool-group{flex-direction:row;gap:1px}body.atelier .sf3-tool-group+.sf3-tool-group{border-top:0;border-left:1px solid #b0ccde21;padding-top:0;padding-left:3px}body.atelier #sf3-toolbar .ic,body.atelier #sf3-toolbar button.ic{width:32px;min-height:32px;height:32px}}
+
+/* Touch screens use explicit controls; small desktop windows keep mouse input. */
+#m24-stick,#m24-speed,#m24-menu,#m24-back{display:none}
+body.sf-mobile{--m24-bottom:env(safe-area-inset-bottom,0px);--m24-left:env(safe-area-inset-left,0px);--m24-right:env(safe-area-inset-right,0px)}
+body.sf-mobile button{touch-action:manipulation;min-height:44px}
+body.sf-mobile :is(#opts,#prof,#cxpanel,#talpanel,#mppanel,#qf9,#bugpanel,#mkpanel,#bpanel,#trpanel,#cus3,.sf2-window,#tabX){touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+body.sf-mobile #sf3-toolbar{display:none!important}
+body.sf-mobile #m24-menu{display:flex;position:fixed;right:calc(var(--m24-right) + 12px);top:calc(env(safe-area-inset-top,0px) + 102px);align-items:center;gap:6px;padding:8px 11px;z-index:55;background:#102638ed;font-size:11px;min-height:44px}
+body.sf-mobile #m24-menu .i{width:18px;height:18px}
+body.sf-mobile #m24-back{position:fixed;inset:0;width:100%;height:100%;border:0!important;border-radius:0!important;background:#020a16ad;backdrop-filter:blur(3px);z-index:72}
+body.sf-mobile.m24-menu-open #m24-back{display:block}
+body.sf-mobile.m24-menu-open #sf3-toolbar{display:grid!important;grid-template-columns:1fr 1fr;gap:8px;position:fixed;top:50%;left:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);width:min(340px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 100px);overflow:auto;flex-direction:row;padding:15px;border-radius:18px;z-index:78;touch-action:pan-y}
+body.sf-mobile.m24-menu-open .sf3-tool-group{display:contents}
+body.sf-mobile.m24-menu-open #sf3-toolbar button.ic{position:relative;width:auto;height:56px;min-height:56px;display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:10px 12px;transform:none}
+body.sf-mobile.m24-menu-open #sf3-toolbar button.ic::before{display:none}
+body.sf-mobile.m24-menu-open #sf3-toolbar button.ic::after{position:static;opacity:1;transform:none;content:attr(data-label);border:0;background:none;box-shadow:none;white-space:normal;font-size:12px;padding:0;color:#e0f4f4}
+body.sf-mobile.m24-menu-open #m24-menu{top:calc(env(safe-area-inset-top,0px) + 12px);z-index:79}
+body.sf-mobile #m24-stick{display:block;position:fixed;left:calc(var(--m24-left) + 16px);bottom:calc(var(--m24-bottom) + 24px);width:112px;height:112px;border:1px solid #b4edf24d;border-radius:50%;background:radial-gradient(circle,#173b4855,#092436aa);z-index:23;touch-action:none;box-shadow:0 5px 25px #0005}
+#m24-stick>i{position:absolute;inset:23%;border:1px dashed #9ee5e445;border-radius:50%;pointer-events:none}#m24-stick>b{position:absolute;top:50%;left:50%;width:43px;height:43px;transform:translate(-50%,-50%);border:1px solid #b2f7e1b3;border-radius:50%;background:#507e83b3;pointer-events:none;box-shadow:0 2px 14px #0004}#m24-stick>span{position:absolute;bottom:calc(100% + 7px);left:0;right:0;text-align:center;font-size:8px;letter-spacing:1.5px;color:#c1e3e7}#m24-stick.active{border-color:#a0f1df}
+body.sf-mobile #m24-speed{display:block;position:fixed;left:calc(var(--m24-left) + 14px);bottom:calc(var(--m24-bottom) + 166px);width:160px;padding:7px 10px 0;box-sizing:border-box;border:1px solid #adcfdc2b;background:#0c2030e8;border-radius:12px;z-index:24;touch-action:pan-x}
+#m24-speed>span{display:flex;align-items:center;gap:8px;color:#b5d1de;font-size:9px;letter-spacing:.5px}#m24-percent{color:#a4f0dc;font-size:11px}#m24-speed small{margin-left:auto;font-size:10px;letter-spacing:0;color:#dfedf4}#m24-speed input{width:100%;height:44px;margin:0;touch-action:pan-x}#m24-speed input::-webkit-slider-runnable-track{height:6px}#m24-speed input::-webkit-slider-thumb{width:26px;height:26px;margin-top:-10px}
+body.sf-mobile #thr6{display:none!important}
+body.sf-mobile .b{z-index:25;touch-action:none;box-sizing:border-box;min-width:48px;min-height:48px}
+body.sf-mobile #fire{width:76px;height:76px;right:calc(var(--m24-right) + 16px);bottom:calc(var(--m24-bottom) + 24px);border-radius:50%!important}
+body.sf-mobile #brake{width:54px;height:54px;right:calc(var(--m24-right) + 102px);bottom:calc(var(--m24-bottom) + 24px);border-radius:18px!important}
+body.sf-mobile #boost{width:58px;height:58px;right:calc(var(--m24-right) + 20px);bottom:calc(var(--m24-bottom) + 112px);border-radius:20px!important}
+body.sf-mobile #dodge{width:48px;height:48px;right:calc(var(--m24-right) + 88px);bottom:calc(var(--m24-bottom) + 112px)}
+body.sf-mobile #flare{width:48px;height:48px;right:calc(var(--m24-right) + 146px);bottom:calc(var(--m24-bottom) + 112px)}
+body.sf-mobile #wbtn{position:fixed;right:calc(var(--m24-right) + 20px);bottom:calc(var(--m24-bottom) + 182px);width:58px;height:46px;z-index:25;padding:8px;border-radius:14px!important}
+body.sf-mobile #land{bottom:calc(var(--m24-bottom) + 244px);max-width:calc(100vw - 28px);white-space:normal;padding:10px 18px;z-index:26;font-size:12px}
+body.sf-mobile #footb{left:50%;right:auto;transform:translateX(-50%);bottom:calc(var(--m24-bottom) + 296px);max-width:calc(100vw - 28px);padding:10px 16px;font-size:12px;z-index:26}
+body.sf-mobile #hud{padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 0;gap:8px}
+body.sf-mobile #pl{width:136px!important;padding:9px!important;box-sizing:border-box}body.sf-mobile #pr{min-width:92px!important;max-width:130px;padding:9px!important}body.sf-mobile #cr{font-size:17px!important}body.sf-mobile #info,body.sf-mobile #sub,body.sf-mobile #pwr,body.sf-mobile #v1sys,body.sf-mobile #help,body.sf-mobile #mpfeed{display:none!important}body.sf-mobile #zone{font-size:8px!important;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}body.sf-mobile #wpn{font-size:10px}body.sf-mobile #lvrow{font-size:10px}
+body.sf-mobile #sf2-objective{left:12px;top:calc(env(safe-area-inset-top,0px) + 130px);bottom:auto;width:calc(100vw - 112px);max-width:300px;padding:8px 10px;box-sizing:border-box;pointer-events:none}
+body.sf-mobile #sf2-objective b{font-size:11px;line-height:1.35;margin:4px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}body.sf-mobile #sf2-objective span{font-size:9px;line-height:1.4}body.sf-mobile #sf2-target{top:calc(env(safe-area-inset-top,0px) + 224px);width:154px;padding:8px 10px}
+body.sf-mobile #sf2-alert{top:auto;bottom:calc(var(--m24-bottom) + 234px);left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 30px);font-size:10px;padding:8px 12px;box-sizing:border-box}
+body.sf-mobile #toast{top:30%;max-width:calc(100vw - 34px);font-size:11px!important;padding:9px 12px}body.sf-mobile #achb{top:calc(env(safe-area-inset-top,0px) + 220px);max-width:calc(100vw - 24px);padding:10px 12px}body.sf-mobile #achb small{font-size:10px}
+body.sf-mobile #v1bar{display:none!important}body.sf-mobile #tut9{top:calc(env(safe-area-inset-top,0px) + 130px);left:12px;right:96px;transform:none;width:auto;max-width:none;padding:10px;font-size:10px}body.sf-mobile #tut9 b{font-size:12px;margin:5px 0}body.sf-mobile #tut9 p{font-size:10px;line-height:1.4;margin:5px 0}body.sf-mobile .t9bar{margin-top:8px}
+body.sf-mobile :is(#opts,#prof,#cxpanel,#talpanel,#mppanel,#qf9,#bugpanel,#mkpanel,#bpanel,#trpanel,#cus3){left:12px;right:12px;top:50%;bottom:auto;transform:translateY(-50%);width:auto;max-width:600px;max-height:calc(100dvh - 28px);min-height:0;overflow-y:auto;box-sizing:border-box;padding:15px;border-radius:16px!important}
+body.sf-mobile :is(.phead,.mphead)>button{width:44px;height:44px;min-height:44px}body.sf-mobile #sf3-settings-tabs{gap:3px}body.sf-mobile #sf3-settings-tabs button{min-height:44px;padding:8px 10px}body.sf-mobile .orow{min-height:44px;gap:8px}body.sf-mobile .orow button{min-height:44px;min-width:100px}body.sf-mobile .orow input[type=range]{height:44px}body.sf-mobile .srow button{min-height:44px;padding:8px 10px}body.sf-mobile .aslots button{min-height:48px}body.sf-mobile #tabs{overflow-x:auto;flex-wrap:nowrap;touch-action:pan-x}body.sf-mobile #tabs button{flex-shrink:0;min-height:44px}body.sf-mobile .sf2-window{max-height:calc(100dvh - 28px);overflow-y:auto;padding:18px}
+body.sf-mobile #shop,body.sf-mobile.atelier #shop{left:12px;right:12px;top:auto;bottom:calc(var(--m24-bottom) + 72px);transform:none;width:auto;max-height:calc(100dvh - 186px);overflow:hidden;padding:12px!important}body.sf-mobile.atelier #tabX{max-height:calc(100dvh - 320px)}body.sf-mobile.atelier #land{bottom:calc(var(--m24-bottom) + 14px)}body.sf-mobile.atelier #m24-menu{top:calc(env(safe-area-inset-top,0px) + 112px)}
+body.sf-mobile #mapbtns{left:12px;right:12px;gap:6px;justify-content:flex-end}body.sf-mobile #mapbtns button{min-width:44px;min-height:44px;font-size:11px;padding:8px}body.sf-mobile #map3b{margin-right:auto}body.sf-mobile #j23-map{bottom:74px;max-height:34dvh}body.sf-mobile #j23-map button{min-height:44px}body.sf-mobile #mapinfo{max-width:calc(100vw - 50px);font-size:12px}
+body.sf-mobile #dlg{bottom:calc(var(--m24-bottom) + 70px);max-height:55dvh;overflow-y:auto;touch-action:pan-y;font-size:12px}body.sf-mobile #bossbar{top:calc(env(safe-area-inset-top,0px) + 98px);width:42vw}
+body.sf-mobile.m24-controls-off :is(#fire,#boost,#brake,#dodge,#flare,#wbtn){visibility:hidden!important;pointer-events:none!important}
+body.sf-mobile #m24-stick[hidden],body.sf-mobile #m24-speed[hidden],body.sf-mobile #m24-menu[hidden],body.sf-mobile #m24-back[hidden]{display:none!important}
+body.sf-mobile #sf2-alert{top:calc(env(safe-area-inset-top,0px) + 224px);bottom:auto}body.sf-mobile.m24-alert #sf2-target{display:none}
+@media(orientation:landscape){body.sf-mobile #m24-stick{bottom:calc(var(--m24-bottom) + 16px);width:104px;height:104px}body.sf-mobile #m24-speed{bottom:calc(var(--m24-bottom) + 146px)}body.sf-mobile #m24-menu{top:calc(env(safe-area-inset-top,0px) + 88px)}body.sf-mobile #sf2-objective{top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);width:32vw;max-width:310px;padding:7px 10px}body.sf-mobile #sf2-target{top:92px;width:136px;padding:6px}body.sf-mobile #sf2-alert{bottom:16px;max-width:32vw;font-size:9px}body.sf-mobile #land{bottom:calc(var(--m24-bottom) + 20px);max-width:32vw}body.sf-mobile #footb{bottom:calc(var(--m24-bottom) + 76px);max-width:32vw}body.sf-mobile #toast{top:42%;max-width:45vw}body.sf-mobile #achb{top:100px;max-width:45vw}body.sf-mobile #tut9{top:8px;left:50%;right:auto;transform:translateX(-50%);width:32vw;max-height:45dvh;overflow:auto}body.sf-mobile #tut9 p{font-size:9px}body.sf-mobile #j23-map{left:auto;right:12px;top:80px;bottom:auto;width:250px;max-height:calc(100dvh - 150px)}body.sf-mobile #mapinfo{max-width:36vw}body.sf-mobile #shop,body.sf-mobile.atelier #shop{left:auto;right:12px;top:12px;bottom:66px;width:min(57vw,460px);max-height:none}body.sf-mobile.atelier #tabX{max-height:calc(100dvh - 180px)}body.sf-mobile #dlg{bottom:30px;max-width:58vw;max-height:70dvh}body.sf-mobile #bossbar{top:77px;width:32vw}}
+@media(orientation:landscape){body.sf-mobile #sf2-alert{top:calc(env(safe-area-inset-top,0px) + 92px);bottom:auto}}
+body.sf-mobile.atelier #m24-menu{top:auto;bottom:calc(var(--m24-bottom) + 14px)}body.sf-mobile.atelier #land{left:12px;transform:none;max-width:calc(100vw - 120px)}@media(max-width:340px){body.sf-mobile #flare{right:calc(var(--m24-right) + 140px)}}
+body.sf-mobile.m24-menu-open #sf3-toolbar button.ic::after{display:block}
 </style></head><body>
 <canvas id="c"></canvas><canvas id="ov"></canvas>
 <div id="hud"><div class="pan" id="pl"><div class="row"><span class="lab h" title="Coque"><svg class="i"><use href="#i-hull"/></svg></span><div class="bar" id="hpbar"><i id="hpb"></i></div><span class="num" id="hpt"></span></div><div class="row" id="shrow" style="display:none"><span class="lab s" title="Bouclier"><svg class="i"><use href="#i-shield"/></svg></span><div class="bar" id="shbar"><i id="shb"></i></div><span class="num" id="sht"></span></div><div class="row"><span class="lab c" title="Soute"><svg class="i"><use href="#i-cargo"/></svg></span><div class="bar" id="orebar"><i id="orb"></i></div><span class="num" id="ort"></span></div><div class="row" id="lvrow"><span class="lvt" id="lvt"></span><div class="xbar"><i id="xpb"></i></div><span id="xpg"></span></div><div class="row" id="pwr" title="Énergie : touche pour changer (1/2/3 sur PC)"></div><div id="wpn"></div><div id="info"></div></div><div class="pan" id="pr"><div id="cr"></div><div id="sub"></div><div class="chip" id="zone"></div><div class="chip" id="want" style="display:none"></div></div></div>
@@ -474,7 +524,7 @@ body.sf2-contrast #sf3-toolbar,body.sf2-contrast #sf2-objective,body.sf2-contras
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261017-130944"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261017-132111"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -6150,7 +6200,7 @@ setInterval(()=>{if(mode=='space'&&!S.dead)save()},5000);addEventListener('visib
 
 // ===== COMMANDES =====
 const TOUCH=(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)||/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-const DESK=!TOUCH||/[?&]pc\b/.test(location.search);if(DESK)document.body.classList.add('desk');
+const DESK=(!TOUCH&&!/[?&]mobile\b/.test(location.search))||/[?&]pc\b/.test(location.search);if(DESK)document.body.classList.add('desk');
 const K={},B={fire:0,boost:0,brake:0},MS={x:0,y:0,in:false,fire:0,boost:0};let stick=null,inv=false;
 try{inv=localStorage.getItem('sf-inv')=='1'}catch(e){}
 onkeydown=e=>{if(e.target&&(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable))return;if(!K[e.code])keyAct(e.code);K[e.code]=1;if(e.code=='Space'||e.code.startsWith('Arrow')||e.code=='Tab')e.preventDefault()};
@@ -6163,7 +6213,13 @@ addEventListener('pointerup',e=>{if(e.pointerType=='mouse'){if(e.button==0)MS.fi
 OV.addEventListener('pointerdown',e=>{if(e.pointerType=='mouse'){mouseAim(e);if(e.button==0)MS.fire=1;if(e.button==2)MS.boost=1;return}if(!stick&&e.clientX<innerWidth*.62){stick={id:e.pointerId,ox:e.clientX,oy:e.clientY,x:0,y:0};try{OV.setPointerCapture(e.pointerId)}catch(_){}}});
 OV.addEventListener('pointermove',e=>{if(stick&&stick.id==e.pointerId){const dx=e.clientX-stick.ox,dy=e.clientY-stick.oy,l=Math.hypot(dx,dy),R=Math.min(70,innerWidth*.16),m=Math.min(l,R);stick.x=l?dx/l*m/R:0;stick.y=l?dy/l*m/R:0;stick.R=R}});
 const endStick=e=>{if(stick&&stick.id==e.pointerId)stick=null};OV.addEventListener('pointerup',endStick);OV.addEventListener('pointercancel',endStick);
-for(const k of['fire','boost','brake']){const b=$(k);b.addEventListener('pointerdown',e=>{e.preventDefault();B[k]=1;b.classList.add('on')});for(const ev of['pointerup','pointerleave','pointercancel'])b.addEventListener(ev,()=>{B[k]=0;b.classList.remove('on')})}
+for(const k of['fire','boost','brake']){const b=$(k);let pointer=null;
+const release=e=>{if(e&&pointer!==e.pointerId)return;pointer=null;B[k]=0;b.classList.remove('on')};
+b.addEventListener('pointerdown',e=>{if(isPaused())return;e.preventDefault();if(!B[k])pointer=null;if(pointer!=null)return;pointer=e.pointerId;B[k]=1;b.classList.add('on');try{b.setPointerCapture(e.pointerId)}catch(_){}});
+for(const ev of['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,release);
+addEventListener('pointerup',release);addEventListener('pointercancel',release);addEventListener('blur',()=>release());
+b.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&!b.hasPointerCapture(e.pointerId))release(e)});
+}
 $('inv').onclick=()=>{inv=!inv;$('inv').classList.toggle('on',inv);try{localStorage.setItem('sf-inv',inv?'1':'0')}catch(e){}toast(inv?'Commandes inversées (style avion)':'Commandes normales')};$('inv').classList.toggle('on',inv);
 document.addEventListener('gesturestart',e=>e.preventDefault());document.addEventListener('dblclick',e=>e.preventDefault());
 // lecture du joystick → [lacet, tangage]
@@ -8054,7 +8110,7 @@ $('mapb').onclick=openMap;$('mapx').onclick=closeMap;$('mapzi').onclick=()=>mapZ
 addEventListener('keydown',e=>{if(e.target.tagName=='INPUT')return;if(e.code=='KeyC'&&!e.repeat)openMap();if(e.code=='Escape'&&MAP.open)closeMap()});addEventListener('resize',()=>{if(MAP.open){sizeMap();drawMap()}});
 // ----- intégration -----
 function storyTarget(){const s=SG();if(!s||!CHAPTERS[s.ch])return null;return CHAPTERS[s.ch].tg()}
-const isPaused=()=>DLG.open||MAP.open||window.XPAUSE>0||document.hidden||!!window.SF2PAUSE||(typeof OPTP!="undefined"&&OPTP.open);
+const isPaused=()=>DLG.open||MAP.open||window.XPAUSE>0||document.hidden||!!window.SF2PAUSE||!!window.SFMobilePause||(typeof OPTP!="undefined"&&OPTP.open);
 function updContent(dt){G.time=(G.time||0)+dt;storyTick(dt);updEvents(dt);updBoss(dt)}
 function updContentAlways(dt){updDlg(dt);updMusic();bossBar();if(MAP.open&&Math.random()<.2)drawMap();updShop();setH('wpn',wpnHUD());setD('wbtn',G.w.length>1&&!DESK?'flex':'none');if(G.w.length>1)setH('wbtn',ICO(WSVG[curW()]||'canon'))}
 function contentInfo(){let s='';const c=SG()&&SG().ch<8&&CHAPTERS[SG().ch];if(c)s+=`<span style="color:#c9f">★ ${c.txt()}</span>`;if(SG()&&SG().ch==1&&scanT>0)s+=` <b style="color:#c9f">scan ${Math.min(100,scanT/3*100|0)}%</b>`;
@@ -8987,7 +9043,7 @@ function label(p,txt,col,maxD){const s=proj(p);if(!s.front||s.d>maxD||s.y<(DESK?
 function overlay(){const W=innerWidth,H=innerHeight;OX.clearRect(0,0,W,H);OX.shadowColor='rgba(0,0,0,.75)';OX.shadowBlur=4;
 if(CLOUDW>.01&&mode=='surf'){OX.fillStyle=`rgba(${CLOUDC},${CLOUDW*.88})`;OX.fillRect(0,0,W,H)}if(S.heat>.02){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.75);g.addColorStop(0,'rgba(255,120,30,0)');g.addColorStop(1,`rgba(255,110,30,${S.heat*.55})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}
 if(shieldT>0&&ckActive()&&S.sh>0){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.75);g.addColorStop(0,'rgba(80,160,255,0)');g.addColorStop(1,`rgba(90,170,255,${shieldT*.45})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}if(hurt>0){const g=OX.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.7);g.addColorStop(0,'rgba(255,0,0,0)');g.addColorStop(1,`rgba(255,30,30,${hurt*.9})`);OX.fillStyle=g;OX.fillRect(0,0,W,H)}
-speedVeil(W,H);if(S.dead)return;if(mode=='vox'){vxOverlay(W,H);return}if(mode=='int'){derOverlay(W,H);if(stick){const R=stick.R||70;OX.strokeStyle='rgba(120,220,255,.45)';OX.lineWidth=2;OX.beginPath();OX.arc(stick.ox,stick.oy,R,0,TAU);OX.stroke();OX.fillStyle='rgba(120,220,255,.35)';OX.beginPath();OX.arc(stick.ox+stick.x*R,stick.oy+stick.y*R,R*.36,0,TAU);OX.fill()}return}
+speedVeil(W,H);if(S.dead)return;if(mode=='vox'){vxOverlay(W,H);return}if(mode=='int'){derOverlay(W,H);if(stick&&!stick.mobile24){const R=stick.R||70;OX.strokeStyle='rgba(120,220,255,.45)';OX.lineWidth=2;OX.beginPath();OX.arc(stick.ox,stick.oy,R,0,TAU);OX.stroke();OX.fillStyle='rgba(120,220,255,.35)';OX.beginPath();OX.arc(stick.ox+stick.x*R,stick.oy+stick.y*R,R*.36,0,TAU);OX.fill()}return}
 // étiquettes
 if(mode=='space'){for(const p of planets)if(G.disc.has(p.name))label({x:p.x,y:p.y+p.r*1.25,z:p.z},p.name,'rgba(170,215,255,.9)',14000);for(const s of suns)label({x:s.x,y:s.y+s.r*1.5,z:s.z},'★ '+s.name,'#ffd890',22000);for(const st of stations)if(!(G.m&&G.m.tg===st)&&st!==hud.mk)label({x:st.x,y:st.y+110,z:st.z},st.n,'#ffc845',4000)}
 lensFlares();if(ckActive())ckHUD(W,H);
@@ -9004,7 +9060,7 @@ if(!ckActive()&&!(typeof SI!='undefined'&&SI.on)&&!window.THR6VIS&&!S.docked){{c
 if(DESK&&MS.in&&!S.dead){const R=Math.min(W,H)*.34,cx=W/2+MS.x*R,cy=H/2+MS.y*R;OX.strokeStyle='rgba(160,230,255,.25)';OX.lineWidth=1;OX.beginPath();OX.arc(W/2,H/2,R*.05,0,TAU);OX.stroke();OX.setLineDash([3,5]);OX.beginPath();OX.moveTo(W/2,H/2);OX.lineTo(cx,cy);OX.stroke();OX.setLineDash([]);OX.strokeStyle='rgba(200,240,255,.9)';OX.lineWidth=2;OX.beginPath();OX.arc(cx,cy,7,0,TAU);OX.stroke();OX.fillStyle='#fff';OX.fillRect(cx-1,cy-1,2,2)}
 if(!ckActive())radar();contentOverlay();mpOverlay();groundOverlay(W,H);
 // joystick
-if(stick){const R=stick.R||70;OX.strokeStyle='rgba(120,220,255,.45)';OX.lineWidth=2;OX.beginPath();OX.arc(stick.ox,stick.oy,R,0,TAU);OX.stroke();OX.fillStyle='rgba(120,220,255,.35)';OX.beginPath();OX.arc(stick.ox+stick.x*R,stick.oy+stick.y*R,R*.36,0,TAU);OX.fill()}
+if(stick&&!stick.mobile24){const R=stick.R||70;OX.strokeStyle='rgba(120,220,255,.45)';OX.lineWidth=2;OX.beginPath();OX.arc(stick.ox,stick.oy,R,0,TAU);OX.stroke();OX.fillStyle='rgba(120,220,255,.35)';OX.beginPath();OX.arc(stick.ox+stick.x*R,stick.oy+stick.y*R,R*.36,0,TAU);OX.fill()}
 else if(!DESK&&(hint>0||t<4)){OX.globalAlpha=.35+.25*Math.sin(t*3);OX.strokeStyle='#8fd8ff';OX.lineWidth=2;OX.beginPath();OX.arc(W*.24,H*.72,52,0,TAU);OX.stroke();OX.globalAlpha=1}
 window.HINTY=null;if(hint>0&&!DLG.open){OX.font="600 14px 'Chakra Petch',system-ui";OX.textAlign='center';let hy=W>H?H*.24:H*.19;if(!DESK){try{const r=$('pl').getBoundingClientRect(),r2=$('pr').getBoundingClientRect();if(W<=H||r.right>W*.3)hy=Math.max(hy,Math.max(r.bottom,r2.bottom)+30)}catch(e){}}window.HINTY=hy;
 {const a=Math.min(1,hint/1.2);OX.globalAlpha=a;const lw=Math.min(W-24,DESK?520:360);OX.fillStyle='rgba(6,14,28,.72)';OX.fillRect(W/2-lw/2,hy-20,lw,70);OX.fillStyle='rgba(120,210,255,.5)';OX.fillRect(W/2-lw/2,hy-20,2,70)}OX.fillStyle='rgba(210,240,255,.95)';OX.fillText(DESK?'Le vaisseau suit ta souris · Clic gauche pour tirer':'Glisse à gauche pour piloter (haut = monter)',W/2,hy);OX.fillText(DESK?(THR6.man?'Z/S : gaz · clic droit/Maj : boost · B : frein · E : amarrer':'Z/W ou clic droit : boost · S : frein · E : atterrir/amarrer'):(THR6.man?'FEU tire · jauge GAZ = vitesse · FREIN coupe les gaz':'FEU tire · BOOST accélère · FREIN ralentit'),W/2,hy+22);OX.fillText('Va vers la station ⬡ pour commencer',W/2,hy+44);OX.globalAlpha=1}}
@@ -15532,7 +15588,7 @@ if(!menu3Skip())menu3Open();else setTimeout(news13,7000);
  */
 const STARFARER_POLISH = (() => {
   'use strict';
-  const VERSION = '2.3';
+  const VERSION = '2.4';
   const defaults = {
     compact: true,
     calm: matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -15778,12 +15834,12 @@ const STARFARER_POLISH = (() => {
         text('sf2-objective-name',wp.n||wp.name||G.m&&G.m.txt||'Destination');
         text('sf2-objective-detail',(distance>=1000?(distance/1000).toFixed(1)+' km':Math.round(distance)+' m')+' · C : carte');
       }else if(G.m){text('sf2-objective-label','CONTRAT EN COURS');text('sf2-objective-name',G.m.txt||'Mission active');text('sf2-objective-detail',G.m.type==='chasse'?Math.max(0,(G.kills||0)-(G.m.k0||0))+' / '+G.m.n+' pirates':'Suis le marqueur de mission');}
-      else{text('sf2-objective-label','À TOI DE CHOISIR');text('sf2-objective-name','Explorer · commercer · combattre');text('sf2-objective-detail','F1 : activités à proximité · C : carte');}
+      else{text('sf2-objective-label','À TOI DE CHOISIR');text('sf2-objective-name','Explorer · commercer · combattre');text('sf2-objective-detail',DESK?'F1 : activités à proximité · C : carte':'Menu → Activités ou Carte');}
     }
     if(typeof STARFARER_JOURNEY!=='undefined')STARFARER_JOURNEY.updateObjective();
     let alert='';
     if(active){
-      if(EB.some(b=>b.home&&b.l>0&&b.m.position.distanceToSquared(S.pos)<490000))alert='MISSILE EN APPROCHE · X : leurres · R : esquive';
+      if(EB.some(b=>b.home&&b.l>0&&b.m.position.distanceToSquared(S.pos)<490000))alert=DESK?'MISSILE EN APPROCHE · X : leurres · R : esquive':'MISSILE EN APPROCHE · Touche Leurres ou Tonneau';
       else if(S.hp/maxhp()<.25)alert='COQUE CRITIQUE · Rejoins une station pour réparer';
       else if(cargoUsed()>=cap())alert='SOUTE PLEINE · Vends tes ressources en station';
     }
@@ -15944,9 +16000,9 @@ const STARFARER_UI = (() => {
     const start=$('m3play'),label=start.textContent.toLowerCase().includes('continuer')?'Continuer l’aventure':'Commencer l’aventure';start.innerHTML='<span>'+label+'</span>'+icon('arrow');
     const progress=$('sf2-menu-progress');if(progress)progress.innerHTML=icon('chart')+'<span>Mon parcours</span>';
     $('m3opt').innerHTML=icon('gear')+'<span>Options</span>';$('m3ph').innerHTML=icon('cam')+'<span>Mode photo</span>';
-    const version=menu.querySelector('.m3ver');if(version)version.textContent='STARFARER 3D · VERSION 2.3';
+    const version=menu.querySelector('.m3ver');if(version)version.textContent='STARFARER 3D · VERSION 2.4';
   }
-  return Object.freeze({version:'2.3',toolbar:dock,originalButtons:originalButtons.length,settingsTabs:sections.length});
+  return Object.freeze({version:'2.4',toolbar:dock,originalButtons:originalButtons.length,settingsTabs:sections.length});
 })();
 
 /* Navigation, equipment comparisons and notification priorities. */
@@ -16007,7 +16063,7 @@ const STARFARER_JOURNEY=(()=>{
     let action='Suis le marqueur';
     if(g.kind==='chasse')action=Math.min(G.m.n,Math.max(0,G.kills-G.m.k0))+' / '+G.m.n+' pirates · Verrouille une cible puis tire';
     else if(Number.isFinite(g.x)){const d=distance(g);action=meters(d)+' · '+(g.kind==='liv'?'Rejoins la station et amarre-toi':g.kind==='exp'?'Approche la planète pour la découvrir':d<700?'Ralentis et utilise l’action proposée à l’écran':'Aligne ton vaisseau sur le marqueur');}
-    $('sf2-objective-detail').textContent=action+' · C : carte';
+    $('sf2-objective-detail').textContent=action+(DESK?' · C : carte':' · Menu → Carte');
   }
   // Keep every message in the journal; only urgent messages interrupt a toast.
   const history=[],pending=TOQ.q;
@@ -16031,7 +16087,55 @@ const STARFARER_JOURNEY=(()=>{
     pending.push(s);pending.sort((a,b)=>priority(b)-priority(a));if(pending.length>5)pending.length=5;if(!TOQ.busy)next();
   };
   let elapsed=0;TICK.push(dt=>{elapsed+=dt;if(elapsed<.25)return;elapsed=0;panel.hidden=!MAP.open||mode==='surf';});
-  return Object.freeze({version:'2.3',compare,goal,priority,history,updateObjective,updateMap});
+  return Object.freeze({version:'2.4',compare,goal,priority,history,updateObjective,updateMap});
+})();
+
+/* Mobile cockpit: two-thumb controls and an expandable shortcut menu. */
+const STARFARER_MOBILE=(()=>{
+  'use strict';
+  if(DESK)return Object.freeze({enabled:false,version:'2.4'});
+  const body=document.body;body.classList.add('sf-mobile');
+  const note=document.querySelector('.sf2-key-note');if(note)note.textContent='Joystick à gauche · Actions à droite · Menu : carte, activités et options';
+  const joystick=document.createElement('div');joystick.id='m24-stick';joystick.setAttribute('aria-label','Joystick de déplacement');
+  joystick.innerHTML='<span>DIRECTION</span><i></i><b></b>';
+  const speed=document.createElement('label');speed.id='m24-speed';speed.innerHTML='<span>GAZ <b id="m24-percent">0 %</b><small id="m24-velocity">0 m/s</small></span><input id="m24-throttle" type="range" min="0" max="100" step="1" value="0" aria-label="Gaz du vaisseau">';
+  const menu=document.createElement('button');menu.id='m24-menu';menu.innerHTML=ICO('gear')+'<span>Menu</span>';menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-controls','sf3-toolbar');
+  const back=document.createElement('button');back.id='m24-back';back.hidden=true;back.setAttribute('aria-label','Fermer les raccourcis');
+  body.append(joystick,speed,back,menu);
+  let opened=false,allowed=false,dragSpeed=false;
+  function release(){stick=null;dragSpeed=false;THR6E.drag=null;for(const k of ['fire','boost','brake']){B[k]=0;$(k).classList.remove('on');}MS.fire=MS.boost=0;joystick.classList.remove('active');joystick.querySelector('b').style.transform='translate(-50%,-50%)';}
+  function toggle(on){
+    on=on==null?!opened:!!on;if(on===opened)return;
+    release();opened=on;window.SFMobilePause=on;body.classList.toggle('m24-menu-open',on);back.hidden=!on;menu.setAttribute('aria-expanded',String(on));menu.querySelector('span').textContent=on?'Fermer':'Menu';
+    if(on)$('mapb').focus();else menu.focus();sync();
+  }
+  menu.onclick=()=>toggle();back.onclick=()=>toggle(false);
+  $('sf3-toolbar').addEventListener('click',e=>{if(e.target.closest('button'))toggle(false);},true);
+  addEventListener('keydown',e=>{if(e.code==='Escape'&&opened){e.preventDefault();toggle(false);}});
+  function playable(){return !MENU3.on&&!PH.on&&!MAP.open&&!S.dead&&!isPaused()&&!body.classList.contains('sf3-panel-open')&&!SI.on&&!GZ.on&&!S.entry&&!S.ascent&&!(WK3.on&&WK3.menu)&&(!S.docked||WK3.on||FOOT.on);}
+  function move(e){if(!allowed||!stick||stick.id!==e.pointerId||!stick.mobile24)return;const r=joystick.getBoundingClientRect(),R=r.width*.32,dx=e.clientX-stick.ox,dy=e.clientY-stick.oy,l=Math.hypot(dx,dy),k=l>R?R/l:1;
+    stick.x=dx*k/R;stick.y=dy*k/R;stick.R=R;joystick.querySelector('b').style.transform=`translate(calc(-50% + ${dx*k}px),calc(-50% + ${dy*k}px))`;
+  }
+  joystick.addEventListener('pointerdown',e=>{if(!allowed||stick)return;e.preventDefault();const r=joystick.getBoundingClientRect();stick={id:e.pointerId,ox:r.x+r.width/2,oy:r.y+r.height/2,x:0,y:0,mobile24:true};try{joystick.setPointerCapture(e.pointerId);}catch(_){}joystick.classList.add('active');move(e);});
+  joystick.addEventListener('pointermove',move);
+  for(const name of ['pointerup','pointercancel','lostpointercapture'])joystick.addEventListener(name,e=>{if(stick?.mobile24&&stick.id===e.pointerId){stick=null;joystick.classList.remove('active');joystick.querySelector('b').style.transform='translate(-50%,-50%)';}});
+  OV.addEventListener('pointerdown',e=>{if(!allowed){e.stopImmediatePropagation();e.preventDefault();}},true);
+  const slider=$('m24-throttle');slider.addEventListener('input',()=>{if(allowed&&THR6.man){thr6Set(+slider.value/100);$('m24-percent').textContent=slider.value+' %';}});
+  slider.addEventListener('pointerdown',()=>dragSpeed=true);for(const ev of ['pointerup','pointercancel','lostpointercapture'])slider.addEventListener(ev,()=>dragSpeed=false);
+  addEventListener('blur',release);addEventListener('resize',()=>{release();dragSpeed=false;});
+  document.addEventListener('visibilitychange',()=>{release();if(document.hidden)toggle(false);});
+  function sync(){
+    const next=playable();if(allowed&&!next)release();allowed=next;
+    body.classList.toggle('m24-controls-off',!allowed);joystick.hidden=!allowed;speed.hidden=!allowed||!THR6.man||FOOT.on||WK3.on||!['space','surf'].includes(mode);
+    body.classList.toggle('m24-alert',!$('sf2-alert').hidden);
+    const modal=body.classList.contains('sf3-panel-open')||window.SF2PAUSE;
+    menu.hidden=MENU3.on||PH.on||MAP.open||S.dead||(!opened&&(modal||DLG.open));
+    if(opened&&(MENU3.on||PH.on||MAP.open||S.dead||modal))toggle(false);
+    if(!dragSpeed)slider.value=Math.round(THR6.v*100);$('m24-percent').textContent=Math.round(THR6.v*100)+' %';$('m24-velocity').textContent=Math.round(S.spd)+' m/s';
+    for(const id of ['dodge','flare'])$(id).setAttribute('aria-label',id==='dodge'?'Esquive'+(CBT.rollCd>0?' en recharge':''):'Leurres'+(CBT.flCd>0?' en recharge':''));
+  }
+  let elapsed=0;TICK.push(dt=>{elapsed+=dt;if(elapsed>=.08){elapsed=0;sync();}});sync();
+  return Object.freeze({enabled:true,version:'2.4',toggle,sync,release});
 })();
 
 

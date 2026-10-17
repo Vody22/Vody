@@ -8,13 +8,13 @@
 import os, sys, time
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 S = D + 'src/'
-MODS = ['core','audio','gfx','models','world','game','surface','fx','ultra','detail','content','lasers','parts','cockpit','speed','sounds','visuals','chars','ground','story','explore','prog','planet2','daynight','gfxplus','weather2','base','netroom','mp','mpplus','hud','ui','options','svc','codex','law','wing','tools','anomaly','war','fmiss','race','derelict','board','combat','foes','talents','econ2','stations2','space2','jump','fx2','caves','gfx3','worlds3','space3','galmap','surf3','ship3','render3','hud3','model3','ground3','hangar3','anim3','ai3','custom3','dmg3','nat3','mega3','event3','walk3','perf3','snd3','diff3','mmo','mmo3','w1','w2','w4','w5','w6','w7','w7m','ui4','w8','w9','chars4','chars5','glchar','ship4','mdl4','sky4','pl4','wg4','city4','vox','voxp','vxast','saga','traf','fin5','photo','menu','polish-v2','ui-modern','journey-v23']
+MODS = ['core','audio','gfx','models','world','game','surface','fx','ultra','detail','content','lasers','parts','cockpit','speed','sounds','visuals','chars','ground','story','explore','prog','planet2','daynight','gfxplus','weather2','base','netroom','mp','mpplus','hud','ui','options','svc','codex','law','wing','tools','anomaly','war','fmiss','race','derelict','board','combat','foes','talents','econ2','stations2','space2','jump','fx2','caves','gfx3','worlds3','space3','galmap','surf3','ship3','render3','hud3','model3','ground3','hangar3','anim3','ai3','custom3','dmg3','nat3','mega3','event3','walk3','perf3','snd3','diff3','mmo','mmo3','w1','w2','w4','w5','w6','w7','w7m','ui4','w8','w9','chars4','chars5','glchar','ship4','mdl4','sky4','pl4','wg4','city4','vox','voxp','vxast','saga','traf','fin5','photo','menu','polish-v2','ui-modern','journey-v23','mobile-v24']
 EXS = ['CopyShader','LuminosityHighPassShader','EffectComposer','RenderPass','ShaderPass','UnrealBloomPass','SSAOShader','BokehShader','BokehPass','GLTFLoader','SkeletonUtils']
 import base64
 FONTS = ''.join("@font-face{font-family:'Chakra Petch';font-style:normal;font-weight:%d;font-display:swap;src:url(data:font/woff;base64,%s) format('woff')}" % (w, base64.b64encode(open(S+'fonts/cp-'+n+'.woff','rb').read()).decode()) for n,w in [('Medium',500),('SemiBold',600),('Bold',700)])
 sh = open(S+'shell.html').read().replace('%%FONTS%%', FONTS)
 # Keep the modern interface in every web and portal build.
-sh = sh.replace('</head>', '<style>' + '\n'.join(open(S+n+'.css').read() for n in ['polish-v2','ui-modern','journey-v23']) + '</style></head>')
+sh = sh.replace('</head>', '<style>' + '\n'.join(open(S+n+'.css').read() for n in ['polish-v2','ui-modern','journey-v23','mobile-v24']) + '</style></head>')
 game = ''.join(open(S+m+'.js').read()+'\n' for m in MODS)
 EX = '<script>' + ''.join(open(S+'three-examples/'+e+'.js').read()+'\n' for e in EXS) + '</script>'
 chk = '<script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script>'

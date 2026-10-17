@@ -64,7 +64,7 @@ setInterval(()=>{if(mode=='space'&&!S.dead)save()},5000);addEventListener('visib
 
 // ===== COMMANDES =====
 const TOUCH=(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)||/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-const DESK=!TOUCH||/[?&]pc\b/.test(location.search);if(DESK)document.body.classList.add('desk');
+const DESK=(!TOUCH&&!/[?&]mobile\b/.test(location.search))||/[?&]pc\b/.test(location.search);if(DESK)document.body.classList.add('desk');
 const K={},B={fire:0,boost:0,brake:0},MS={x:0,y:0,in:false,fire:0,boost:0};let stick=null,inv=false;
 try{inv=localStorage.getItem('sf-inv')=='1'}catch(e){}
 onkeydown=e=>{if(e.target&&(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable))return;if(!K[e.code])keyAct(e.code);K[e.code]=1;if(e.code=='Space'||e.code.startsWith('Arrow')||e.code=='Tab')e.preventDefault()};
@@ -77,7 +77,13 @@ addEventListener('pointerup',e=>{if(e.pointerType=='mouse'){if(e.button==0)MS.fi
 OV.addEventListener('pointerdown',e=>{if(e.pointerType=='mouse'){mouseAim(e);if(e.button==0)MS.fire=1;if(e.button==2)MS.boost=1;return}if(!stick&&e.clientX<innerWidth*.62){stick={id:e.pointerId,ox:e.clientX,oy:e.clientY,x:0,y:0};try{OV.setPointerCapture(e.pointerId)}catch(_){}}});
 OV.addEventListener('pointermove',e=>{if(stick&&stick.id==e.pointerId){const dx=e.clientX-stick.ox,dy=e.clientY-stick.oy,l=Math.hypot(dx,dy),R=Math.min(70,innerWidth*.16),m=Math.min(l,R);stick.x=l?dx/l*m/R:0;stick.y=l?dy/l*m/R:0;stick.R=R}});
 const endStick=e=>{if(stick&&stick.id==e.pointerId)stick=null};OV.addEventListener('pointerup',endStick);OV.addEventListener('pointercancel',endStick);
-for(const k of['fire','boost','brake']){const b=$(k);b.addEventListener('pointerdown',e=>{e.preventDefault();B[k]=1;b.classList.add('on')});for(const ev of['pointerup','pointerleave','pointercancel'])b.addEventListener(ev,()=>{B[k]=0;b.classList.remove('on')})}
+for(const k of['fire','boost','brake']){const b=$(k);let pointer=null;
+const release=e=>{if(e&&pointer!==e.pointerId)return;pointer=null;B[k]=0;b.classList.remove('on')};
+b.addEventListener('pointerdown',e=>{if(isPaused())return;e.preventDefault();if(!B[k])pointer=null;if(pointer!=null)return;pointer=e.pointerId;B[k]=1;b.classList.add('on');try{b.setPointerCapture(e.pointerId)}catch(_){}});
+for(const ev of['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,release);
+addEventListener('pointerup',release);addEventListener('pointercancel',release);addEventListener('blur',()=>release());
+b.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&!b.hasPointerCapture(e.pointerId))release(e)});
+}
 $('inv').onclick=()=>{inv=!inv;$('inv').classList.toggle('on',inv);try{localStorage.setItem('sf-inv',inv?'1':'0')}catch(e){}toast(inv?'Commandes inversées (style avion)':'Commandes normales')};$('inv').classList.toggle('on',inv);
 document.addEventListener('gesturestart',e=>e.preventDefault());document.addEventListener('dblclick',e=>e.preventDefault());
 // lecture du joystick → [lacet, tangage]

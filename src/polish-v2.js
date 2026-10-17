@@ -3,7 +3,7 @@
  */
 const STARFARER_POLISH = (() => {
   'use strict';
-  const VERSION = '2.3';
+  const VERSION = '2.4';
   const defaults = {
     compact: true,
     calm: matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -249,12 +249,12 @@ const STARFARER_POLISH = (() => {
         text('sf2-objective-name',wp.n||wp.name||G.m&&G.m.txt||'Destination');
         text('sf2-objective-detail',(distance>=1000?(distance/1000).toFixed(1)+' km':Math.round(distance)+' m')+' · C : carte');
       }else if(G.m){text('sf2-objective-label','CONTRAT EN COURS');text('sf2-objective-name',G.m.txt||'Mission active');text('sf2-objective-detail',G.m.type==='chasse'?Math.max(0,(G.kills||0)-(G.m.k0||0))+' / '+G.m.n+' pirates':'Suis le marqueur de mission');}
-      else{text('sf2-objective-label','À TOI DE CHOISIR');text('sf2-objective-name','Explorer · commercer · combattre');text('sf2-objective-detail','F1 : activités à proximité · C : carte');}
+      else{text('sf2-objective-label','À TOI DE CHOISIR');text('sf2-objective-name','Explorer · commercer · combattre');text('sf2-objective-detail',DESK?'F1 : activités à proximité · C : carte':'Menu → Activités ou Carte');}
     }
     if(typeof STARFARER_JOURNEY!=='undefined')STARFARER_JOURNEY.updateObjective();
     let alert='';
     if(active){
-      if(EB.some(b=>b.home&&b.l>0&&b.m.position.distanceToSquared(S.pos)<490000))alert='MISSILE EN APPROCHE · X : leurres · R : esquive';
+      if(EB.some(b=>b.home&&b.l>0&&b.m.position.distanceToSquared(S.pos)<490000))alert=DESK?'MISSILE EN APPROCHE · X : leurres · R : esquive':'MISSILE EN APPROCHE · Touche Leurres ou Tonneau';
       else if(S.hp/maxhp()<.25)alert='COQUE CRITIQUE · Rejoins une station pour réparer';
       else if(cargoUsed()>=cap())alert='SOUTE PLEINE · Vends tes ressources en station';
     }
