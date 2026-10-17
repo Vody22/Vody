@@ -15,7 +15,7 @@ TICK.push(()=>{const t=performance.now(),dt=Math.min(.1,(t-THR6E.t0)/1000);THR6E
 // amarrage : manette à zéro ; départ d'une station : 40 % ; décollage d'une planète : au moins 50 %
 if(S.docked){THR6.v=0;THR6E.wasDock=true}else if(THR6E.wasDock){THR6E.wasDock=false;THR6.v=.4}
 if(THR6E.mode!=mode){if(THR6E.mode=='surf'&&mode=='space')THR6.v=Math.max(THR6.v,.5);THR6E.mode=mode}
-if(THR6.man&&!FOOT.on&&!S.docked&&(mode=='space'||mode=='surf')&&!(typeof SI!='undefined'&&SI.on)){
+if(THR6.man&&!isPaused()&&!FOOT.on&&!S.docked&&(mode=='space'||mode=='surf')&&!(typeof SI!='undefined'&&SI.on)){
  const typing=document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName);
  if(!typing&&DESK){if(K.KeyW)thr6Set(THR6.v+.7*dt);if(K.KeyS)thr6Set(THR6.v-.7*dt)}
  if(isBrake())thr6Set(THR6.v-1.6*dt);

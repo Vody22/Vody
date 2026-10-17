@@ -67,7 +67,7 @@ const TOUCH=(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)
 const DESK=!TOUCH||/[?&]pc\b/.test(location.search);if(DESK)document.body.classList.add('desk');
 const K={},B={fire:0,boost:0,brake:0},MS={x:0,y:0,in:false,fire:0,boost:0};let stick=null,inv=false;
 try{inv=localStorage.getItem('sf-inv')=='1'}catch(e){}
-onkeydown=e=>{if(e.target&&e.target.tagName=='INPUT')return;if(!K[e.code])keyAct(e.code);K[e.code]=1;if(e.code=='Space'||e.code.startsWith('Arrow')||e.code=='Tab')e.preventDefault()};
+onkeydown=e=>{if(e.target&&(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable))return;if(!K[e.code])keyAct(e.code);K[e.code]=1;if(e.code=='Space'||e.code.startsWith('Arrow')||e.code=='Tab')e.preventDefault()};
 function keyAct(c){if(c=='KeyE'){const l=$('land');if(l&&l.style.display!='none')l.click()}else if(c=='Digit1'||c=='Digit2'||c=='Digit3'){if(S.docked)$('u'+c.slice(-1)).click()}else if(c=='KeyF'){if(S.docked)$('mis').click()}else if(c=='KeyG'&&typeof cycleQuality=='function')cycleQuality();else if(c=='KeyH')document.body.classList.toggle('nohelp');else if(c=='KeyI')$('inv').click();else if(c=='KeyM')$('snd').click()}onkeyup=e=>K[e.code]=0;
 const OV=$('ov');
 OV.addEventListener('contextmenu',e=>e.preventDefault());

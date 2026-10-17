@@ -15,8 +15,8 @@ const TUT9S=[
 {k:'go',t:'Repartir',d:()=>'Remonte dans ton vaisseau (« Retour au vaisseau »), puis appuie sur « Partir ». Bon vol !',hl:'#w3ship',ok:()=>!S.docked&&mode=='space'}];
 function t9Station(){let b=null,bd=1e12;for(const s of(typeof w7Sts=='function'?w7Sts():stations)){const d=Math.hypot(s.x-S.pos.x,s.y-S.pos.y,s.z-S.pos.z);if(d<bd){bd=d;b=s}}return b}
 function t9Wp(x,y,z,n){G.x.wp9={x,y,z,n};}
-function tutStart(){G.x.tut9={i:0};TUT9.on=true;TUT9.acc=0;TUT9.d0=0;hint=0;t9Step();toast('🎓 Tutoriel : suis les étapes en haut de l\'écran');}
-function tutStop(done){TUT9.on=false;t9HL(null);$('tut9').style.display='none';const T=GX('tut9',{});T.done=1;if(done){G.cr+=500;gainXP(80);banner('trophy','Tutoriel terminé !','+500 ¢ · Appuie sur « Quoi faire ? » ('+(DESK?'F1':'bouton ?')+') quand tu cherches une idée.','#7fffb0');try{SFX.win()}catch(e){}}save()}
+function tutStart(){const rewarded=!!(G.x.tut9&&G.x.tut9.rewarded)||!!GX('polish',{}).tutorialReward;G.x.tut9={i:0,rewarded};TUT9.on=true;TUT9.acc=0;TUT9.d0=0;hint=0;t9Step();toast('🎓 Tutoriel : suis les étapes en haut de l\'écran');}
+function tutStop(done){TUT9.on=false;t9HL(null);$('tut9').style.display='none';const T=GX('tut9',{});T.done=1;T.skipped=!done;if(done&&!T.rewarded&&!GX('polish',{}).tutorialReward){T.rewarded=1;GX('polish',{}).tutorialReward=1;G.cr+=500;gainXP(80);banner('trophy','Tutoriel terminé !','+500 ¢ · Appuie sur « Quoi faire ? » ('+(DESK?'F1':'bouton ?')+') quand tu cherches une idée.','#7fffb0');try{SFX.win()}catch(e){}}save()}
 function t9HL(sel){if(TUT9.hl===sel)return;if(TUT9.hl)document.querySelectorAll(TUT9.hl).forEach(e=>e.classList.remove('tut9hl'));TUT9.hl=sel;if(sel)document.querySelectorAll(sel).forEach(e=>e.classList.add('tut9hl'))}
 function t9Step(){const T=G.x.tut9,s=TUT9S[T.i];if(!s){tutStop(true);return}TUT9.acc=0;if(s.go)s.go();const el=$('tut9');el.style.display='block';el.innerHTML=`<div class="t9h"><span>${ICO('star')} Tutoriel · ${T.i+1}/${TUT9S.length}</span><button id="t9x">Passer</button></div><b>${s.t}</b><p>${s.d()}</p><div class="t9bar"><i style="width:${(T.i/TUT9S.length*100).toFixed(0)}%"></i></div>`;$('t9x').onclick=()=>{tutStop(false);toast('Tutoriel passé — tu peux le relancer depuis « Quoi faire ? »')};t9HL(s.hl||null)}
 document.body.insertAdjacentHTML('beforeend','<div id="tut9"></div><div id="qf9"></div>');
@@ -24,9 +24,9 @@ let t9T0=performance.now();TICK.push(()=>{const t9n=performance.now(),dt=Math.mi
  // cap (marqueur violet)
  const W=G.x.wp9;if(W&&mode=='space'&&(Math.hypot(W.x-S.pos.x,W.y-S.pos.y,W.z-S.pos.z)<450||S.docked&&S.docked.n===W.n))G.x.wp9=null;
  // démarrage automatique pour les nouveaux pilotes
- if(!TUT9.on&&!G.x.tut9&&(G.xp||0)<150&&mode=='space'&&!(typeof MENU3!='undefined'&&MENU3.on)){TUT9.d0+=dt;if(TUT9.d0>3&&!DLG.open)tutStart()}
+ if(!TUT9.on&&!G.x.tut9&&(G.xp||0)<150&&mode=='space'&&!isPaused()&&!(typeof MENU3!='undefined'&&MENU3.on)){TUT9.d0+=dt;if(TUT9.d0>3&&!DLG.open)tutStart()}
  document.body.classList.toggle('t9dock',TUT9.on&&!!S.docked);if(!TUT9.on)return;const T=G.x.tut9,s=TUT9S[T.i];if(!s){tutStop(true);return}hint=0;
- if(DLG.open||MAP.open&&s.k!='map'){$('tut9').style.opacity=.35}else $('tut9').style.opacity=1;
+ if(isPaused()&&(s.k!='map'||!MAP.open)){$('tut9').style.opacity=.35;return}else $('tut9').style.opacity=1;
  let ok=false;try{ok=s.ok(dt)}catch(e){}if(ok){T.i++;try{tone(880,1320,.12,'sine',.05)}catch(e){}t9Step()}
  // sauter les étapes impossibles (ex. pilote déjà à quai au lancement)
  if(s.k!='dock'&&s.k!='shop'&&s.k!='walk'&&s.k!='talk'&&s.k!='go'&&S.docked&&!S.docked.ground){T.i=TUT9S.findIndex(x=>x.k=='shop');t9Step()}});

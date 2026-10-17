@@ -268,13 +268,191 @@ body.desk #w3go{top:110px}
 #w3ship{right:calc(env(safe-area-inset-right,0px) + 16px);bottom:calc(env(safe-area-inset-bottom,0px) + 70px);font-size:12px!important;opacity:.9}
 #w3back{left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 12px)}
 body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.walk3.w3menu #shop{display:flex!important}
+</style><style>/* Stronger hierarchy, restrained glass and readable small-screen controls. */
+:root { --sf2-panel:rgba(5,14,26,.94); --sf2-border:rgba(128,218,244,.28); }
+button { min-height:36px; }
+button:focus-visible,input:focus-visible,a:focus-visible { outline:2px solid #ffe0a0; outline-offset:3px; }
+[hidden] { display:none!important; }
+body.sf2-compact.desk #pl { width:220px; }
+body.sf2-compact.desk .pan { padding:10px 13px; }
+body.sf2-compact.desk #cr { font-size:23px; }
+body.sf2-compact.desk #sub { font-size:11px; }
+body.sf2-compact.desk #info { font-size:11px; line-height:1.55; }
+body.sf2-compact.desk #wpn { font-size:12px; }
+body.sf2-compact.desk #help { max-width:650px; font-size:11px; line-height:1.7; opacity:.86; }
+#toast { background:rgba(5,14,26,.94); max-width:min(580px,84vw); line-height:1.5; }
+#free4 { border-radius:5px; clip-path:none; box-shadow:0 4px 24px #0008,inset 0 0 0 1px #ffc34d77; }
+#tut9 { border-radius:8px; clip-path:none; background:var(--sf2-panel); box-shadow:0 8px 35px #0007,inset 0 0 0 1px #ffc34d66; }
+#tut9 p { line-height:1.6; }
+#tut9 .t9h button { min-height:32px; padding:5px 10px; }
+#opts input[type=range] { accent-color:#82e9ff; }
+.sf2-range { display:block; margin:15px 0; font-size:13px; }
+.sf2-range>span { display:flex; justify-content:space-between; gap:12px; }
+.sf2-range output { color:#9aeaff; font-variant-numeric:tabular-nums; }
+.sf2-range input { width:100%; margin:10px 0 0; height:24px; }
+.sf2-options .orow { gap:16px; min-height:44px; }
+.sf2-options button { min-width:100px; }
+.sf2-option-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.sf2-option-actions button:first-child { color:#b3fff0; box-shadow:inset 0 0 0 1px #7fe6ce80; }
+.sf2-key-note { display:block; margin-top:14px; line-height:1.6; color:#a8c0d4; }
+#sf2-menu-progress { background:rgba(8,24,38,.8); border:1px solid #8aeaff4d; color:#c9efff; width:100%; letter-spacing:.06em; }
+#sf2-panel { position:fixed; inset:0; z-index:110; background:#02060dbd; display:grid; place-items:center; padding:20px; box-sizing:border-box; font-family:var(--hf),system-ui; color:#e0f2ff; }
+.sf2-window { width:min(650px,100%); max-height:88dvh; overflow-y:auto; background:#091321; border:1px solid #89d8ef4d; border-radius:15px; padding:25px; box-sizing:border-box; box-shadow:0 25px 100px #0009; }
+.sf2-window header { display:flex; justify-content:space-between; align-items:center; gap:18px; }
+.sf2-window header small { font-size:10px; letter-spacing:.22em; color:#8de7eb; }
+.sf2-window h2 { margin:6px 0; font-size:29px; letter-spacing:.01em; }
+.sf2-intro { color:#b4cadc; font-size:13px; line-height:1.65; margin:16px 0 20px; }
+.sf2-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
+.sf2-stats>div { background:#13263a; border-radius:8px; text-align:center; padding:12px 4px; }
+.sf2-stats b { display:block; font-size:24px; color:#c2f6ff; font-variant-numeric:tabular-nums; }
+.sf2-stats span { display:block; font-size:10px; color:#a7c0d4; margin-top:5px; }
+.sf2-milestone { border:1px solid #8aeaff25; background:#0c1c2c; padding:15px; border-radius:8px; margin:10px 0; }
+.sf2-milestone>div { display:flex; align-items:center; justify-content:space-between; gap:15px; }
+.sf2-milestone b { font-size:14px; }
+.sf2-milestone>div>span { color:#91aabf; font-size:11px; white-space:nowrap; }
+.sf2-milestone p { color:#b8cddd; font-size:12px; line-height:1.5; margin:9px 0; }
+.sf2-milestone progress { width:100%; height:6px; accent-color:#89d9ff; border:0; display:block; margin-bottom:9px; }
+.sf2-milestone small { color:#ffd28a; font-size:11px; }
+.sf2-milestone.done { border-color:#76e8c455; }
+.sf2-milestone.done>div>span,.sf2-milestone.done small { color:#8ce8c8; }
+.sf2-window footer { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+.sf2-window footer button { flex:1; padding:12px; }
+#sf2-hud { pointer-events:none; font-family:var(--hf),system-ui; color:#e3f4ff; }
+#sf2-objective { position:fixed; left:18px; bottom:100px; width:250px; max-width:38vw; background:linear-gradient(110deg,#071523e8,#071523a8); border-left:2px solid #8aeaff; padding:11px 14px; border-radius:0 6px 6px 0; z-index:5; }
+#sf2-objective small { display:block; color:#82cbd9; font-size:9px; letter-spacing:.17em; }
+#sf2-objective b { display:block; font-size:12px; line-height:1.45; margin:5px 0; overflow-wrap:anywhere; }
+#sf2-objective span { font-size:10px; color:#b4cadb; line-height:1.6; }
+#sf2-target { position:fixed; top:22px; left:50%; transform:translateX(-50%); width:210px; text-align:center; background:#091625d9; border:1px solid #91e5ff30; padding:9px 14px; border-radius:7px; z-index:6; }
+#sf2-target>span { display:block; font-size:8px; letter-spacing:.16em; color:#f3bf8c; }
+#sf2-target b { display:block; font-size:13px; margin:4px 0 7px; }
+#sf2-target progress { display:block; width:100%; height:4px; accent-color:#ffa471; border:0; }
+#sf2-target progress::-webkit-progress-bar { background:#254055; }
+#sf2-target progress::-webkit-progress-value { background:#ffa471; }
+#sf2-target small { display:block; color:#bdd5e7; font-size:10px; margin-top:5px; }
+#sf2-alert { position:fixed; bottom:70px; left:50%; transform:translateX(-50%); background:#2d1420ef; border:1px solid #ef9b7c66; border-radius:5px; color:#ffcfad; padding:8px 14px; font-size:11px; text-align:center; max-width:80vw; z-index:25; }
+#sf2-fps { position:fixed; left:18px; bottom:12px; font:10px var(--hf),system-ui; color:#b7d3e5; padding:5px 9px; background:#07121bd9; border-radius:4px; z-index:24; }
+body.sf2-calm *,body.sf2-calm *::before,body.sf2-calm *::after { animation-duration:.001ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; }
+body.sf2-calm .bar.low i { opacity:1; }
+body.sf2-contrast { --dim:#c0d6e7; --ice:#f2fbff; --edge2:#a0cddd; }
+body.sf2-contrast .pan,body.sf2-contrast #toast,body.sf2-contrast #tut9 { background:#071321!important; }
+body.sf2-contrast #sf2-objective { background:#071321; }
+body.ph #sf2-hud,body.m3 #sf2-hud,body.walk3 #sf2-objective { display:none!important; }
+body.m3>#sf2-panel { visibility:visible!important; }
+@media(pointer:coarse) { .sf2-options button,.sf2-window button { min-height:44px; } }
+@media(max-width:700px) { #sf2-objective { left:12px; bottom:180px; width:190px; max-width:43vw; padding:9px 11px; } #sf2-target { top:122px; width:170px; padding:7px 10px; } #sf2-alert { bottom:150px; width:max-content; max-width:84vw; font-size:10px; } .sf2-window { padding:18px; } #sf2-panel { padding:12px; } .sf2-window h2 { font-size:24px; } }
+@media(max-width:700px) { body.sf2-compact.desk #pl { width:156px; padding:8px 10px; } body.sf2-compact.desk #info { font-size:10px; } body.sf2-compact.desk .num { font-size:11px; min-width:32px; } body.sf2-compact.desk #cr { font-size:20px; } body.sf2-compact.desk #sub { font-size:10px; } #sf2-target { top:215px; } }
+@media(orientation:landscape) and (max-height:520px) { #sf2-objective { bottom:60px; width:200px; max-width:30vw; padding:7px 10px; } #sf2-target { top:10px; width:145px; padding:5px 8px; } #sf2-target>span { display:none; } #sf2-alert { bottom:16px; } .sf2-window { max-height:94dvh; } }
+
+/* Starfarer 3D 2.2 — Orbit: quiet surfaces, clean line icons, clear actions. */
+:root{--hf:Inter,"Segoe UI",system-ui,-apple-system,sans-serif;--ink:rgba(9,18,31,.91);--ink2:rgba(20,34,51,.96);--edge:rgba(171,201,222,.16);--edge2:rgba(171,201,222,.25);--ice:#e8f1f8;--dim:#a1b5c8;--amber:#f4cb87;--hull:#73dfbc;--shd:#9abaff;--cargo:#7bcddb;--sf3-accent:#8fe8dc;--sf3-ring:rgba(143,232,220,.45);--cut:0px;color-scheme:dark}
+body{font-family:var(--hf);-webkit-font-smoothing:antialiased}
+button{font-family:var(--hf)!important;font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;border-radius:10px!important;clip-path:none!important;border:1px solid var(--edge2);background:rgba(20,34,51,.95);color:#e5eef7;box-shadow:0 2px 5px #0002;min-height:38px;transition:background .16s,border-color .16s,color .16s,box-shadow .16s,transform .16s;cursor:pointer}
+button:hover{background:#223a4d;border-color:#8fe8dc80;filter:none}
+button:active,button.on{filter:none;transform:translateY(1px);background:#19413e;border-color:#8fe8dc99;color:#c3fff3}
+button:disabled,button.dim{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #9fefe1;outline-offset:4px;box-shadow:0 0 0 5px #8fe8dc1a}
+.i{width:20px;height:20px;stroke-width:1.7;filter:none!important;vertical-align:middle}
+.i path,.i circle,.i rect,.i polyline{vector-effect:non-scaling-stroke}
+.pan,#shop,#dlg,#toast,#mppanel,#mapinfo,#help,#opts,#prof,#bpanel,#trpanel,#cxpanel,#achb,#chc,#mkpanel,#bugpanel,#talpanel{clip-path:none!important;border-radius:15px!important;border:1px solid var(--edge);background:rgba(9,18,31,.94);box-shadow:0 10px 38px #0003,0 1px 0 #ffffff06 inset}
+#hud{padding:18px 20px 0;gap:18px}
+body.desk .pan,body.sf2-compact.desk .pan{padding:15px 17px}
+body.sf2-compact.desk #pl{width:226px}
+#pl .row{margin:7px 0;gap:10px}.lab{width:17px!important;color:#9eb7cc}.lab .i{width:17px;height:17px}
+.bar{height:5px!important;background:#253448;border-radius:10px;overflow:hidden}
+.bar i{background:currentColor;mask:none;-webkit-mask:none;filter:none;border-radius:10px;transition:width .25s}
+.bar.low i{animation:none}
+body.desk .num{font-size:11px!important;min-width:32px;font-weight:600;color:#e2eef7}
+#lvrow{margin-top:12px;gap:10px}body.desk .lvt{font-size:11px;min-width:42px}.xbar,.xbar i{border-radius:8px;box-shadow:none}.xbar{background:#263548;height:3px}
+body.desk #wpn{font-size:11px;margin-top:12px;color:#bfd2e2;gap:8px}#wpn .i{width:16px;height:16px}
+body.desk #info{border-top:1px solid #b0ccde20;margin-top:12px;padding-top:10px;font-size:11px;line-height:1.55;color:#bacbdd}#info .i{width:14px;height:14px}
+#pr{min-width:148px;padding-left:17px}body.desk #cr,body.sf2-compact.desk #cr{font-size:24px;font-weight:600;text-shadow:none;gap:9px}#cr .i{width:19px;height:19px}
+#v4f{margin:9px 0 6px;gap:8px;color:#a9bdce;font-size:10px}#v4f>span,#v4f i{height:3px;border-radius:5px}#v4f em{font-weight:500}
+body.desk #sub,body.sf2-compact.desk #sub{margin-top:8px;font-size:10px;gap:12px}#sub .i{width:12px;height:12px}
+.chip{border:1px solid #84e0b72e;border-radius:6px;clip-path:none;box-shadow:none;background:#122b24;color:#a3ebc7!important;font-size:9px!important;padding:4px 8px;margin-top:10px}.chip::before{width:4px;height:4px;border-radius:50%;transform:none;box-shadow:none}
+kbd{font-family:var(--hf);font-size:9px;font-weight:600;border-radius:4px;clip-path:none;border:1px solid #c0d7e329;box-shadow:none;background:#ffffff08;color:#b8cbd8;padding:2px 5px}
+#sf3-toolbar{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:8px;background:rgba(9,18,31,.94);border:1px solid #b0ccde2e;border-radius:18px;box-shadow:0 8px 32px #0006,0 1px 0 #ffffff08 inset;z-index:45;pointer-events:auto;max-width:calc(100vw - 36px);box-sizing:border-box}
+.sf3-tool-group{display:flex;align-items:center;gap:3px}.sf3-tool-group+.sf3-tool-group{border-left:1px solid #b0ccde21;padding-left:8px}
+#sf3-toolbar .ic,#sf3-toolbar button.ic{position:relative!important;inset:auto!important;display:flex;flex:none;align-items:center;justify-content:center;width:43px;height:43px;min-height:43px;padding:0;border:1px solid transparent;background:transparent;box-shadow:none;border-radius:11px!important;color:#a1b8ca;transform:none;zoom:1}
+#sf3-toolbar .ic .i{width:21px;height:21px;stroke-width:1.7}
+#sf3-toolbar .ic:hover,#sf3-toolbar .ic:focus-visible{color:#d4fff6;background:#183333;border-color:#91e4d62e}
+#sf3-toolbar .ic.sf3-active,#sf3-toolbar .ic.on{color:#a2f3e2;background:#1c3a37;border-color:#91e4d64d;filter:none;transform:none}
+#sf3-toolbar .ic::after{content:attr(data-label);position:absolute;bottom:calc(100% + 16px);left:50%;transform:translate(-50%,4px);padding:8px 11px;background:#132331;border:1px solid #b2cddf2e;border-radius:8px;color:#e5f5fb;font-size:11px;font-weight:500;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 5px 18px #0005;z-index:2}
+#sf3-toolbar .ic::before{content:attr(data-key);position:absolute;right:2px;bottom:1px;font-size:7px;font-weight:600;color:#8aa6b6;opacity:0;transition:opacity .15s}
+#sf3-toolbar .ic:hover::after,#sf3-toolbar .ic:focus-visible::after{opacity:1;transform:translate(-50%,0)}
+#sf3-toolbar .ic:hover::before,#sf3-toolbar .ic:focus-visible::before{opacity:1}
+#sf3-toolbar #mpb i{position:absolute;right:0;top:0;min-width:12px;height:12px;padding:1px 2px;border-radius:10px;background:#3c796c;font:600 8px var(--hf);color:#eafff9}
+body.desk #help{left:20px;bottom:100px;max-width:min(560px,40vw);padding:12px 15px;font-size:10px;line-height:1.75;color:#a0b9ca;pointer-events:none}
+body.desk:not(.nohelp) #sf2-objective{bottom:240px}
+#sf3-scrim{position:fixed;inset:0;z-index:70;background:rgba(2,8,16,.58);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+body.m3>#sf3-scrim{visibility:visible!important}
+#opts,#prof,#bpanel,#trpanel,#cxpanel,#mkpanel,#bugpanel,#talpanel,#mppanel,#qf9{z-index:80;right:26px;top:50%;transform:translateY(-50%);width:min(440px,calc(100vw - 52px));max-height:min(84dvh,850px);padding:22px;gap:18px;font-family:var(--hf);font-size:13px;scrollbar-width:thin;scrollbar-color:#486577 transparent;overscroll-behavior:contain;background:rgba(10,21,34,.98)}
+#qf9{left:auto}#mppanel{width:min(480px,calc(100vw - 52px))}#opts{width:min(470px,calc(100vw - 52px));min-height:420px}
+.phead,.mphead{font-family:var(--hf);font-size:19px;font-weight:600;gap:18px;padding-bottom:16px;border-bottom:1px solid #b0ccde1c;letter-spacing:-.02em}.phead b{font-weight:600;gap:11px}.phead b>.i,.mphead b>.i{width:20px;height:20px;color:#8fe8dc}
+.phead button,.mphead>button{height:32px;width:32px;min-height:32px;padding:6px;border-color:transparent;background:#c0d7e30b;border-radius:8px!important;color:#adc2d1}.phead button .i,.mphead button .i{width:17px;height:17px}
+#sf3-settings-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 4px;padding:0}
+#sf3-settings-tabs button{font-size:11px;font-weight:500;min-height:32px;padding:7px 11px;border:1px solid transparent;border-radius:7px!important;box-shadow:none;background:transparent;color:#91aabd}
+#sf3-settings-tabs button:hover{background:#1b3040;color:#d4e6f3}
+#sf3-settings-tabs button.sf3-selected{background:#21413c;border-color:#8fe8dc2b;color:#bafbea}
+#opts .sf3-inactive{display:none!important}#opts>.psec{border-top:0;padding-top:4px;gap:9px;margin:0}
+.pt{font:600 10px var(--hf);letter-spacing:.14em;text-transform:uppercase;color:#91b4c3;margin-bottom:5px}
+.orow{min-height:43px;gap:18px}.orow>span{font-size:12px;line-height:1.5;color:#bccfdd}.orow button,.sf2-options .orow button{min-width:125px;font-size:11px;font-weight:500;padding:8px 12px;min-height:36px;background:#172b3c;border-color:#bad0e11f;justify-content:center}
+.orow button[aria-pressed="true"]{background:#1a3b34;color:#a5f3d3;border-color:#86dcb94d}.orow button[aria-pressed="false"]{color:#a3b7c7}
+.orow button[aria-pressed]::before{content:'';height:6px;width:6px;border-radius:50%;background:#6a7f8e;margin-right:3px}.orow button[aria-pressed="true"]::before{background:#82dfb8}
+.sf2-range{font-size:12px;margin:10px 0}.sf2-range output{color:#9fe9db;font-size:11px}.sf2-range input{height:23px;margin-top:8px}
+input[type=range]{appearance:none;-webkit-appearance:none;background:transparent;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:6px;background:#30485a}input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;background:#a3e8d9;border:3px solid #152c37;border-radius:50%;height:17px;width:17px;margin-top:-6.5px;box-shadow:0 0 0 1px #8edfcc66}
+input:not([type=range]),select,textarea{border-radius:8px!important;font-family:var(--hf)!important;background:#122536!important;border:1px solid #b0ccde2e!important;color:#dfebf4;box-shadow:none!important;padding:10px!important}
+.sf2-option-actions{gap:8px}.sf2-option-actions button{font-size:11px;padding:9px 12px;flex:1}.sf2-key-note{font-size:10px;line-height:1.7;color:#829cae}
+#sf2-open,#sf2-next{background:#264d45!important;color:#c3f9e8;border-color:#8fe8dc44!important;box-shadow:none!important}
+#shop{padding:17px!important;gap:9px;box-shadow:0 12px 50px #0007;border-radius:16px!important}#shopT{color:#dfedf6;font-size:16px;justify-content:flex-start;margin:0 0 8px}
+#tabs{gap:5px;padding:4px;border-radius:10px;background:#030d176b}#tabs button{opacity:1;color:#8eaabd;border:0;background:transparent;min-height:36px;border-radius:7px!important}#tabs button.on{background:#21413d;color:#b7f2e4;box-shadow:none}
+.aslots{gap:7px}.aslots button{border-radius:9px!important;padding:8px 4px;opacity:1}.aslots button.on{background:#27463e;box-shadow:none;border-color:#8fe8dc6e;color:#c0f6e3}.aslots button small{font-size:9px;margin-top:6px}
+#mis{background:#21483a;color:#baf5d9;border:1px solid #8fe8dc36;box-shadow:none;min-height:44px}
+#land,#footb,#baseb{animation:none!important;filter:none!important;border:1px solid #b4f7e15c!important;border-radius:12px!important;background:#2f6356!important;color:#e3fff5;box-shadow:0 5px 20px #0004!important;min-height:44px;padding:11px 22px;font:600 13px var(--hf)}
+#land::before,#footb::before{display:none!important}#land:active{transform:translateX(-50%) translateY(1px)}
+#v1bar{gap:8px}.v1b{font:500 11px var(--hf);border-radius:9px!important;clip-path:none!important;background:#102337e0;box-shadow:none;padding:8px 12px;border:1px solid #bad0e126}.v1b .i{width:16px;height:16px}
+.b{border-radius:24px!important;text-shadow:none;background:rgba(12,26,42,.92);border:1px solid color-mix(in srgb,var(--c) 65%,transparent);box-shadow:0 4px 18px #0005!important;font-weight:600!important}.b .i{filter:none!important;stroke-width:1.8}#fire{border-radius:27px!important;background:#47222b}#boost{background:#352c1b}#brake{background:#172c45}
+#thr6{border:1px solid #b0ccde2b;box-shadow:none;border-radius:10px!important;background:#0c1c2bdd}#thr6 small{font-family:var(--hf);letter-spacing:.04em;font-size:8px}#thr6 i{border-radius:4px;-webkit-mask:none;mask:none;background:linear-gradient(#96ead8,#2d8070)}#thr6 b{font:600 9px var(--hf)}
+#sf2-objective{border:1px solid #b0ccde21;border-left:2px solid #85cfca;background:#0a1727ed;border-radius:12px;padding:14px 16px;box-shadow:0 6px 24px #0003}#sf2-objective small{font-size:8px;letter-spacing:.14em;color:#89b3c2}#sf2-objective b{font-size:12px;font-weight:500;margin:7px 0;color:#d8e8f4}#sf2-objective span{font-size:10px;color:#8ea8bd}
+#sf2-target{border-radius:12px;box-shadow:0 8px 24px #0003;background:#0b1829ef;border-color:#b0ccde26;padding:12px 16px}#sf2-target b{font-family:var(--hf);font-weight:500;font-size:13px}#sf2-target>span{font-size:8px;color:#d6b78b;letter-spacing:.12em}#sf2-target progress,#sf2-target progress::-webkit-progress-bar,#sf2-target progress::-webkit-progress-value{border-radius:5px}
+#sf2-alert{border-radius:10px;background:#382530f2;border-color:#f4c2a63b;padding:11px 16px;font-size:11px;box-shadow:0 5px 25px #0004}
+#toast,#achb{border-radius:12px!important;background:#101f30f2;border:1px solid #bad0e12b;box-shadow:0 6px 30px #0004;font-family:var(--hf);font-size:13px!important;font-weight:500;padding:13px 19px}#achb b{font-size:13px}#achb small{font-size:11px;line-height:1.5;color:#a8c0d0}#toast .i{color:#9fdfcd}
+#tut9,#qf9{border-radius:15px;box-shadow:0 10px 32px #0004;border:1px solid #e7cc8e36;background:#0e1e30f5;padding:16px 19px;font-family:var(--hf);font-size:12px}#tut9 b{font-weight:600;font-size:15px;color:#f2daab;margin:8px 0}#tut9 p{font-size:12px;color:#b6ccdb;line-height:1.6}.t9h{font-size:10px;color:#8fb6c5;letter-spacing:.05em}.t9bar,.t9bar i{border-radius:5px}.t9bar{height:3px;background:#27384b;margin-top:15px}.t9bar i{background:#e9cf93}
+.qfr{padding:15px 0;gap:14px}.qfr b{font-size:13px;font-weight:600}.qfr small{font-size:11px;line-height:1.6}.qfi{border-radius:10px;background:#1b3440;box-shadow:none;color:#9fe2d3;width:37px;height:37px}.qfb{gap:8px;margin-top:14px}
+#sf2-panel{background:#030c16b3;backdrop-filter:blur(5px)}.sf2-window{border-radius:20px;background:#0c1929;border-color:#b0ccde2e;padding:28px;font-family:var(--hf);box-shadow:0 30px 100px #0008}.sf2-window h2{font-family:var(--hf);font-size:27px;font-weight:600;letter-spacing:-.04em}.sf2-window header small{font-size:9px;letter-spacing:.14em;color:#89b9c6}.sf2-intro{font-size:12px;color:#99b2c6;line-height:1.75}.sf2-stats>div{background:#14283a;border-radius:11px;padding:17px 5px}.sf2-stats b{font-size:25px;font-weight:500;color:#b5ebdf}.sf2-stats span{font-size:10px;color:#9cb6ca}.sf2-milestone{background:#112438;border-radius:12px;border-color:#bad0e11f;padding:18px}.sf2-milestone b{font-weight:500;font-size:13px}.sf2-milestone p{font-size:11px;color:#a3bed0}.sf2-milestone.done{border-color:#8ae2b34a;background:#112a29}.sf2-milestone progress{height:4px}.sf2-milestone progress::-webkit-progress-bar{background:#294252;border-radius:5px}.sf2-milestone progress::-webkit-progress-value{background:#80d9bb;border-radius:5px}
+#menu3{align-items:flex-start;justify-content:center;padding:clamp(24px,5vw,90px);gap:30px;background:linear-gradient(90deg,rgba(3,12,24,.91),rgba(3,12,24,.65) 32%,transparent 74%)}
+.m3top{text-align:left;animation:none}.sf3-eyebrow{display:flex;align-items:center;gap:10px;font:500 9px var(--hf);letter-spacing:.18em;color:#96c4c9;margin-bottom:22px}.sf3-eyebrow .i{width:18px;height:18px}
+.m3logo{justify-content:flex-start;font:700 clamp(34px,4.5vw,68px)/1.1 'Chakra Petch',system-ui;letter-spacing:.025em;filter:none;gap:14px}.m3logo b{animation:none;background:linear-gradient(180deg,#f2faff,#b5d6e7);background-clip:text;-webkit-background-clip:text}.m3logo span{font:600 12px var(--hf);letter-spacing:.06em;color:#b6e8d9;background:#244b42;border:1px solid #b4f3d130;border-radius:7px;padding:7px 9px;align-self:center}
+.m3tag{font:400 12px var(--hf);text-transform:none;letter-spacing:.08em;color:#98b1c6;text-shadow:none;margin-top:15px}
+.m3bot{width:min(340px,86vw);gap:11px;align-items:stretch;animation:none}.m3card{font:400 11px var(--hf);line-height:1.5;text-align:left;background:transparent;box-shadow:none;border:0;padding:0 0 7px;color:#91aabd}
+#m3play{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:56px;border-radius:13px!important;border:1px solid #b8f4dc70;background:linear-gradient(115deg,#9be4cc,#74c9bc);color:#102d2a;box-shadow:0 6px 28px #4aa59422;animation:none;filter:none;padding:16px 20px;font:600 14px var(--hf);letter-spacing:.01em;text-transform:none}
+#m3play:hover{background:#b2f2de;box-shadow:0 8px 35px #4aa59444;transform:translateY(-1px)}#m3play .i{width:20px;height:20px}.m3row{gap:10px}.m3row button,#sf2-menu-progress{display:flex;align-items:center;justify-content:center;gap:9px;min-height:44px;border-radius:11px!important;border:1px solid #c0dbe626;background:#132436d9;color:#c2d4e2;font:500 11px var(--hf);box-shadow:none}.m3row button .i,#sf2-menu-progress .i{width:16px;height:16px;color:#8fb9c5}#sf2-menu-progress{width:100%;letter-spacing:0}.m3ver{font:400 8px var(--hf);letter-spacing:.1em;color:#668a9f;order:5;margin-top:10px}
+body.sf2-contrast #sf3-toolbar,body.sf2-contrast #sf2-objective,body.sf2-contrast .sf2-window{background:#071321}
+@media(max-width:700px){
+ #hud{padding:12px 12px 0;gap:10px}body.sf2-compact.desk #pl,body.desk #pl{width:160px;padding:11px!important}body.desk #pr{min-width:118px;padding:11px!important}body.desk #cr,body.sf2-compact.desk #cr{font-size:19px}#sub{gap:7px!important}#v4f{margin:7px 0 4px}.chip{font-size:8px!important}#info{font-size:10px!important}
+ body.desk #help{display:none!important}body.desk:not(.nohelp) #sf2-objective{bottom:170px}
+ #sf3-toolbar{left:auto;right:9px;top:48%;bottom:auto;transform:translateY(-50%);flex-direction:column;padding:5px;gap:5px;max-width:54px;border-radius:15px}.sf3-tool-group{flex-direction:column;gap:2px}.sf3-tool-group+.sf3-tool-group{border-left:0;border-top:1px solid #b0ccde21;padding-left:0;padding-top:5px}
+ #sf3-toolbar .ic,#sf3-toolbar button.ic{width:35px;height:35px;min-height:35px;border-radius:9px!important}#sf3-toolbar .ic .i{width:19px;height:19px}#sf3-toolbar .ic::after{left:auto;right:calc(100% + 14px);bottom:auto;top:50%;transform:translate(4px,-50%)}#sf3-toolbar .ic:hover::after,#sf3-toolbar .ic:focus-visible::after{transform:translate(0,-50%)}
+ #opts,#prof,#bpanel,#trpanel,#cxpanel,#mkpanel,#bugpanel,#talpanel,#mppanel,#qf9{left:12px;right:12px;top:50%;width:auto;max-height:88dvh;padding:18px;border-radius:16px!important;font-size:12px}#opts{min-height:390px}.orow{gap:12px}.orow button,.sf2-options .orow button{min-width:115px}.orow>span{font-size:11px}
+ #sf2-target{top:205px;width:155px;padding:10px 12px}#sf2-objective{max-width:42vw;bottom:170px;left:12px;padding:11px 13px}#sf2-objective b{font-size:11px}#sf2-objective span{font-size:9px}.sf2-window{padding:21px}.sf2-window h2{font-size:23px}.sf2-stats{gap:7px}.sf2-stats b{font-size:23px}.sf2-stats span{font-size:9px}.sf2-milestone{padding:14px}
+ #menu3{align-items:center;justify-content:space-between;padding:50px 22px 32px;background:linear-gradient(#061321b3,transparent 35%,#061321e6)}.m3top{text-align:center}.sf3-eyebrow{justify-content:center;margin-bottom:18px;font-size:8px}.m3logo{justify-content:center;font-size:34px;gap:10px}.m3logo span{font-size:10px;padding:5px 7px}.m3tag{font-size:10px;letter-spacing:.04em}.m3bot{width:min(330px,88vw)}
+}
+@media(orientation:landscape) and (max-height:520px){
+ #hud{padding:10px 12px 0}.pan{padding:9px 12px!important}#sf3-toolbar{left:50%;right:auto;top:auto;bottom:10px;transform:translateX(-50%);flex-direction:row;max-width:90vw;padding:5px;gap:5px;border-radius:13px}.sf3-tool-group{flex-direction:row;gap:2px}.sf3-tool-group+.sf3-tool-group{border-top:0;border-left:1px solid #b0ccde21;padding-top:0;padding-left:5px}#sf3-toolbar .ic,#sf3-toolbar button.ic{height:32px;min-height:32px;width:32px}#sf3-toolbar .ic::after{display:none}
+ #sf2-objective{bottom:70px;max-width:27vw;font-size:10px}#sf2-target{top:12px;left:50%;width:135px;padding:7px 9px}#opts,#prof,#bpanel,#trpanel,#cxpanel,#mkpanel,#bugpanel,#talpanel,#mppanel,#qf9{top:50%;max-height:94dvh;right:12px;left:auto;width:min(440px,94vw);padding:16px}#opts{min-height:0}
+ #menu3{align-items:flex-start;justify-content:center;padding:20px 38px;gap:18px;background:linear-gradient(90deg,#061321e6,transparent 85%)}.m3top{text-align:left}.sf3-eyebrow{justify-content:flex-start;margin-bottom:10px}.m3logo{font-size:36px;justify-content:flex-start}.m3tag{margin-top:8px}.m3bot{width:290px;gap:7px}#m3play{min-height:43px;padding:11px 16px}.m3row button,#sf2-menu-progress{min-height:33px}.m3ver{display:none}
+}
+
+.j23-compare{grid-column:1/-1;flex-basis:100%;display:flex;flex-wrap:wrap;gap:5px 14px;padding-top:9px;border-top:1px solid #ffffff12;font-size:11px}.j23-compare>small{flex-basis:100%;color:#99adbd;font-size:9px;letter-spacing:1px}.j23-compare span{display:flex;gap:8px}.j23-compare .gain{color:#83ecd0}.j23-compare .loss{color:#ffad9e}.arow{flex-wrap:wrap}.arow>.j23-compare{width:100%}.j23-compare b{font-variant-numeric:tabular-nums}
+#j23-map{position:absolute;top:90px;right:24px;width:280px;max-height:calc(100dvh - 180px);overflow:auto;padding:18px;background:rgba(9,24,37,.96);border:1px solid #72f2d238;border-radius:18px;color:#dceef4;box-shadow:0 18px 60px #0006;z-index:3;pointer-events:auto}#j23-map[hidden]{display:none}#j23-map>small{display:block;color:#83dccc;font-size:10px;letter-spacing:1.4px}#j23-map>b{display:block;font-size:17px;margin:10px 0}#j23-map p{line-height:1.55;font-size:12px;color:#b6cbd8}#j23-map .j23-legend{font-size:10px;letter-spacing:0;line-height:1.5;color:#91aab9;margin-top:14px}.j23-actions{display:flex;flex-wrap:wrap;gap:7px}.j23-actions button{padding:9px 12px;border-radius:10px;font-size:11px}#j23-set-course{background:#72f2d2;color:#07251f}#j23-map button:disabled{opacity:.4;cursor:default}#j23-journal{margin-top:18px;border-top:1px solid #ffffff18;padding-top:14px}#j23-journal summary{cursor:pointer;color:#a5eee0;font-size:13px}#j23-notice-count{float:right;color:#91aab9}#j23-notice-list{padding-left:18px;max-height:230px;overflow:auto;font-size:12px}#j23-notice-list li{margin:10px 0;line-height:1.5;color:#bacbd6}#j23-notice-list .priority-2{color:#ffbaab}#toast[data-priority="0"]{font-size:12px;max-width:340px}#toast[data-priority="2"]{border-color:#ff9b7b;color:#ffe0d3}
+@media(max-width:650px){#j23-map{top:auto;bottom:80px;right:12px;left:12px;width:auto;padding:12px;max-height:32dvh;border-radius:14px}#j23-map>b{font-size:14px;margin:5px 0}#j23-map p{margin:5px 0;font-size:11px}#j23-map .j23-legend{display:none}.j23-actions button{padding:8px;font-size:10px}.j23-compare{gap:5px 10px}.j23-compare span{font-size:10px}}
+@media(max-width:700px){body.desk #shop,body.desk.atelier #shop,body.atelier #shop{left:12px;right:12px;top:auto;bottom:90px;transform:none;width:auto;max-width:calc(100vw - 24px);max-height:70dvh}body.desk.atelier #tabX,body.atelier #tabX{max-height:42dvh}.arow>div:first-child{min-width:0;flex:1}.arow .j23-compare{min-width:0;flex-basis:100%}.j23-compare span{flex-shrink:1;flex-wrap:wrap}body.atelier #sf3-toolbar{left:50%;right:auto;top:auto;bottom:12px;transform:translateX(-50%);flex-direction:row;max-width:95vw;gap:3px}body.atelier .sf3-tool-group{flex-direction:row;gap:1px}body.atelier .sf3-tool-group+.sf3-tool-group{border-top:0;border-left:1px solid #b0ccde21;padding-top:0;padding-left:3px}body.atelier #sf3-toolbar .ic,body.atelier #sf3-toolbar button.ic{width:32px;min-height:32px;height:32px}}
 </style></head><body>
 <canvas id="c"></canvas><canvas id="ov"></canvas>
 <div id="hud"><div class="pan" id="pl"><div class="row"><span class="lab h" title="Coque"><svg class="i"><use href="#i-hull"/></svg></span><div class="bar" id="hpbar"><i id="hpb"></i></div><span class="num" id="hpt"></span></div><div class="row" id="shrow" style="display:none"><span class="lab s" title="Bouclier"><svg class="i"><use href="#i-shield"/></svg></span><div class="bar" id="shbar"><i id="shb"></i></div><span class="num" id="sht"></span></div><div class="row"><span class="lab c" title="Soute"><svg class="i"><use href="#i-cargo"/></svg></span><div class="bar" id="orebar"><i id="orb"></i></div><span class="num" id="ort"></span></div><div class="row" id="lvrow"><span class="lvt" id="lvt"></span><div class="xbar"><i id="xpb"></i></div><span id="xpg"></span></div><div class="row" id="pwr" title="Énergie : touche pour changer (1/2/3 sur PC)"></div><div id="wpn"></div><div id="info"></div></div><div class="pan" id="pr"><div id="cr"></div><div id="sub"></div><div class="chip" id="zone"></div><div class="chip" id="want" style="display:none"></div></div></div>
 <button id="optb" class="ic" title="Options (O)"><svg class="i"><use href="#i-gear"/></svg></button><button id="profb" class="ic" title="Profil (P)"><svg class="i"><use href="#i-user"/></svg></button><button id="cxb" class="ic" title="Journal de bord (J)"><svg class="i"><use href="#i-book"/></svg></button><div id="achb"></div>
 <div id="toast"></div>
 <div id="shop"><div id="shopT"></div><div id="tabs"></div><div id="tabStation"><button id="mis"></button><button class="up" id="u1"></button><button class="up" id="u2"></button><button class="up" id="u3"></button></div><div id="tabX"></div></div>
-<div id="help"><kbd>Souris</kbd> diriger · <kbd>Tab</kbd> curseur libre · <kbd>F1</kbd> quoi faire ? · <kbd>Clic</kbd> tirer · <kbd>Z</kbd>/<kbd>S</kbd> gaz + / − · <kbd>Clic droit</kbd>/<kbd>Maj</kbd> boost · <kbd>B</kbd> frein<br><kbd>E</kbd> atterrir · amarrer · repartir · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> améliorer (à quai) · <kbd>F</kbd> mission<br><kbd>Q</kbd>/molette arme · <kbd>C</kbd> carte · <kbd>Entrée</kbd> dialogue<br><kbd>T</kbd> discuter · <kbd>G</kbd> qualité · <kbd>I</kbd> inverser · <kbd>V</kbd> cockpit · <kbd>F</kbd> sortir à pied · <kbd>M</kbd> son · <kbd>O</kbd> options · <kbd>R</kbd> tonneau · <kbd>X</kbd> leurres · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> énergie (en vol)<br><kbd>P</kbd> profil · <kbd>K</kbd> talents · <kbd>J</kbd> journal · <kbd>B</kbd> mode photo · <kbd>H</kbd> cacher l'aide</div><button id="land"></button><button id="baseb"></button><button class="b" id="brake"><svg class="i"><use href="#i-brake"/></svg><span>Frein</span></button><button class="b" id="boost"><svg class="i"><use href="#i-boost"/></svg><span>Boost</span></button><button class="b" id="fire"><svg class="i"><use href="#i-fire"/></svg><span>Feu</span></button><button class="b" id="dodge"></button><button class="b" id="flare"></button>
+<div id="help"><kbd>Souris</kbd> diriger · <kbd>Tab</kbd> curseur libre · <kbd>F1</kbd> quoi faire ? · <kbd>Clic</kbd> tirer · <kbd>Z</kbd>/<kbd>S</kbd> gaz + / − · <kbd>Clic droit</kbd>/<kbd>Maj</kbd> boost · <kbd>B</kbd> frein<br><kbd>E</kbd> atterrir · amarrer · repartir · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> améliorer (à quai) · <kbd>F</kbd> mission<br><kbd>Q</kbd>/molette arme · <kbd>C</kbd> carte · <kbd>Entrée</kbd> dialogue<br><kbd>T</kbd> discuter · <kbd>G</kbd> qualité · <kbd>I</kbd> inverser · <kbd>V</kbd> cockpit · <kbd>F</kbd> sortir à pied · <kbd>M</kbd> son · <kbd>O</kbd> options · <kbd>R</kbd> tonneau · <kbd>X</kbd> leurres · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> énergie (en vol)<br><kbd>P</kbd> profil · <kbd>K</kbd> talents · <kbd>J</kbd> journal · <kbd>F8</kbd> mode photo · <kbd>H</kbd> cacher l'aide</div><button id="land"></button><button id="baseb"></button><button class="b" id="brake"><svg class="i"><use href="#i-brake"/></svg><span>Frein</span></button><button class="b" id="boost"><svg class="i"><use href="#i-boost"/></svg><span>Boost</span></button><button class="b" id="fire"><svg class="i"><use href="#i-fire"/></svg><span>Feu</span></button><button class="b" id="dodge"></button><button class="b" id="flare"></button>
 <button id="mapb" class="ic" title="Carte (C)"><svg class="i"><use href="#i-map"/></svg></button><button id="wbtn" title="Changer d'arme"></button>
 <div id="bossbar"><div id="bossN"></div><div class="bar"><i id="bossB"></i></div></div>
 <div id="dlg"><div id="dlgI"></div><div><div id="dlgN"></div><div id="dlgT"></div><small>Touche pour continuer ▶</small></div></div>
@@ -287,7 +465,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <div class="psec"><b class="pt">Jeu</b><div class="orow"><span>Difficulté des combats</span><button id="df3b"></button></div><div class="orow"><span>Pilotage du vaisseau</span><button id="thr6b"></button></div><div class="orow"><span>Chiffres de dégâts</span><button id="dn5b"></button></div></div>
 <div class="psec"><b class="pt">Son</b><div class="orow"><span>Son</span><button id="snd"></button></div><label class="orow"><span>Musique</span><input type="range" id="vmus" min="0" max="100"></label><label class="orow"><span>Effets</span><input type="range" id="vsfx" min="0" max="100"></label></div>
 <div class="psec"><b class="pt">Commandes</b><label class="orow"><span>Sensibilité</span><input type="range" id="sens" min="40" max="180"></label><div class="orow"><span>Tangage inversé</span><button id="inv"></button></div><div class="orow"><span>Manette</span><b id="gpst">Non détectée</b></div></div>
-<div class="psec"><b class="pt">Sauvegarde dans le cloud</b><small>Ta partie est enregistrée en ligne avec ton code. Sur un autre appareil, choisis « Charger un code » et tape-le pour retrouver ta progression.</small><div class="orow"><span>Ton code</span><b id="ccode"></b></div><div class="obtns"><button id="csave">Sauvegarder</button><button id="cload">Charger un code</button><button id="ccopy">Copier le code</button></div><small id="cstat"></small></div><div class="psec"><b class="pt">Un problème ?</b><small>Un bug, un prix bizarre, quelque chose de trop dur ? Prépare un rapport et colle-le dans ta conversation avec Claude.</small><div class="obtns"><button id="bugb">Signaler un problème</button></div></div></div>
+<div class="psec"><b class="pt">Sauvegarde dans le cloud</b><small>Ta partie est enregistrée en ligne avec ton code. Sur un autre appareil, choisis « Charger un code » et tape-le pour retrouver ta progression.</small><div class="orow"><span>Ton code</span><b id="ccode"></b></div><div class="obtns"><button id="csave">Sauvegarder</button><button id="cload">Charger un code</button><button id="ccopy">Copier le code</button></div><small id="cstat"></small></div><div class="psec"><b class="pt">Un problème ?</b><small>Un bug, un prix bizarre, quelque chose de trop dur ? Prépare un rapport à partager pour faciliter la correction.</small><div class="obtns"><button id="bugb">Signaler un problème</button></div></div></div>
 <div id="mppanel"><div class="mphead"><b><svg class="i"><use href="#i-squad"/></svg> Réseau galactique</b><button id="mpclose"><svg class="i"><use href="#i-close"/></svg></button></div><div id="mmtabs"><button data-mt="zone" class="on">Zone</button><button data-mt="on">En ligne</button><button data-mt="chat">Discussion</button><button data-mt="guild">Guilde</button><button data-mt="proj">Chantier</button></div><div id="mmx"></div><div id="mpz"><div id="mpstat"></div><div id="mpnet"><span>Salon <b id="mpcode"></b></span><button id="mpinv"><svg class="i"><use href="#i-swap"/></svg> Inviter</button><button id="mpnew"><svg class="i"><use href="#i-lock"/></svg> Salon privé</button><button id="mppub"><svg class="i"><use href="#i-planet"/></svg> Public</button></div>
 <label class="mpl">Ton pseudo <input id="mpnick" maxlength="16" placeholder="Pilote" autocomplete="off"></label>
 <button id="mppvp"></button><div id="mplist"></div>
@@ -296,7 +474,7 @@ body.walk3 #shop,body.walk3 #land,body.walk3 #pwr{display:none!important}body.wa
 <script>window.SFE=[];(function(){function esc(x){return String(x).replace(/[<>&]/g,function(c){return c=='<'?'&lt;':c=='>'?'&gt;':'&amp;'})}
 addEventListener('error',function(e){SFE.push((e.message||'erreur')+(e.lineno?' (ligne '+e.lineno+':'+(e.colno||0)+')':''))});addEventListener('unhandledrejection',function(e){SFE.push('Promesse : '+(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){var l=document.getElementById('loading');if(!l)return;var m=SFE.length?'Erreur : '+SFE.slice(0,3).map(esc).join('<br>'):'Le chargement est très long (connexion lente ?)';l.innerHTML='STARFARER 3D<small style="max-width:86vw;text-align:center;line-height:1.5">Le jeu n\'a pas pu démarrer.<br>'+m+'<br><br>Fais une capture d\'écran de ce message.</small><button style="margin-top:8px;padding:10px 18px;font:600 14px system-ui;color:#03050c;background:#7fe0ff;border:0;border-radius:8px" onclick="location.href=location.pathname+\'?v=\'+Date.now()">Recharger</button>'},15000)})()</script>
-<meta name="sf-build" content="20261016-200607"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<meta name="sf-build" content="20261017-130944"><script>window.SF_STANDALONE=1</script><script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 <script>window.Peer||document.write('<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"><\/script>')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script><script>if(!window.THREE)document.getElementById("loading").innerHTML="STARFARER 3D<small>Impossible de charger le moteur 3D. Vérifie ta connexion et recharge la page.</small>"</script><script>( function () {
 
@@ -5975,7 +6153,7 @@ const TOUCH=(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)
 const DESK=!TOUCH||/[?&]pc\b/.test(location.search);if(DESK)document.body.classList.add('desk');
 const K={},B={fire:0,boost:0,brake:0},MS={x:0,y:0,in:false,fire:0,boost:0};let stick=null,inv=false;
 try{inv=localStorage.getItem('sf-inv')=='1'}catch(e){}
-onkeydown=e=>{if(e.target&&e.target.tagName=='INPUT')return;if(!K[e.code])keyAct(e.code);K[e.code]=1;if(e.code=='Space'||e.code.startsWith('Arrow')||e.code=='Tab')e.preventDefault()};
+onkeydown=e=>{if(e.target&&(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable))return;if(!K[e.code])keyAct(e.code);K[e.code]=1;if(e.code=='Space'||e.code.startsWith('Arrow')||e.code=='Tab')e.preventDefault()};
 function keyAct(c){if(c=='KeyE'){const l=$('land');if(l&&l.style.display!='none')l.click()}else if(c=='Digit1'||c=='Digit2'||c=='Digit3'){if(S.docked)$('u'+c.slice(-1)).click()}else if(c=='KeyF'){if(S.docked)$('mis').click()}else if(c=='KeyG'&&typeof cycleQuality=='function')cycleQuality();else if(c=='KeyH')document.body.classList.toggle('nohelp');else if(c=='KeyI')$('inv').click();else if(c=='KeyM')$('snd').click()}onkeyup=e=>K[e.code]=0;
 const OV=$('ov');
 OV.addEventListener('contextmenu',e=>e.preventDefault());
@@ -6301,12 +6479,12 @@ function rebuildShip(){const p=ship.parent;p.remove(ship);ship=buildShip();p.add
 const fwd=(q=S.q,o=_f)=>o.set(0,0,-1).applyQuaternion(q);
 // ----- pilotage -----
 function fly(dt,{rate=1,minSpd=0,surf=false}={}){const[yaw,pitch]=steerInput(),R=(1.2+.08*(G.u[1]-1))*rate*HS().turn*PM('turn');
-S.yawV=lerp(S.yawV||0,yaw,damp(7,dt));S.pitchV=lerp(S.pitchV||0,pitch,damp(7,dt));
+S.yawV=lerp(S.yawV||0,yaw,damp(8.5,dt));S.pitchV=lerp(S.pitchV||0,pitch,damp(8.5,dt));
 _q.setFromAxisAngle(AY,S.yawV*R*dt);S.q.multiply(_q);_q.setFromAxisAngle(AX,S.pitchV*R*.85*dt);S.q.multiply(_q);
 _r.set(1,0,0).applyQuaternion(S.q);fwd();if(Math.abs(_f.y)<.97){const roll=Math.asin(clamp(_r.y,-1,1));_q.setFromAxisAngle(AZ,-roll*damp(2.2,dt));S.q.multiply(_q)}S.q.normalize();
-const tg=S.docked?0:THR6.man?(isBoost()?boostSpd()*(surf?.6:1):Math.max(minSpd,cruise()*THR6.v*(surf?.75:1))):isBrake()?Math.max(minSpd,10):isBoost()?boostSpd()*(surf?.6:1):cruise()*(surf?.75:1);S.spd=lerp(S.spd,tg,damp(isBoost()?1.6:THR6.man&&isBrake()?3.2:2.4,dt));
+const tg=S.docked?0:isBrake()?Math.max(minSpd,0):THR6.man?(isBoost()?boostSpd()*(surf?.6:1):Math.max(minSpd,cruise()*THR6.v*(surf?.75:1))):isBrake()?Math.max(minSpd,10):isBoost()?boostSpd()*(surf?.6:1):cruise()*(surf?.75:1);S.spd=lerp(S.spd,tg,damp(isBoost()?1.6:THR6.man&&isBrake()?3.2:2.4,dt));
 fwd();S.vel.lerp(_v.copy(_f).multiplyScalar(S.spd),damp(3.2,dt));S.pos.addScaledVector(S.vel,dt);
-S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.75,damp(5,dt))}
+S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.52,damp(5,dt))}
 // ----- caméra -----
 const camUp=new V3(0,1,0),camLook=new V3();let camInit=true,fovK=0;const CAMQ=new QT(),CAMS={y:0,p:0,a:0,ls:0};
 function updCam(dt){if(mode=='int'){derCam(dt);return}if(FOOT.on&&mode=='surf'){footCam(dt);return}if(atelierOn()){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
@@ -6315,12 +6493,12 @@ if(ckActive()){ckCam(dt);return}
 const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(2.4,dt));const sk=Math.max(1,ship.userData.body.scale.z),spK=clamp(S.spd/Math.max(1,cruise()),0,2.8),srf=mode=='surf'?.84:1;
 if(camInit){CAMQ.copy(S.q);CAMS.ls=S.spd;camInit=false}else CAMQ.slerp(S.q,damp(5,dt));
 CAMS.y=lerp(CAMS.y,S.yawV||0,damp(3.5,dt));CAMS.p=lerp(CAMS.p,S.pitchV||0,damp(3.5,dt));const acc=dt>0?(S.spd-CAMS.ls)/dt:0;CAMS.ls=S.spd;CAMS.a=lerp(CAMS.a,clamp(acc*.025,-4,6),damp(2.5,dt));
-const back=(35+spK*3+fovK*10+CAMS.a)*sk*srf,up=(9.5+fovK*1.5)*sk*srf;
+const back=(39+spK*2+fovK*6+CAMS.a*.45)*sk*srf,up=(10+fovK*.7)*sk*srf;
 camera.position.copy(_v.set(-CAMS.y*5*sk,up+CAMS.p*2.4*sk,back).applyQuaternion(CAMQ).add(S.pos));
 _u.set(0,1,0).applyQuaternion(S.q);camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);camLook.copy(S.pos).addScaledVector(fwd(),90);camera.lookAt(camLook);
-const vib=(fovK*.3+Math.max(0,spK-1.05)*.06)*sk;if(vib>.01){camera.position.x+=rv(vib);camera.position.y+=rv(vib);camera.position.z+=rv(vib)}
-if(shake>0){camera.position.x+=rv(shake);camera.position.y+=rv(shake);shake=Math.max(0,shake-dt*2.5)}
-const base=innerWidth<innerHeight?74:(DESK?60:54),fv=base+fovK*20+Math.max(0,spK-1)*3;if(Math.abs(camera.fov-fv)>.05){camera.fov=fv;camera.updateProjectionMatrix()}sky.position.copy(camera.position)}
+const vib=(fovK*.12+Math.max(0,spK-1.05)*.025)*sk*(window.SF2Motion==null?.6:window.SF2Motion);if(vib>.01){camera.position.x+=rv(vib);camera.position.y+=rv(vib);camera.position.z+=rv(vib)}
+if(shake>0){camera.position.x+=rv(shake*(window.SF2Motion==null?.6:window.SF2Motion));camera.position.y+=rv(shake*(window.SF2Motion==null?.6:window.SF2Motion));shake=Math.max(0,shake-dt*2.5)}
+const base=innerWidth<innerHeight?74:(DESK?60:54),fv=base+fovK*10*(window.SF2Motion==null?.6:window.SF2Motion)+Math.max(0,spK-1)*1.5;if(Math.abs(camera.fov-fv)>.05){camera.fov=fv;camera.updateProjectionMatrix()}sky.position.copy(camera.position)}
 function placeShip(dt){if(FOOT.on){ship.position.copy(FOOT.sp);ship.quaternion.copy(FOOT.sq);const ud=ship.userData;ud.body.rotation.set(0,0,0);for(const f of ud.flames){f.fl.scale.set(1,1,.05);f.fl.material.opacity=.1;f.gs.scale.setScalar(1.2)}ud.shield.material.uniforms.op.value=0;return}ship.position.copy(S.pos);ship.quaternion.copy(S.q);const ud=ship.userData;ud.body.rotation.z=S.bank;ud.body.rotation.x=(S.pitchV||0)*.18;
 const k=S.thr;for(const f of ud.flames){f.fl.scale.set(1,1,.3+k*(.7+Math.random()*.3));f.fl.material.opacity=.35+k*.25;f.gs.scale.setScalar(2.6+k*1.6)}
 ud.shield.material.uniforms.op.value=Math.max(0,shieldT);if(ud.plasma){const hk=S.heat||0;ud.plasma.visible=hk>.02;PLU.k.value=hk;ud.plasma.scale.set(6+hk*2,4.5+hk*1.5,14+hk*10);ud.plasma.position.z=2+hk*3}ud.shield.rotation.y+=dt;const bl=Math.sin(t*5)>.6;ud.nl.visible=ud.nr.visible=bl;
@@ -6342,7 +6520,8 @@ if(lock){const tp=lock.pos.clone();if(lock.vel){const tt=tp.distanceTo(p)/bs;tp.
 mpShot(p,dir,'c');const m=mkPB(col);m.position.copy(p);m.lookAt(p.clone().sub(dir));PB.push({m,p:m.position,v:dir.multiplyScalar(bs).addScaledVector(S.vel,.5),l:1.6,d:dmg,c:col});muzzleFlash(M.l,col)}gunKick();SFX.shoot()}
 const segHit=(a,b,c,r)=>{_v.copy(b).sub(a);const L2=_v.lengthSq();let k=L2?_w.copy(c).sub(a).dot(_v)/L2:0;k=clamp(k,0,1);return _w.copy(a).addScaledVector(_v,k).distanceToSquared(c)<r*r};
 function updPB(dt,targets){for(const b of PB){const a=b.p.clone();b.p.addScaledVector(b.v,dt);b.l-=dt;for(const T of targets){if(b.l<=0)break;if(segHit(a,b.p,T.pos,T.r)){b.l=0;impactFX(b.p,b.c);T.hit(b.d,b.p)}}if(b.l<=0)rmPB(b)}PB=PB.filter(b=>b.l>0)}
-function updEB(dt){for(const b of EB){if(b.home&&!S.dead){const sp=b.v.length();b.v.lerp(_w.copy(S.pos).sub(b.m.position).normalize().multiplyScalar(sp),damp(1.6,dt)).setLength(Math.min(330,sp+40*dt));b.m.lookAt(_w.copy(b.m.position).sub(b.v));if(Math.random()<.7)FIRE.emit(b.m.position.x,b.m.position.y,b.m.position.z,rv(6),rv(6),rv(6),.35,1,.55,.2,.4)}if(!b.or){b.or=1;b.m.lookAt(_w.copy(b.m.position).sub(b.v))}b.m.position.addScaledVector(b.v,dt);b.l-=dt;if(b.m.position.distanceTo(S.pos)<7.5){b.l=0;damage(b.dmg);impactFX(b.m.position,S.sh>0?partOf('shield').scol||0x5ad0ff:0xff6650,.8)}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}EB=EB.filter(b=>b.l>0)}
+const EBPREV2=new V3();
+function updEB(dt){for(const b of EB){if(b.home&&!S.dead){const sp=b.v.length();b.v.lerp(_w.copy(S.pos).sub(b.m.position).normalize().multiplyScalar(sp),damp(1.6,dt)).setLength(Math.min(330,sp+40*dt));b.m.lookAt(_w.copy(b.m.position).sub(b.v));if(Math.random()<.7)FIRE.emit(b.m.position.x,b.m.position.y,b.m.position.z,rv(6),rv(6),rv(6),.35,1,.55,.2,.4)}if(!b.or){b.or=1;b.m.lookAt(_w.copy(b.m.position).sub(b.v))}EBPREV2.copy(b.m.position);b.m.position.addScaledVector(b.v,dt);b.l-=dt;if(segHit(EBPREV2,b.m.position,S.pos,7.5)){b.l=0;damage(b.dmg);impactFX(b.m.position,S.sh>0?partOf('shield').scol||0x5ad0ff:0xff6650,.8)}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}EB=EB.filter(b=>b.l>0)}
 // dégâts : le bouclier absorbe d'abord, l'éperon annule les collisions
 function damage(n,kind){if(S.dead)return;if(kind=='col'&&PM('ram'))return;S.shT=t;if(PM('sh')>0&&S.sh>0){const a=Math.min(S.sh,n);S.sh-=a;n-=a;shieldT=1;if(n<=0){SFX.shield();return}}S.hp-=n;SFX.hit()}
 // ----- butin -----
@@ -7875,7 +8054,7 @@ $('mapb').onclick=openMap;$('mapx').onclick=closeMap;$('mapzi').onclick=()=>mapZ
 addEventListener('keydown',e=>{if(e.target.tagName=='INPUT')return;if(e.code=='KeyC'&&!e.repeat)openMap();if(e.code=='Escape'&&MAP.open)closeMap()});addEventListener('resize',()=>{if(MAP.open){sizeMap();drawMap()}});
 // ----- intégration -----
 function storyTarget(){const s=SG();if(!s||!CHAPTERS[s.ch])return null;return CHAPTERS[s.ch].tg()}
-const isPaused=()=>DLG.open||MAP.open||window.XPAUSE>0;
+const isPaused=()=>DLG.open||MAP.open||window.XPAUSE>0||document.hidden||!!window.SF2PAUSE||(typeof OPTP!="undefined"&&OPTP.open);
 function updContent(dt){G.time=(G.time||0)+dt;storyTick(dt);updEvents(dt);updBoss(dt)}
 function updContentAlways(dt){updDlg(dt);updMusic();bossBar();if(MAP.open&&Math.random()<.2)drawMap();updShop();setH('wpn',wpnHUD());setD('wbtn',G.w.length>1&&!DESK?'flex':'none');if(G.w.length>1)setH('wbtn',ICO(WSVG[curW()]||'canon'))}
 function contentInfo(){let s='';const c=SG()&&SG().ch<8&&CHAPTERS[SG().ch];if(c)s+=`<span style="color:#c9f">★ ${c.txt()}</span>`;if(SG()&&SG().ch==1&&scanT>0)s+=` <b style="color:#c9f">scan ${Math.min(100,scanT/3*100|0)}%</b>`;
@@ -13185,7 +13364,7 @@ TICK.push(()=>{const t=performance.now(),dt=Math.min(.1,(t-THR6E.t0)/1000);THR6E
 // amarrage : manette à zéro ; départ d'une station : 40 % ; décollage d'une planète : au moins 50 %
 if(S.docked){THR6.v=0;THR6E.wasDock=true}else if(THR6E.wasDock){THR6E.wasDock=false;THR6.v=.4}
 if(THR6E.mode!=mode){if(THR6E.mode=='surf'&&mode=='space')THR6.v=Math.max(THR6.v,.5);THR6E.mode=mode}
-if(THR6.man&&!FOOT.on&&!S.docked&&(mode=='space'||mode=='surf')&&!(typeof SI!='undefined'&&SI.on)){
+if(THR6.man&&!isPaused()&&!FOOT.on&&!S.docked&&(mode=='space'||mode=='surf')&&!(typeof SI!='undefined'&&SI.on)){
  const typing=document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName);
  if(!typing&&DESK){if(K.KeyW)thr6Set(THR6.v+.7*dt);if(K.KeyS)thr6Set(THR6.v-.7*dt)}
  if(isBrake())thr6Set(THR6.v-1.6*dt);
@@ -13578,8 +13757,8 @@ const TUT9S=[
 {k:'go',t:'Repartir',d:()=>'Remonte dans ton vaisseau (« Retour au vaisseau »), puis appuie sur « Partir ». Bon vol !',hl:'#w3ship',ok:()=>!S.docked&&mode=='space'}];
 function t9Station(){let b=null,bd=1e12;for(const s of(typeof w7Sts=='function'?w7Sts():stations)){const d=Math.hypot(s.x-S.pos.x,s.y-S.pos.y,s.z-S.pos.z);if(d<bd){bd=d;b=s}}return b}
 function t9Wp(x,y,z,n){G.x.wp9={x,y,z,n};}
-function tutStart(){G.x.tut9={i:0};TUT9.on=true;TUT9.acc=0;TUT9.d0=0;hint=0;t9Step();toast('🎓 Tutoriel : suis les étapes en haut de l\'écran');}
-function tutStop(done){TUT9.on=false;t9HL(null);$('tut9').style.display='none';const T=GX('tut9',{});T.done=1;if(done){G.cr+=500;gainXP(80);banner('trophy','Tutoriel terminé !','+500 ¢ · Appuie sur « Quoi faire ? » ('+(DESK?'F1':'bouton ?')+') quand tu cherches une idée.','#7fffb0');try{SFX.win()}catch(e){}}save()}
+function tutStart(){const rewarded=!!(G.x.tut9&&G.x.tut9.rewarded)||!!GX('polish',{}).tutorialReward;G.x.tut9={i:0,rewarded};TUT9.on=true;TUT9.acc=0;TUT9.d0=0;hint=0;t9Step();toast('🎓 Tutoriel : suis les étapes en haut de l\'écran');}
+function tutStop(done){TUT9.on=false;t9HL(null);$('tut9').style.display='none';const T=GX('tut9',{});T.done=1;T.skipped=!done;if(done&&!T.rewarded&&!GX('polish',{}).tutorialReward){T.rewarded=1;GX('polish',{}).tutorialReward=1;G.cr+=500;gainXP(80);banner('trophy','Tutoriel terminé !','+500 ¢ · Appuie sur « Quoi faire ? » ('+(DESK?'F1':'bouton ?')+') quand tu cherches une idée.','#7fffb0');try{SFX.win()}catch(e){}}save()}
 function t9HL(sel){if(TUT9.hl===sel)return;if(TUT9.hl)document.querySelectorAll(TUT9.hl).forEach(e=>e.classList.remove('tut9hl'));TUT9.hl=sel;if(sel)document.querySelectorAll(sel).forEach(e=>e.classList.add('tut9hl'))}
 function t9Step(){const T=G.x.tut9,s=TUT9S[T.i];if(!s){tutStop(true);return}TUT9.acc=0;if(s.go)s.go();const el=$('tut9');el.style.display='block';el.innerHTML=`<div class="t9h"><span>${ICO('star')} Tutoriel · ${T.i+1}/${TUT9S.length}</span><button id="t9x">Passer</button></div><b>${s.t}</b><p>${s.d()}</p><div class="t9bar"><i style="width:${(T.i/TUT9S.length*100).toFixed(0)}%"></i></div>`;$('t9x').onclick=()=>{tutStop(false);toast('Tutoriel passé — tu peux le relancer depuis « Quoi faire ? »')};t9HL(s.hl||null)}
 document.body.insertAdjacentHTML('beforeend','<div id="tut9"></div><div id="qf9"></div>');
@@ -13587,9 +13766,9 @@ let t9T0=performance.now();TICK.push(()=>{const t9n=performance.now(),dt=Math.mi
  // cap (marqueur violet)
  const W=G.x.wp9;if(W&&mode=='space'&&(Math.hypot(W.x-S.pos.x,W.y-S.pos.y,W.z-S.pos.z)<450||S.docked&&S.docked.n===W.n))G.x.wp9=null;
  // démarrage automatique pour les nouveaux pilotes
- if(!TUT9.on&&!G.x.tut9&&(G.xp||0)<150&&mode=='space'&&!(typeof MENU3!='undefined'&&MENU3.on)){TUT9.d0+=dt;if(TUT9.d0>3&&!DLG.open)tutStart()}
+ if(!TUT9.on&&!G.x.tut9&&(G.xp||0)<150&&mode=='space'&&!isPaused()&&!(typeof MENU3!='undefined'&&MENU3.on)){TUT9.d0+=dt;if(TUT9.d0>3&&!DLG.open)tutStart()}
  document.body.classList.toggle('t9dock',TUT9.on&&!!S.docked);if(!TUT9.on)return;const T=G.x.tut9,s=TUT9S[T.i];if(!s){tutStop(true);return}hint=0;
- if(DLG.open||MAP.open&&s.k!='map'){$('tut9').style.opacity=.35}else $('tut9').style.opacity=1;
+ if(isPaused()&&(s.k!='map'||!MAP.open)){$('tut9').style.opacity=.35;return}else $('tut9').style.opacity=1;
  let ok=false;try{ok=s.ok(dt)}catch(e){}if(ok){T.i++;try{tone(880,1320,.12,'sine',.05)}catch(e){}t9Step()}
  // sauter les étapes impossibles (ex. pilote déjà à quai au lancement)
  if(s.k!='dock'&&s.k!='shop'&&s.k!='walk'&&s.k!='talk'&&s.k!='go'&&S.docked&&!S.docked.ground){T.i=TUT9S.findIndex(x=>x.k=='shop');t9Step()}});
@@ -15305,8 +15484,8 @@ out.toBlob(b=>{if(!b){toast('Photo impossible sur cet appareil');return}PH.blob=
 async function phShare(){if(!PH.blob)return;const f=new File([PH.blob],'starfarer-'+Date.now()+'.jpg',{type:'image/jpeg'});try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'Starfarer 3D'});else if(navigator.share)await navigator.share({title:'Starfarer 3D',text:'Ma photo dans Starfarer 3D'});else $('phdl').click()}catch(e){}}
 // pas d'interface de jeu pendant la photo (les reflets du soleil restent)
 {const _ovPH=overlay;overlay=function(){if(PH.on){OX.clearRect(0,0,innerWidth,innerHeight);try{lensFlares()}catch(e){}return}_ovPH()}}
-addEventListener('keydown',e=>{const tg=e.target&&e.target.tagName;if(tg=='INPUT'||tg=='TEXTAREA'||e.repeat)return;if(e.code=='KeyB')photoToggle();else if(e.code=='Escape'&&PH.on)photoToggle(false)});
-{const b=document.createElement('button');b.id='phob';b.className='ic';b.title='Mode photo (B)';b.innerHTML=ICO('cam');b.onclick=()=>photoToggle(true);document.body.appendChild(b)}
+addEventListener('keydown',e=>{const tg=e.target&&e.target.tagName;if(tg=='INPUT'||tg=='TEXTAREA'||e.repeat)return;if(e.code=='F8'){e.preventDefault();photoToggle();}else if(e.code=='Escape'&&PH.on)photoToggle(false)});
+{const b=document.createElement('button');b.id='phob';b.className='ic';b.title='Mode photo (F8)';b.innerHTML=ICO('cam');b.onclick=()=>photoToggle(true);document.body.appendChild(b)}
 TICK.push(()=>{if(PH.on&&(S.dead))photoToggle(false)});
 
 // ===== MENU D'ACCUEIL ANIMÉ : le vaisseau du joueur tourne devant une planète au lancement =====
@@ -15347,6 +15526,513 @@ TICK.push(()=>{if(MENU3.fc&&FADE.v<.01){MENU3.fc=0;if(FADE.tg==0)FADE.col='255,2
 addEventListener('keydown',e=>{if(MENU3.on&&(e.code=='Enter'||e.code=='Space')&&!(OPTP&&OPTP.open)){e.preventDefault();menu3Close()}},true);
 function news13(){if(G.x.news19)return;G.x.news19=1;G.x.news18=1;G.x.news17=1;G.x.news16=1;G.x.news15=1;G.x.news14=1;G.x.news13=1;G.x.news12=1;banner('star','Mise à jour : personnages réalistes !','Ton pilote et tous les habitants sont refaits : corps articulé, visages (yeux qui clignent, sourcils, barbe), coiffures, tenues détaillées et démarche naturelle. Choisis ta silhouette, ton visage, ta peau et ta coiffure dans Profil → Personnalisation.','#7ab6ff');try{save()}catch(e){}}
 if(!menu3Skip())menu3Open();else setTimeout(news13,7000);
+
+/* Starfarer 3D — flight, combat, comfort and progression polish.
+ * Uses the original simulation and save format. No third-party dependencies.
+ */
+const STARFARER_POLISH = (() => {
+  'use strict';
+  const VERSION = '2.3';
+  const defaults = {
+    compact: true,
+    calm: matchMedia('(prefers-reduced-motion: reduce)').matches,
+    contrast: false,
+    fov: 68,
+    glare: 55,
+    telemetry: false,
+    effects: true
+  };
+  let prefs = { ...defaults };
+  try {
+    const v = JSON.parse(localStorage.getItem('sf-polish-v2') || '{}');
+    for (const k of ['compact','calm','contrast','telemetry','effects']) if (typeof v[k] === 'boolean') prefs[k] = v[k];
+    if (Number.isFinite(v.fov)) prefs.fov = clamp(v.fov, 55, 85);
+    if (Number.isFinite(v.glare)) prefs.glare = clamp(v.glare, 0, 100);
+  } catch (_) {}
+
+  const state = GX('polish', {});
+  if (!state.claimed || typeof state.claimed !== 'object' || Array.isArray(state.claimed)) state.claimed = {};
+  // Older completed tutorials must not be rewarded again after this update.
+  if (!state.migrated) {
+    state.migrated = 1;
+    if (G.x.tut9 && G.x.tut9.done && !G.x.tut9.skipped) state.tutorialReward = 1;
+  }
+  const MILESTONES = [
+    { id:'mission1', name:'Premier contrat', desc:'Terminer une mission', goal:1, value:()=>G.done||0, credits:200, xp:35 },
+    { id:'explore3', name:'Au-delà de la base', desc:'Découvrir 3 planètes', goal:3, value:()=>G.disc.size, credits:300, xp:50 },
+    { id:'pirates5', name:'Secteur sécurisé', desc:'Abattre 5 ennemis', goal:5, value:()=>G.kills||0, credits:350, xp:60 },
+    { id:'upgrade3', name:'Prêt pour le grand voyage', desc:'Acheter 3 améliorations armes, moteur ou coque', goal:3, value:()=>G.u.reduce((n,v)=>n+Math.max(0,v-1),0), credits:400, xp:70 }
+  ];
+  let panelOpen = false, previousFocus = null, lastHUD = 0, lastProgress = 0, hitUntil = 0, damageUntil = 0;
+  let styledShip = null;
+  const ringPool = [], ringGeometry = new THREE.RingGeometry(.82, 1, 32);
+  let ringIndex = 0;
+
+  function clearInput() {
+    for (const k of Object.keys(K)) K[k] = 0;
+    for (const k of ['fire','boost','brake']) {
+      B[k] = 0;
+      const el = $(k); if (el) el.classList.remove('on');
+    }
+    MS.in = MS.fire = MS.boost = false;
+    stick = null;
+    if (typeof THR6E !== 'undefined') THR6E.drag = null;
+  }
+  addEventListener('blur', clearInput);
+  addEventListener('pagehide', clearInput);
+  document.addEventListener('visibilitychange', () => {
+    clearInput(); last = performance.now(); FX3.pqOk = false;
+  });
+  document.addEventListener('focusin', e => {
+    if (e.target.matches('input,textarea,select,[contenteditable="true"]')) clearInput();
+  });
+  addEventListener('pointercancel', clearInput);
+  document.addEventListener('pointerup', e => {
+    if (e.pointerType === 'mouse') {
+      if (e.button === 0) MS.fire = false;
+      if (e.button === 2) MS.boost = false;
+    }
+  }, true);
+  addEventListener('keydown', e => {
+    const target = e.target;
+    if (panelOpen) {
+      if (e.code === 'Escape') { e.preventDefault(); togglePanel(false); }
+      if (e.code === 'Tab') {
+        const controls = [...panel.querySelectorAll('button,input,select')].filter(x => !x.disabled);
+        const first = controls[0], end = controls[controls.length-1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); end.focus(); }
+        else if (!e.shiftKey && document.activeElement === end) { e.preventDefault(); first.focus(); }
+      }
+      e.stopImmediatePropagation(); return;
+    }
+    if (target instanceof Element && target.matches('textarea,select,[contenteditable="true"]')) {
+      e.stopImmediatePropagation(); return;
+    }
+    if (target instanceof Element && target.closest('button') && (e.code === 'Space' || e.code === 'Enter')) {
+      e.stopImmediatePropagation();
+    }
+  }, true);
+
+  const oldOptions = optToggle;
+  optToggle = function(v) { clearInput(); oldOptions(v); syncControls(); };
+  const oldSteer = steerInput;
+  steerInput = function() { return isPaused() ? [0,0] : oldSteer(); };
+  const oldCamera = updCam;
+  updCam = function(dt) {
+    oldCamera(dt);
+    if ((mode === 'space' || mode === 'surf') && !FOOT.on && !S.docked && !S.entry && !S.ascent &&
+        !MENU3.on && !PH.on && !MAP.open && !ckActive() && !SI.on && !GZ.on && !WK3.on) {
+      camera.fov = clamp(camera.fov + prefs.fov - 60, 45, 105);
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  // Cap actual pixels, including large desktop and high-DPI displays. Reuse the
+  // existing adaptive-resolution system, rather than introducing a second loop.
+  const oldMaxPR = fx3PRMax;
+  fx3PRMax = function() {
+    const budget = DESK ? (QI === 0 ? 4500000 : 2800000) : 1800000;
+    return Math.max(fx3PRMin(), Math.min(oldMaxPR(), Math.sqrt(budget / Math.max(1, innerWidth*innerHeight))));
+  };
+  fx3SetPR(Math.min(R3.getPixelRatio(), fx3PRMax()));
+
+  function applyPreferences(persist = true) {
+    window.SF2Motion = prefs.calm ? 0 : .6;
+    document.body.classList.toggle('sf2-compact', prefs.compact);
+    document.body.classList.toggle('sf2-calm', prefs.calm);
+    document.body.classList.toggle('sf2-contrast', prefs.contrast);
+    if (persist) try { localStorage.setItem('sf-polish-v2', JSON.stringify(prefs)); } catch (_) {}
+    if (prefs.calm) { FX3.mb.set(0,0); shake = 0; }
+    syncControls();
+  }
+
+  function text(id, value) {
+    const e = $(id); if (e && e.textContent !== String(value)) e.textContent = value;
+  }
+  function syncControls() {
+    for (const k of ['compact','calm','contrast','telemetry','effects']) {
+      const e=$('sf2-'+k); if (e) { e.textContent=prefs[k]?'Activé':'Désactivé'; e.setAttribute('aria-pressed',String(prefs[k])); }
+    }
+    for (const k of ['fov','glare']) { const e=$('sf2-'+k); if (e) e.value=prefs[k]; }
+    text('sf2-fov-value',prefs.fov+'°'); text('sf2-glare-value',prefs.glare+' %');
+    text('sf2-auto',FX3.auto?'Automatique':'Manuel');
+  }
+  const section=document.createElement('section'); section.className='psec sf2-options';
+  section.innerHTML=`<b class="pt">Confort et lisibilité · ${VERSION}</b>
+    <div class="orow"><span>Interface compacte</span><button id="sf2-compact"></button></div>
+    <div class="orow"><span>Mouvements réduits</span><button id="sf2-calm"></button></div>
+    <div class="orow"><span>Contraste renforcé</span><button id="sf2-contrast"></button></div>
+    <div class="orow"><span>Effets d’impact</span><button id="sf2-effects"></button></div>
+    <label class="sf2-range" for="sf2-fov"><span>Champ de vision <output id="sf2-fov-value"></output></span><input id="sf2-fov" type="range" min="55" max="85" step="1"></label>
+    <label class="sf2-range" for="sf2-glare"><span>Éclat des lumières <output id="sf2-glare-value"></output></span><input id="sf2-glare" type="range" min="0" max="100" step="5"></label>
+    <div class="orow"><span>Choix automatique des effets</span><button id="sf2-auto"></button></div>
+    <div class="orow"><span>Indicateur de fluidité</span><button id="sf2-telemetry"></button></div>
+    <div class="sf2-option-actions"><button id="sf2-open">Mon parcours</button><button id="sf2-defaults">Réglages conseillés</button></div>
+    <small class="sf2-key-note">B : frein · F8 : mode photo · Tab : curseur libre</small>`;
+  const firstSection=$('opts').querySelector('.psec');
+  firstSection.parentNode.insertBefore(section,firstSection.nextSibling);
+  for (const k of ['compact','calm','contrast','telemetry','effects']) $('sf2-'+k).onclick=()=>{ prefs[k]=!prefs[k]; applyPreferences(); };
+  for (const k of ['fov','glare']) $('sf2-'+k).oninput=e=>{ prefs[k]=+e.target.value; applyPreferences(); };
+  $('sf2-auto').onclick=()=>{
+    FX3.auto=!FX3.auto; FX3.bad=FX3.good=0; FX3.block=performance.now()+4000;
+    try { if(FX3.auto)localStorage.removeItem('sf-fx');else localStorage.setItem('sf-fx',FX3.lv); } catch (_) {}
+    syncControls();
+  };
+  $('sf2-defaults').onclick=()=>{prefs={...defaults};FX3.auto=true;try{localStorage.removeItem('sf-fx')}catch(_){}applyPreferences();toast('Réglages de confort rétablis');};
+
+  const panel=document.createElement('div');panel.id='sf2-panel';panel.hidden=true;
+  panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','sf2-panel-title');
+  panel.innerHTML=`<div class="sf2-window"><header><div><small>JOURNAL DU PILOTE</small><h2 id="sf2-panel-title">Mon parcours</h2></div><button id="sf2-close" aria-label="Fermer mon parcours">Fermer</button></header>
+    <p class="sf2-intro">Explore, équipe ton vaisseau et termine des contrats. Chaque étape ci-dessous donne sa récompense une seule fois.</p>
+    <div id="sf2-stats" class="sf2-stats"></div><div id="sf2-milestones"></div>
+    <footer><button id="sf2-next">Trouver ma prochaine activité</button><button id="sf2-settings">Confort et commandes</button></footer></div>`;
+  document.body.appendChild(panel);
+  function renderProgress() {
+    const stats=$('sf2-stats');stats.replaceChildren();
+    for(const [label,value] of [['Niveau',lvInfo().L],['Contrats',G.done||0],['Planètes',G.disc.size],['Victoires',G.kills||0]]){
+      const cell=document.createElement('div'),number=document.createElement('b'),caption=document.createElement('span');
+      number.textContent=value;caption.textContent=label;cell.append(number,caption);stats.append(cell);
+    }
+    const list=$('sf2-milestones');list.replaceChildren();
+    for(const m of MILESTONES){
+      const done=!!state.claimed[m.id],value=Math.min(m.goal,m.value()),item=document.createElement('article');item.className='sf2-milestone'+(done?' done':'');
+      const heading=document.createElement('div'),name=document.createElement('b'),count=document.createElement('span');name.textContent=m.name;count.textContent=done?'Accompli':value+' / '+m.goal;heading.append(name,count);
+      const description=document.createElement('p');description.textContent=m.desc;
+      const bar=document.createElement('progress');bar.max=m.goal;bar.value=value;bar.setAttribute('aria-label',m.desc);
+      const reward=document.createElement('small');reward.textContent=done?'Récompense reçue':`Récompense : ${m.credits} ¢ · ${m.xp} XP`;
+      item.append(heading,description,bar,reward);list.append(item);
+    }
+  }
+  function togglePanel(on) {
+    on=on==null?!panelOpen:!!on;if(on===panelOpen)return;
+    clearInput();panelOpen=on;window.SF2PAUSE=on;panel.hidden=!on;
+    if(on){previousFocus=document.activeElement;if(OPTP.open)oldOptions(false);renderProgress();$('sf2-close').focus();}
+    else if(previousFocus&&previousFocus.isConnected)previousFocus.focus();
+  }
+  $('sf2-close').onclick=()=>togglePanel(false);
+  $('sf2-open').onclick=()=>togglePanel(true);
+  $('sf2-next').onclick=()=>{togglePanel(false);qfOpen();};
+  $('sf2-settings').onclick=()=>{togglePanel(false);optToggle(true);section.scrollIntoView({block:'start'});};
+  panel.addEventListener('pointerdown',e=>{if(e.target===panel)togglePanel(false);});
+  const menuProgress=document.createElement('button');menuProgress.id='sf2-menu-progress';menuProgress.textContent='Mon parcours';menuProgress.onclick=()=>togglePanel(true);
+  if($('menu3'))$('menu3').querySelector('.m3bot').appendChild(menuProgress);
+  const hud=document.createElement('div');hud.id='sf2-hud';hud.innerHTML='<div id="sf2-target" hidden><span id="sf2-target-type"></span><b id="sf2-target-name"></b><progress id="sf2-target-hp" max="1" value="1" aria-label="Coque de la cible"></progress><small id="sf2-target-distance"></small></div><div id="sf2-objective" hidden><small id="sf2-objective-label">PROCHAIN CAP</small><b id="sf2-objective-name"></b><span id="sf2-objective-detail"></span></div><div id="sf2-alert" role="status" aria-live="polite" hidden></div><div id="sf2-fps" hidden></div><div id="sf2-pause" hidden>EN PAUSE · Ferme les options pour reprendre</div>';
+  document.body.appendChild(hud);
+  const oldLens=lensFlares;
+  lensFlares=function(){const v=FL3.v,f=FL3.f,k=prefs.glare/100;FL3.v*=k;FL3.f*=k;try{return oldLens()}finally{FL3.v=v;FL3.f=f;}};
+
+  function addRing(position,kill) {
+    if(!prefs.effects||FX3.lv==='eco'||!position)return;
+    if(!ringPool.length)for(let i=0;i<12;i++){
+      const material=new THREE.MeshBasicMaterial({color:0x8aeaff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+      const mesh=new THREE.Mesh(ringGeometry,material);mesh.visible=false;mesh.frustumCulled=false;ringPool.push({mesh,age:1,life:.45,size:1});
+    }
+    const r=ringPool[ringIndex++%ringPool.length];r.age=0;r.life=kill?.6:.3;r.size=kill?14:3;
+    r.mesh.position.copy(position);r.mesh.material.color.setHex(kill?0xffa34d:0x8aeaff);r.mesh.visible=true;curScene().add(r.mesh);
+  }
+  const oldHit=hitEnemy;
+  hitEnemy=function(e,amount,p){
+    if(!e||e.dead||!(amount>0))return;
+    const hp=e.hp;oldHit(e,amount,p);
+    if(e.hp<hp||e.dead){hitUntil=t+(e.dead?.45:.13);addRing(p||e.pos,!!e.dead);}
+  };
+  const oldDamage=damage;
+  damage=function(amount,kind){
+    if(!Number.isFinite(amount)||amount<=0)return;
+    // Let a new pilot learn the controls in the starting sector. Collisions
+    // and travel outside that sector keep their normal consequences.
+    if(kind!=='col'&&mode==='space'&&TUT9.on&&danger()===0)amount*=.6;
+    const hp=S.hp,shield=S.sh||0;oldDamage(amount,kind);
+    if(S.hp<hp||(S.sh||0)<shield)damageUntil=t+.45;
+  };
+  const oldEnemy=mkEnemy;
+  mkEnemy=function(type,position,zone){const enemy=oldEnemy(type,position,zone);if(!enemy.boss)enemy.cd=Math.max(2.3,enemy.cd||0);return enemy;};
+  const oldOverlay=overlay;
+  overlay=function(){oldOverlay();if(MENU3.on||PH.on||MAP.open||S.dead||window.SF2PAUSE||OPTP.open)return;
+    const W=innerWidth,H=innerHeight;
+    if(damageUntil>t&&!prefs.calm){OX.save();OX.strokeStyle='rgba(255,95,80,'+Math.min(.55,(damageUntil-t)*1.2)+')';OX.lineWidth=3;OX.strokeRect(2,2,W-4,H-4);OX.restore();}
+    if(hitUntil>t&&mode==='space'&&!ckActive()){OX.save();OX.globalAlpha=Math.min(1,(hitUntil-t)*7);OX.strokeStyle='#b9f5ff';OX.lineWidth=1.6;OX.beginPath();for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2;OX.moveTo(W/2+Math.cos(a)*12,H/2+Math.sin(a)*12);OX.lineTo(W/2+Math.cos(a)*17,H/2+Math.sin(a)*17);}OX.stroke();OX.restore();}
+  };
+
+  function updateHUD(now) {
+    const hidden=MENU3.on||PH.on||MAP.open||OPTP.open||panelOpen||S.dead||DLG.open||!!window.XPAUSE;
+    hud.hidden=hidden;
+    $('sf2-pause').hidden=!OPTP.open||MENU3.on;
+    // Pause label lives outside the hidden gameplay HUD when Options are open.
+    if(hidden)return;
+    const active=mode==='space'&&!S.docked&&!FOOT.on&&!SI.on&&!GZ.on;
+    let target=active&&lock&&lock.foe&&!lock.dead?lock:null;
+    $('sf2-target').hidden=!target||TUT9.on;
+    if(target){
+      text('sf2-target-type',target.boss?'MENACE MAJEURE':'CIBLE VERROUILLÉE');
+      text('sf2-target-name',target.label||({pirate:'Pirate',chasseur:'Intercepteur',lourd:'Croiseur',boss:'Chef pirate'}[target.ty])||'Hostile');
+      $('sf2-target-hp').value=clamp(target.hp/Math.max(1,target.mhp||target.hp),0,1);
+      text('sf2-target-distance',Math.round(S.pos.distanceTo(target.pos))+' m');
+    }
+    const wp=G.x.wp9||(G.m&&G.m.tg),obj=$('sf2-objective');
+    obj.hidden=!active||TUT9.on;
+    if(active&&!TUT9.on){
+      if(wp&&Number.isFinite(wp.x)){
+        const distance=Math.hypot(wp.x-S.pos.x,wp.y-S.pos.y,wp.z-S.pos.z);
+        text('sf2-objective-label',G.m?'CONTRAT EN COURS':'CAP ACTUEL');
+        text('sf2-objective-name',wp.n||wp.name||G.m&&G.m.txt||'Destination');
+        text('sf2-objective-detail',(distance>=1000?(distance/1000).toFixed(1)+' km':Math.round(distance)+' m')+' · C : carte');
+      }else if(G.m){text('sf2-objective-label','CONTRAT EN COURS');text('sf2-objective-name',G.m.txt||'Mission active');text('sf2-objective-detail',G.m.type==='chasse'?Math.max(0,(G.kills||0)-(G.m.k0||0))+' / '+G.m.n+' pirates':'Suis le marqueur de mission');}
+      else{text('sf2-objective-label','À TOI DE CHOISIR');text('sf2-objective-name','Explorer · commercer · combattre');text('sf2-objective-detail','F1 : activités à proximité · C : carte');}
+    }
+    if(typeof STARFARER_JOURNEY!=='undefined')STARFARER_JOURNEY.updateObjective();
+    let alert='';
+    if(active){
+      if(EB.some(b=>b.home&&b.l>0&&b.m.position.distanceToSquared(S.pos)<490000))alert='MISSILE EN APPROCHE · X : leurres · R : esquive';
+      else if(S.hp/maxhp()<.25)alert='COQUE CRITIQUE · Rejoins une station pour réparer';
+      else if(cargoUsed()>=cap())alert='SOUTE PLEINE · Vends tes ressources en station';
+    }
+    const box=$('sf2-alert');box.hidden=!alert;text('sf2-alert',alert);
+    $('sf2-fps').hidden=!prefs.telemetry;
+    if(prefs.telemetry)text('sf2-fps',(FX3.fps?Math.round(FX3.fps)+' i/s':'Mesure…')+' · '+FX3N[FX3.lv]+' · '+Math.round(R3.getPixelRatio()*100)+' %');
+  }
+
+  function tick(dt) {
+    const paused=isPaused(),elapsed=paused?0:Math.min(dt,.05),now=performance.now();
+    if(bloom){bloom.strength=DESK?.48:.34;bloom.threshold=.91;bloom.radius=.42;}
+    if(prefs.calm){FX3.mb.set(0,0);if(GRADE){GRADE.uniforms.bst.value=0;if(GRADE.uniforms.hit)GRADE.uniforms.hit.value=0;}if(typeof GL3!=='undefined')GL3.v=0;}
+    if(!prefs.effects||prefs.calm)for(const r of ringPool)r.mesh.visible=false;
+    for(const r of ringPool)if(r.mesh.visible){r.age+=elapsed;const k=r.age/r.life;if(k>=1){r.mesh.visible=false;if(r.mesh.parent)r.mesh.parent.remove(r.mesh);continue;}r.mesh.quaternion.copy(camera.quaternion);r.mesh.scale.setScalar(r.size*(.6+k*2.5));r.mesh.material.opacity=(1-k)*.55;}
+    if(ship!==styledShip){styledShip=ship;ship.traverse(o=>{if(!o.isMesh)return;for(const m of(Array.isArray(o.material)?o.material:[o.material]))if(m&&m.isMeshStandardMaterial&&!m.transparent&&m.blending!==THREE.AdditiveBlending){m.roughness=Math.max(.28,m.roughness);m.envMapIntensity=Math.min(m.envMapIntensity||1,1.1);}});}
+    if(now-lastHUD>250){lastHUD=now;updateHUD(now);}
+    if(!paused&&!MENU3.on&&!PH.on&&now-lastProgress>1500){
+      lastProgress=now;let earned=false;
+      for(const m of MILESTONES)if(!state.claimed[m.id]&&m.value()>=m.goal){
+        // Mark before granting: a save, callback, or reload cannot claim twice.
+        state.claimed[m.id]=1;G.cr+=m.credits;gainXP(m.xp);earned=true;
+        banner('trophy',m.name,`+${m.credits} ¢ · +${m.xp} XP · Étape de ton parcours`,'#7fe6ce');
+      }
+      if(earned)save();
+    }
+  }
+  TICK.push(tick);
+  applyPreferences(false);
+  // Tooltips and accessible names remain useful on touch and keyboard.
+  for(const [id,name] of [['optb','Options et confort (O)'],['mapb','Carte stellaire (C)'],['qfb','Trouver une activité (F1)'],['phob','Mode photo (F8)'],['profb','Profil du pilote (P)']]){
+    const e=$(id);if(e){e.title=name;e.setAttribute('aria-label',name);}
+  }
+  $('opts').setAttribute('role','dialog');$('opts').setAttribute('aria-label','Options du jeu');
+  return Object.freeze({version:VERSION});
+})();
+
+/* Starfarer 3D 2.2 — interface redesign, reusing every existing action. */
+const STARFARER_UI = (() => {
+  'use strict';
+  const paths = {
+    gear:'<path d="M4 7h10m4 0h2M4 17h3m4 0h9"/><circle cx="16" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+    map:'<path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Z"/><path d="M9 3v16m6-14v16"/>',
+    user:'<circle cx="12" cy="8" r="3.5"/><path d="M4.5 21v-2a7.5 7.5 0 0 1 15 0v2"/>',
+    book:'<path d="M4 3h12a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3V3Z"/><path d="M4 17h15M8 7h7M8 11h5"/>',
+    cam:'<path d="M3 7h4l2-3h6l2 3h4v13H3V7Z"/><circle cx="12" cy="13" r="4"/>',
+    mp:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v2"/>',
+    squad:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v2"/>',
+    cockpit:'<path d="M3 19v-3a9 9 0 0 1 18 0v3H3ZM12 7v12m-7-9 4 9m10-9-4 9"/>',
+    extcam:'<path d="m12 3 3 9 6 5-7-1-2 5-2-5-7 1 6-5 3-9Z"/>',
+    hull:'<path d="m12 3 4 7v9l-4 2-4-2v-9l4-7Zm-4 9-5 5v3l5-2m8-6 5 5v3l-5-2"/>',
+    shield:'<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    cargo:'<path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v10l9 4 9-4V8M12 13v9M7 5.8l9 5"/>',
+    coin:'<circle cx="12" cy="12" r="9"/><path d="M15 8.5h-4a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4H9m3-10v12"/>',
+    planet:'<circle cx="12" cy="12" r="7"/><path d="M6 7C-3 10 2 20 14 16S26 4 17 6"/>',
+    target:'<circle cx="12" cy="12" r="7"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/><circle cx="12" cy="12" r="1"/>',
+    fire:'<path d="M12 3c1 5 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3 2-5 0 3 2 3 2 1l1-6Z"/><path d="M12 14c3 2 2 6 0 6s-3-3 0-6Z"/>',
+    boost:'<path d="m13 2-8 12h6l-1 8 9-13h-6l0-7Z"/>',
+    brake:'<circle cx="12" cy="12" r="9"/><path d="M9 8v8m6-8v8"/>',
+    close:'<path d="m6 6 12 12M6 18 18 6"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>',
+    minus:'<path d="M5 12h14"/>',
+    check:'<path d="m5 12 4 4L20 5"/>',
+    chat:'<path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 0 1-1-4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6Z"/><path d="M7 8h10M7 12h6"/>',
+    star:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>',
+    trophy:'<path d="M8 3h8v7a4 4 0 0 1-8 0V3Zm0 2H4v4a4 4 0 0 0 4 4m8-8h4v4a4 4 0 0 1-4 4m-4 1v6m-4 1h8"/>',
+    locate:'<circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>',
+    warn:'<path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5m0 3v.01"/>',
+    lock:'<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/>',
+    snd:'<path d="M3 9h4l5-5v16l-5-5H3V9Zm13-1a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
+    mute:'<path d="M3 9h4l5-5v16l-5-5H3V9Zm13 0 5 6m0-6-5 6"/>',
+    arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',
+    help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 8.5a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4m0 4v.01"/>',
+    chart:'<path d="M4 3v17h17M8 15v-4m5 4V7m5 8V4"/>'
+  };
+  const sprite = document.querySelector('symbol[id^="i-"]')?.parentElement;
+  for(const [name,markup] of Object.entries(paths)) {
+    let symbol=$('i-'+name);
+    if(!symbol && sprite){symbol=document.createElementNS('http://www.w3.org/2000/svg','symbol');symbol.id='i-'+name;symbol.setAttribute('viewBox','0 0 24 24');sprite.append(symbol);}
+    if(symbol)symbol.innerHTML=markup;
+    ICONS[name]=markup;
+  }
+  const icon=name=>ICO(name);
+  const dock=document.createElement('nav');dock.id='sf3-toolbar';dock.setAttribute('aria-label','Raccourcis du vaisseau');
+  const groups=[
+    [['mapb','Carte','C'],['profb','Pilote','P'],['cxb','Journal','J']],
+    [['cockb','Caméra','V'],['phob','Photo','F8']],
+    [['mpb','Multijoueur','T'],['qfb','Activités','F1'],['optb','Options','O']]
+  ];
+  const originalButtons=[];
+  for(const items of groups){
+    const group=document.createElement('div');group.className='sf3-tool-group';group.setAttribute('role','group');
+    for(const [id,label,key] of items){
+      const button=$(id);if(!button)continue;
+      originalButtons.push(button);button.dataset.label=label;button.dataset.key=key;button.classList.add('sf3-tool');
+      if(id==='qfb')button.innerHTML=icon('help');
+      button.addEventListener('pointerenter',()=>button.dataset.label=(button.title||label).replace(/\s*\([^)]*\)\s*$/,''));
+      group.append(button);
+    }
+    dock.append(group);
+  }
+  document.body.append(dock);
+
+  const settings=$('opts'),sections=[...settings.children].filter(e=>e.classList.contains('psec'));
+  const tabNames=['Affichage','Confort','Jeu','Son','Commandes','Sauvegarde','Aide'];
+  const tabs=document.createElement('div');tabs.id='sf3-settings-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Catégories des options');
+  let selected=0;
+  function selectTab(index,focus=false){
+    selected=(index+sections.length)%sections.length;
+    sections.forEach((section,i)=>{
+      section.classList.toggle('sf3-inactive',i!==selected);
+      const button=tabs.children[i];button.classList.toggle('sf3-selected',i===selected);button.setAttribute('aria-selected',String(i===selected));button.tabIndex=i===selected?0:-1;
+    });
+    settings.scrollTop=0;if(focus)tabs.children[selected].focus();
+  }
+  sections.forEach((section,i)=>{
+    section.id=section.id||'sf3-settings-section-'+i;section.setAttribute('role','tabpanel');section.setAttribute('aria-labelledby','sf3-settings-tab-'+i);
+    const tab=document.createElement('button');tab.id='sf3-settings-tab-'+i;tab.type='button';tab.setAttribute('role','tab');tab.setAttribute('aria-controls',section.id);tab.textContent=tabNames[i]||section.querySelector('.pt')?.textContent||'Autres';
+    tab.onclick=()=>selectTab(i);tab.addEventListener('keydown',e=>{
+      const direction=e.code==='ArrowRight'?1:e.code==='ArrowLeft'?-1:0;
+      if(direction||e.code==='Home'||e.code==='End'){e.preventDefault();e.stopPropagation();selectTab(e.code==='Home'?0:e.code==='End'?sections.length-1:selected+direction,true);}
+    });tabs.append(tab);
+  });
+  settings.querySelector('.phead').after(tabs);selectTab(0);
+  const comfortIndex=sections.findIndex(s=>s.classList.contains('sf2-options'));
+  const comfortButton=$('sf2-settings');if(comfortButton){const go=comfortButton.onclick;comfortButton.onclick=e=>{go(e);if(comfortIndex>=0)selectTab(comfortIndex);};}
+  for(const id of ['sf2-open','sf2-next','sf2-settings','sf2-close']){
+    const b=$(id);if(b)b.classList.add('sf3-action');
+  }
+  const scrim=document.createElement('div');scrim.id='sf3-scrim';scrim.hidden=true;scrim.setAttribute('aria-hidden','true');document.body.append(scrim);
+  const panels=['opts','prof','cxpanel','talpanel','bugpanel','bpanel','trpanel','mkpanel','mppanel','qf9'];
+  let topPanel=null;
+  scrim.onclick=()=>{
+    if(topPanel==='opts')optToggle(false);
+    else if(topPanel==='prof')profToggle(false);
+    else if(topPanel==='cxpanel')cxToggle(false);
+    else if(topPanel==='qf9')qfClose();
+    else {const close=$(topPanel)?.querySelector('.phead button,.mphead button,[id$="x"]');if(close)close.click();}
+  };
+  function updatePanels(){
+    const visible=panels.filter(id=>{const e=$(id);return e&&e.style.display&&e.style.display!=='none';});
+    topPanel=visible[visible.length-1]||null;
+    scrim.hidden=!topPanel;document.body.classList.toggle('sf3-panel-open',!!topPanel);
+    dock.hidden=MAP.open||PH.on||MENU3.on||!!window.SF2PAUSE;
+    originalButtons.forEach(b=>{const active=b.id==='optb'?OPTP.open:b.id==='profb'?PROF.open:b.id==='cxb'?CXP.open:b.id==='qfb'?QF9.open:b.id==='cockb'?!!COCKPIT:b.id==='mpb'?MP.panel:false;b.classList.toggle('sf3-active',!!active);});
+  }
+  const oldOptions=optToggle;
+  optToggle=function(on){oldOptions(on);updatePanels();};
+  const oldProfile=profToggle;
+  profToggle=function(on){oldProfile(on);updatePanels();};
+  const oldIdeas=qfOpen;
+  qfOpen=function(){oldIdeas();updatePanels();};
+  const oldCloseIdeas=qfClose;
+  qfClose=function(){oldCloseIdeas();updatePanels();};
+  let elapsed=0;TICK.push(dt=>{elapsed+=dt;if(elapsed<.15)return;elapsed=0;updatePanels();});updatePanels();
+
+  const menu=$('menu3');if(menu){
+    const eyebrow=document.createElement('div');eyebrow.className='sf3-eyebrow';eyebrow.innerHTML=icon('planet')+'<span>UN UNIVERS À EXPLORER</span>';menu.querySelector('.m3top').prepend(eyebrow);
+    const start=$('m3play'),label=start.textContent.toLowerCase().includes('continuer')?'Continuer l’aventure':'Commencer l’aventure';start.innerHTML='<span>'+label+'</span>'+icon('arrow');
+    const progress=$('sf2-menu-progress');if(progress)progress.innerHTML=icon('chart')+'<span>Mon parcours</span>';
+    $('m3opt').innerHTML=icon('gear')+'<span>Options</span>';$('m3ph').innerHTML=icon('cam')+'<span>Mode photo</span>';
+    const version=menu.querySelector('.m3ver');if(version)version.textContent='STARFARER 3D · VERSION 2.3';
+  }
+  return Object.freeze({version:'2.3',toolbar:dock,originalButtons:originalButtons.length,settingsTabs:sections.length});
+})();
+
+/* Navigation, equipment comparisons and notification priorities. */
+const STARFARER_JOURNEY=(()=>{
+  'use strict';
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const distance=p=>Math.hypot(p.x-S.pos.x,(p.y||0)-S.pos.y,p.z-S.pos.z);
+  const meters=d=>d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m';
+  const zone=p=>Math.min(4,Math.floor(Math.hypot(p.x,p.y||0,p.z)/9000));
+  function goal(){
+    const wp=G.x.wp9;
+    if(wp&&Number.isFinite(wp.x))return {...wp,label:'CAP CHOISI',name:wp.n||'Destination',kind:'waypoint'};
+    if(G.m){const m=G.m;return {...(m.tg||{}),label:'CONTRAT EN COURS',name:m.txt||'Mission active',kind:m.type||'mission'};}
+    const p=storyTarget();return p?{...p,label:'HISTOIRE',name:CHAPTERS[SG().ch].txt(),kind:'story'}:null;
+  }
+  const stats=[['hp','Coque',false],['spd','Vitesse (m/s)',false],['boost','Boost (m/s)',false],['turn','Maniabilité',false],['dmg','Dégâts',false],['cdmg','Canon',false],['rate','Cadence',false],['shots','Projectiles supplémentaires',false],['heat','Chauffe',true],['ldmg','Laser',false],['twin','Canons doubles',false],['sh','Bouclier',false],['shr','Recharge bouclier',false],['regen','Réparation / s',false],['lock','Portée de verrouillage',false],['cone','Angle de verrouillage',false],['cap','Soute',false],['ram','Éperonnage',false],['lrange','Portée laser',false]];
+  function values(parts){const p=pmCalc(parts);return {...p,hp:Math.round((100+40*(G.u[2]-1))*HS().hp*p.hp),spd:Math.round((110+18*(G.u[1]-1))*HS().spd*p.spd),boost:Math.round((110+18*(G.u[1]-1))*HS().spd*p.spd*2.6*p.boost),cap:capWith(parts)};}
+  function compare(slot,id){
+    if(!PARTS[slot]?.o[id])return [];
+    const before=values(G.parts),after=values({...G.parts,[slot]:id});
+    return stats.filter(([k])=>Math.abs(after[k]-before[k])>.0001).map(([key,name,lower])=>({key,name,before:before[key],after:after[key],better:lower?after[key]<before[key]:after[key]>before[key]}));
+  }
+  const fmt=(key,n)=>['hp','spd','boost','cap','shots','twin','sh','ram','regen'].includes(key)?Number(n.toFixed(1)).toLocaleString('fr-FR'):Math.round(n*100)+' %';
+  const oldShop=shopView;let shopSignature='',shopHTML='';
+  shopView=function(){let h=oldShop.apply(this,arguments);if(TAB!=='atelier')return h;
+    const signature=h+JSON.stringify([G.ship,G.parts,G.u,cargoUsed()]);if(signature===shopSignature)return shopHTML;
+    const wrap=document.createElement('div');wrap.innerHTML=h;
+    for(const row of wrap.querySelectorAll('[data-aprev]')){
+      const [s,id]=row.dataset.aprev.split(':');if((G.parts[s]||'std')===id)continue;
+      const changes=compare(s,id),box=document.createElement('div');box.className='j23-compare';
+      box.innerHTML='<small>PAR RAPPORT À TON ÉQUIPEMENT</small>'+(changes.length?changes.map(c=>'<span class="'+(c.better?'gain':'loss')+'">'+esc(c.name)+' <b>'+fmt(c.key,c.before)+' → '+fmt(c.key,c.after)+'</b></span>').join(''):'<span>Apparence uniquement · performances identiques</span>');
+      if(cargoUsed()>capWith({...G.parts,[s]:id}))box.innerHTML+='<span class="loss">Soute trop chargée pour installer cette pièce</span>';
+      row.append(box);
+    }
+    shopSignature=signature;shopHTML=wrap.innerHTML;return shopHTML;
+  };
+  const panel=document.createElement('aside');panel.id='j23-map';panel.hidden=true;panel.setAttribute('aria-label','Itinéraire et dangers');
+  panel.innerHTML='<small>PLAN DE VOL</small><b id="j23-map-name"></b><p id="j23-map-distance"></p><p id="j23-map-risk"></p><div class="j23-actions"><button id="j23-set-course">Choisir ce cap</button><button id="j23-focus">Voir mon objectif</button><button id="j23-clear">Effacer le cap</button></div><small class="j23-legend">◆ Stations · ● Planètes · Anneaux : danger croissant</small>';
+  $('map').append(panel);
+  $('j23-set-course').onclick=()=>{const p=MAP.sel;if(!p||!Number.isFinite(p.x))return;t9Wp(p.x,p.y||0,p.z,p.n);save();toast('Cap choisi : '+p.n);drawMap();};
+  $('j23-clear').onclick=()=>{G.x.wp9=null;save();drawMap();};
+  $('j23-focus').onclick=()=>{const p=goal();if(!p||!Number.isFinite(p.x))return;MAP.cx=p.x;MAP.cz=p.z;MAP.zoom=Math.min(.12,Math.max(.003,Math.min(innerWidth,innerHeight)/Math.max(1000,distance(p)*2.5)));drawMap();};
+  function updateMap(){
+    const space=mode!=='surf';panel.hidden=!MAP.open||!space;if(panel.hidden)return;
+    const g=goal(),p=MAP.sel||(g&&Number.isFinite(g.x)?g:null),selected=!!MAP.sel;
+    $('j23-map-name').textContent=p?(p.n||p.name):'Choisis une destination';
+    $('j23-map-distance').textContent=p?meters(distance(p))+' · '+(selected?'Lieu sélectionné':g.label):'Touche un lieu pour préparer ton trajet.';
+    $('j23-map-risk').textContent=p?'Danger du secteur : '+['Faible','Modéré','Élevé','Très élevé','Extrême'][zone(p)]+' · '+(zone(p)>zone(S.pos)?'Prépare coque et bouclier avant le départ.':'Surveille les contacts pendant le trajet.'):'Les anneaux colorés indiquent les zones de danger.';
+    $('j23-set-course').hidden=!selected;$('j23-clear').hidden=!G.x.wp9;$('j23-focus').disabled=!g||!Number.isFinite(g.x);
+    const wp=g&&Number.isFinite(g.x)?g:null;if(!wp)return;
+    const [x,y]=w2s(S.pos.x,S.pos.z),[tx,ty]=w2s(wp.x,wp.z);
+    MX.save();MX.strokeStyle='#72f2d2';MX.lineWidth=2;MX.setLineDash([7,6]);MX.beginPath();MX.moveTo(x,y);MX.lineTo(tx,ty);MX.stroke();MX.setLineDash([]);MX.beginPath();MX.arc(tx,ty,18,0,TAU);MX.stroke();MX.restore();
+  }
+  const oldMap=drawMap;drawMap=function(){oldMap.apply(this,arguments);updateMap();};
+  function updateObjective(){
+    const box=$('sf2-objective');if(!box||box.hidden)return;const g=goal();if(!g)return;
+    $('sf2-objective-label').textContent=g.label;$('sf2-objective-name').textContent=g.name;
+    let action='Suis le marqueur';
+    if(g.kind==='chasse')action=Math.min(G.m.n,Math.max(0,G.kills-G.m.k0))+' / '+G.m.n+' pirates · Verrouille une cible puis tire';
+    else if(Number.isFinite(g.x)){const d=distance(g);action=meters(d)+' · '+(g.kind==='liv'?'Rejoins la station et amarre-toi':g.kind==='exp'?'Approche la planète pour la découvrir':d<700?'Ralentis et utilise l’action proposée à l’écran':'Aligne ton vaisseau sur le marqueur');}
+    $('sf2-objective-detail').textContent=action+' · C : carte';
+  }
+  // Keep every message in the journal; only urgent messages interrupt a toast.
+  const history=[],pending=TOQ.q;
+  const priority=s=>/missile|mayday|\bSOS\b|critique|détruit|attaqu|pas assez|impossible|vide ta soute|perdu/i.test(s)?2:/install|nouvelle pièce|récompense|livré|mission|contrat|obtenu|acheté|sauvé|cap choisi|arrivée/i.test(s)?1:0;
+  const key=s=>s.replace(/[\d\s.,+\-%×]+/g,'#');
+  const journal=document.createElement('details');journal.id='j23-journal';journal.innerHTML='<summary>Journal des notifications <span id="j23-notice-count">0</span></summary><ol id="j23-notice-list"></ol>';
+  const section=$('sf2-calm')?.closest('.psec');if(section)section.append(journal);
+  function record(s,p){const now=Date.now(),last=history[0];if(last&&last.key===key(s)&&now-last.time<4000){last.text=s;last.count++;last.time=now;}else history.unshift({text:s,priority:p,count:1,time:now,key:key(s)});history.length=Math.min(40,history.length);$('j23-notice-count').textContent=history.length;}
+  journal.addEventListener('toggle',()=>{if(journal.open)renderHistory();});
+  function renderHistory(){const list=$('j23-notice-list');list.replaceChildren();for(const h of history){const li=document.createElement('li');li.className='priority-'+h.priority;li.textContent=h.text+(h.count>1?' ×'+h.count:'');list.append(li);}}
+  const oldBanner=banner,oldBanNext=banNext,oldBlocked=banBlocked;
+  banner=function(ic,title,sub,col){record(title+(sub?' · '+sub:''),1);if(journal.open)renderHistory();return oldBanner.apply(this,arguments);};
+  banNext=function(){oldBanNext();BANT=Math.min(BANT,4.5);};
+  banBlocked=function(){return oldBlocked()||MAP.open||PH.on||(mode==='space'&&!S.docked&&(S.hp/maxhp()<.25||en.some(e=>!e.dead&&e.pos.distanceToSquared(S.pos)<810000)));};
+  function next(){clearTimeout(TOQ.tm);const s=pending.shift();if(s==null){TOQ.busy=false;TOQ.cur='';$('toast').style.opacity=0;return;}TOQ.busy=true;TOQ.cur=s;TOQ.t0=performance.now();$('toast').innerHTML=toastHTML(s);$('toast').dataset.priority=priority(s);$('toast').style.opacity=1;TOQ.tm=setTimeout(next,priority(s)===2?4200:priority(s)===1?3200:2200);}
+  toastShow=next;
+  toast=function(value){if(value==null)return;const s=String(value),p=priority(s);record(s,p);if(journal.open)renderHistory();if(TOQ.busy&&key(TOQ.cur)===key(s)){TOQ.cur=s;$('toast').innerHTML=toastHTML(s);return;}
+    const i=pending.findIndex(v=>key(v)===key(s));if(i>=0)pending.splice(i,1);
+    if(p===2&&TOQ.busy&&priority(TOQ.cur)<2){if(priority(TOQ.cur)===1)pending.unshift(TOQ.cur);pending.unshift(s);next();return;}
+    if(p===0){const ambient=pending.findIndex(v=>priority(v)===0);if(ambient>=0)pending.splice(ambient,1);}
+    pending.push(s);pending.sort((a,b)=>priority(b)-priority(a));if(pending.length>5)pending.length=5;if(!TOQ.busy)next();
+  };
+  let elapsed=0;TICK.push(dt=>{elapsed+=dt;if(elapsed<.25)return;elapsed=0;panel.hidden=!MAP.open||mode==='surf';});
+  return Object.freeze({version:'2.3',compare,goal,priority,history,updateObjective,updateMap});
+})();
 
 
 </script></body></html>

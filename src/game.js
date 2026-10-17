@@ -6,12 +6,12 @@ function rebuildShip(){const p=ship.parent;p.remove(ship);ship=buildShip();p.add
 const fwd=(q=S.q,o=_f)=>o.set(0,0,-1).applyQuaternion(q);
 // ----- pilotage -----
 function fly(dt,{rate=1,minSpd=0,surf=false}={}){const[yaw,pitch]=steerInput(),R=(1.2+.08*(G.u[1]-1))*rate*HS().turn*PM('turn');
-S.yawV=lerp(S.yawV||0,yaw,damp(7,dt));S.pitchV=lerp(S.pitchV||0,pitch,damp(7,dt));
+S.yawV=lerp(S.yawV||0,yaw,damp(8.5,dt));S.pitchV=lerp(S.pitchV||0,pitch,damp(8.5,dt));
 _q.setFromAxisAngle(AY,S.yawV*R*dt);S.q.multiply(_q);_q.setFromAxisAngle(AX,S.pitchV*R*.85*dt);S.q.multiply(_q);
 _r.set(1,0,0).applyQuaternion(S.q);fwd();if(Math.abs(_f.y)<.97){const roll=Math.asin(clamp(_r.y,-1,1));_q.setFromAxisAngle(AZ,-roll*damp(2.2,dt));S.q.multiply(_q)}S.q.normalize();
-const tg=S.docked?0:THR6.man?(isBoost()?boostSpd()*(surf?.6:1):Math.max(minSpd,cruise()*THR6.v*(surf?.75:1))):isBrake()?Math.max(minSpd,10):isBoost()?boostSpd()*(surf?.6:1):cruise()*(surf?.75:1);S.spd=lerp(S.spd,tg,damp(isBoost()?1.6:THR6.man&&isBrake()?3.2:2.4,dt));
+const tg=S.docked?0:isBrake()?Math.max(minSpd,0):THR6.man?(isBoost()?boostSpd()*(surf?.6:1):Math.max(minSpd,cruise()*THR6.v*(surf?.75:1))):isBrake()?Math.max(minSpd,10):isBoost()?boostSpd()*(surf?.6:1):cruise()*(surf?.75:1);S.spd=lerp(S.spd,tg,damp(isBoost()?1.6:THR6.man&&isBrake()?3.2:2.4,dt));
 fwd();S.vel.lerp(_v.copy(_f).multiplyScalar(S.spd),damp(3.2,dt));S.pos.addScaledVector(S.vel,dt);
-S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.75,damp(5,dt))}
+S.thr=S.docked?0:clamp(tg/cruise(),0,2.6);S.bank=lerp(S.bank,S.yawV*.52,damp(5,dt))}
 // ----- caméra -----
 const camUp=new V3(0,1,0),camLook=new V3();let camInit=true,fovK=0;const CAMQ=new QT(),CAMS={y:0,p:0,a:0,ls:0};
 function updCam(dt){if(mode=='int'){derCam(dt);return}if(FOOT.on&&mode=='surf'){footCam(dt);return}if(atelierOn()){const R=30*Math.max(1,ship.userData.body.scale.z);ORB+=dt*.3;_u.set(0,1,0).applyQuaternion(S.q);const off=_v.set(Math.sin(ORB+.7)*R,R*.3,Math.cos(ORB+.7)*R).applyQuaternion(S.q).add(S.pos);camera.position.lerp(off,damp(2.5,dt));camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);const rgt=_r.crossVectors(_w.copy(S.pos).sub(camera.position).normalize(),_u).normalize();camLook.copy(S.pos);if(innerWidth>innerHeight)camLook.addScaledVector(rgt,R*.4);else camLook.addScaledVector(_u,-R*.55);camera.lookAt(camLook);sky.position.copy(camera.position);return}
@@ -20,12 +20,12 @@ if(ckActive()){ckCam(dt);return}
 const bo=isBoost()&&!S.docked?1:0;fovK=lerp(fovK,bo,damp(2.4,dt));const sk=Math.max(1,ship.userData.body.scale.z),spK=clamp(S.spd/Math.max(1,cruise()),0,2.8),srf=mode=='surf'?.84:1;
 if(camInit){CAMQ.copy(S.q);CAMS.ls=S.spd;camInit=false}else CAMQ.slerp(S.q,damp(5,dt));
 CAMS.y=lerp(CAMS.y,S.yawV||0,damp(3.5,dt));CAMS.p=lerp(CAMS.p,S.pitchV||0,damp(3.5,dt));const acc=dt>0?(S.spd-CAMS.ls)/dt:0;CAMS.ls=S.spd;CAMS.a=lerp(CAMS.a,clamp(acc*.025,-4,6),damp(2.5,dt));
-const back=(35+spK*3+fovK*10+CAMS.a)*sk*srf,up=(9.5+fovK*1.5)*sk*srf;
+const back=(39+spK*2+fovK*6+CAMS.a*.45)*sk*srf,up=(10+fovK*.7)*sk*srf;
 camera.position.copy(_v.set(-CAMS.y*5*sk,up+CAMS.p*2.4*sk,back).applyQuaternion(CAMQ).add(S.pos));
 _u.set(0,1,0).applyQuaternion(S.q);camUp.lerp(_u,damp(5,dt)).normalize();camera.up.copy(camUp);camLook.copy(S.pos).addScaledVector(fwd(),90);camera.lookAt(camLook);
-const vib=(fovK*.3+Math.max(0,spK-1.05)*.06)*sk;if(vib>.01){camera.position.x+=rv(vib);camera.position.y+=rv(vib);camera.position.z+=rv(vib)}
-if(shake>0){camera.position.x+=rv(shake);camera.position.y+=rv(shake);shake=Math.max(0,shake-dt*2.5)}
-const base=innerWidth<innerHeight?74:(DESK?60:54),fv=base+fovK*20+Math.max(0,spK-1)*3;if(Math.abs(camera.fov-fv)>.05){camera.fov=fv;camera.updateProjectionMatrix()}sky.position.copy(camera.position)}
+const vib=(fovK*.12+Math.max(0,spK-1.05)*.025)*sk*(window.SF2Motion==null?.6:window.SF2Motion);if(vib>.01){camera.position.x+=rv(vib);camera.position.y+=rv(vib);camera.position.z+=rv(vib)}
+if(shake>0){camera.position.x+=rv(shake*(window.SF2Motion==null?.6:window.SF2Motion));camera.position.y+=rv(shake*(window.SF2Motion==null?.6:window.SF2Motion));shake=Math.max(0,shake-dt*2.5)}
+const base=innerWidth<innerHeight?74:(DESK?60:54),fv=base+fovK*10*(window.SF2Motion==null?.6:window.SF2Motion)+Math.max(0,spK-1)*1.5;if(Math.abs(camera.fov-fv)>.05){camera.fov=fv;camera.updateProjectionMatrix()}sky.position.copy(camera.position)}
 function placeShip(dt){if(FOOT.on){ship.position.copy(FOOT.sp);ship.quaternion.copy(FOOT.sq);const ud=ship.userData;ud.body.rotation.set(0,0,0);for(const f of ud.flames){f.fl.scale.set(1,1,.05);f.fl.material.opacity=.1;f.gs.scale.setScalar(1.2)}ud.shield.material.uniforms.op.value=0;return}ship.position.copy(S.pos);ship.quaternion.copy(S.q);const ud=ship.userData;ud.body.rotation.z=S.bank;ud.body.rotation.x=(S.pitchV||0)*.18;
 const k=S.thr;for(const f of ud.flames){f.fl.scale.set(1,1,.3+k*(.7+Math.random()*.3));f.fl.material.opacity=.35+k*.25;f.gs.scale.setScalar(2.6+k*1.6)}
 ud.shield.material.uniforms.op.value=Math.max(0,shieldT);if(ud.plasma){const hk=S.heat||0;ud.plasma.visible=hk>.02;PLU.k.value=hk;ud.plasma.scale.set(6+hk*2,4.5+hk*1.5,14+hk*10);ud.plasma.position.z=2+hk*3}ud.shield.rotation.y+=dt;const bl=Math.sin(t*5)>.6;ud.nl.visible=ud.nr.visible=bl;
@@ -47,7 +47,8 @@ if(lock){const tp=lock.pos.clone();if(lock.vel){const tt=tp.distanceTo(p)/bs;tp.
 mpShot(p,dir,'c');const m=mkPB(col);m.position.copy(p);m.lookAt(p.clone().sub(dir));PB.push({m,p:m.position,v:dir.multiplyScalar(bs).addScaledVector(S.vel,.5),l:1.6,d:dmg,c:col});muzzleFlash(M.l,col)}gunKick();SFX.shoot()}
 const segHit=(a,b,c,r)=>{_v.copy(b).sub(a);const L2=_v.lengthSq();let k=L2?_w.copy(c).sub(a).dot(_v)/L2:0;k=clamp(k,0,1);return _w.copy(a).addScaledVector(_v,k).distanceToSquared(c)<r*r};
 function updPB(dt,targets){for(const b of PB){const a=b.p.clone();b.p.addScaledVector(b.v,dt);b.l-=dt;for(const T of targets){if(b.l<=0)break;if(segHit(a,b.p,T.pos,T.r)){b.l=0;impactFX(b.p,b.c);T.hit(b.d,b.p)}}if(b.l<=0)rmPB(b)}PB=PB.filter(b=>b.l>0)}
-function updEB(dt){for(const b of EB){if(b.home&&!S.dead){const sp=b.v.length();b.v.lerp(_w.copy(S.pos).sub(b.m.position).normalize().multiplyScalar(sp),damp(1.6,dt)).setLength(Math.min(330,sp+40*dt));b.m.lookAt(_w.copy(b.m.position).sub(b.v));if(Math.random()<.7)FIRE.emit(b.m.position.x,b.m.position.y,b.m.position.z,rv(6),rv(6),rv(6),.35,1,.55,.2,.4)}if(!b.or){b.or=1;b.m.lookAt(_w.copy(b.m.position).sub(b.v))}b.m.position.addScaledVector(b.v,dt);b.l-=dt;if(b.m.position.distanceTo(S.pos)<7.5){b.l=0;damage(b.dmg);impactFX(b.m.position,S.sh>0?partOf('shield').scol||0x5ad0ff:0xff6650,.8)}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}EB=EB.filter(b=>b.l>0)}
+const EBPREV2=new V3();
+function updEB(dt){for(const b of EB){if(b.home&&!S.dead){const sp=b.v.length();b.v.lerp(_w.copy(S.pos).sub(b.m.position).normalize().multiplyScalar(sp),damp(1.6,dt)).setLength(Math.min(330,sp+40*dt));b.m.lookAt(_w.copy(b.m.position).sub(b.v));if(Math.random()<.7)FIRE.emit(b.m.position.x,b.m.position.y,b.m.position.z,rv(6),rv(6),rv(6),.35,1,.55,.2,.4)}if(!b.or){b.or=1;b.m.lookAt(_w.copy(b.m.position).sub(b.v))}EBPREV2.copy(b.m.position);b.m.position.addScaledVector(b.v,dt);b.l-=dt;if(segHit(EBPREV2,b.m.position,S.pos,7.5)){b.l=0;damage(b.dmg);impactFX(b.m.position,S.sh>0?partOf('shield').scol||0x5ad0ff:0xff6650,.8)}if(b.l<=0)b.m.parent&&b.m.parent.remove(b.m)}EB=EB.filter(b=>b.l>0)}
 // dégâts : le bouclier absorbe d'abord, l'éperon annule les collisions
 function damage(n,kind){if(S.dead)return;if(kind=='col'&&PM('ram'))return;S.shT=t;if(PM('sh')>0&&S.sh>0){const a=Math.min(S.sh,n);S.sh-=a;n-=a;shieldT=1;if(n<=0){SFX.shield();return}}S.hp-=n;SFX.hit()}
 // ----- butin -----

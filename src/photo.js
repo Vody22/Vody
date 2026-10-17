@@ -60,6 +60,6 @@ out.toBlob(b=>{if(!b){toast('Photo impossible sur cet appareil');return}PH.blob=
 async function phShare(){if(!PH.blob)return;const f=new File([PH.blob],'starfarer-'+Date.now()+'.jpg',{type:'image/jpeg'});try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'Starfarer 3D'});else if(navigator.share)await navigator.share({title:'Starfarer 3D',text:'Ma photo dans Starfarer 3D'});else $('phdl').click()}catch(e){}}
 // pas d'interface de jeu pendant la photo (les reflets du soleil restent)
 {const _ovPH=overlay;overlay=function(){if(PH.on){OX.clearRect(0,0,innerWidth,innerHeight);try{lensFlares()}catch(e){}return}_ovPH()}}
-addEventListener('keydown',e=>{const tg=e.target&&e.target.tagName;if(tg=='INPUT'||tg=='TEXTAREA'||e.repeat)return;if(e.code=='KeyB')photoToggle();else if(e.code=='Escape'&&PH.on)photoToggle(false)});
-{const b=document.createElement('button');b.id='phob';b.className='ic';b.title='Mode photo (B)';b.innerHTML=ICO('cam');b.onclick=()=>photoToggle(true);document.body.appendChild(b)}
+addEventListener('keydown',e=>{const tg=e.target&&e.target.tagName;if(tg=='INPUT'||tg=='TEXTAREA'||e.repeat)return;if(e.code=='F8'){e.preventDefault();photoToggle();}else if(e.code=='Escape'&&PH.on)photoToggle(false)});
+{const b=document.createElement('button');b.id='phob';b.className='ic';b.title='Mode photo (F8)';b.innerHTML=ICO('cam');b.onclick=()=>photoToggle(true);document.body.appendChild(b)}
 TICK.push(()=>{if(PH.on&&(S.dead))photoToggle(false)});
